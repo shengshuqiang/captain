@@ -11,18 +11,15 @@ import java.util.List;
  */
 
 public class MorseMessageData {
-    private List<MorseMessageItemData> list;
-
-    public MorseMessageData(List<MorseMessageItemData> list) {
-        this.list = list;
-    }
+    public String title;
+    private List<MorseMessageItemData> data;
 
     public List<MorseMVPAdapter.IMorseMVPAdapterItemData> getItemList() {
         List<MorseMVPAdapter.IMorseMVPAdapterItemData> itemDataList = null;
 
-        if (list != null) {
+        if (data != null) {
             itemDataList = new ArrayList<>();
-            for (MorseMessageItemData messageItemData : list) {
+            for (MorseMessageItemData messageItemData : data) {
                 itemDataList.add(new MorseMVPAdapterNormalItemData(messageItemData));
             }
         }

@@ -65,7 +65,7 @@ public abstract class MVPModule implements IMVPContract.IMVPModule {
             DATA data = null;
             Exception exception = null;
             try {
-                data = getLoadRequestData(loadRequest);
+                data = loadRequest.getData();
             } catch (Exception ex) {
                 exception = ex;
             }
@@ -80,6 +80,4 @@ public abstract class MVPModule implements IMVPContract.IMVPModule {
             }
         }
     }
-
-    protected abstract <DATA> DATA getLoadRequestData(IMVPContract.IMVPLoadRequest<DATA> loadRequest);
 }

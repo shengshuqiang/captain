@@ -18,6 +18,7 @@ package com.google.zxing.client.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -157,12 +158,16 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         findViewById(R.id.open_album).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                /* 开启Pictures画面Type设定为image */
-                intent.setType("image/*");
-                /* 使用Intent.ACTION_GET_CONTENT这个Action */
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                /* 取得相片后返回本画面 */
+//                Intent intent = new Intent();
+//                /* 开启Pictures画面Type设定为image */
+//                intent.setType("image/*");
+//                /* 使用Intent.ACTION_GET_CONTENT这个Action */
+//                intent.setAction(Intent.ACTION_GET_CONTENT);
+//                /* 取得相片后返回本画面 */
+//                startActivityForResult(intent, ALBUM_REQUEST_CODE);
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(intent, ALBUM_REQUEST_CODE);
             }
         });
@@ -188,7 +193,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         resultView = findViewById(R.id.result_view);
         statusView = (TextView) findViewById(R.id.status_view);
 
-        handler = null;
+//        handler = null;
+        if (handler == null) {
+            handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+        }
         lastResult = null;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -425,7 +433,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
                     imgPath = null;
                     if (cursor.moveToFirst()) {
-                        int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                        int columnIndex = cursor.getColumnIndex(proj[0]);
                         //获取到用户选择的二维码图片的绝对路径
                         imgPath = cursor.getString(columnIndex);
                     }
@@ -439,7 +447,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
                 //获取解析结果
                 Result result = parseQRcodeBitmap(imgPath);
-                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
 
                 decodeOrStoreSavedBitmap(null, result);
 
@@ -448,6 +456,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         }
     }
 
+
     //解析二维码图片,返回结果封装在Result对象中
     private com.google.zxing.Result parseQRcodeBitmap(String bitmapPath) {
         //解析转换类型UTF-8
@@ -455,11 +464,12 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         hints.put(DecodeHintType.CHARACTER_SET, "utf-8");
         //获取到待解析的图片
         BitmapFactory.Options options = new BitmapFactory.Options();
+        Bitmap bitmap;
         //如果我们把inJustDecodeBounds设为true，那么BitmapFactory.decodeFile(String path, Options opt)
         //并不会真的返回一个Bitmap给你，它仅仅会把它的宽，高取回来给你
         options.inJustDecodeBounds = true;
         //此时的bitmap是null，这段代码之后，options.outWidth 和 options.outHeight就是我们想要的宽和高了
-        Bitmap bitmap = BitmapFactory.decodeFile(bitmapPath, options);
+        bitmap = BitmapFactory.decodeFile(bitmapPath, options);
         //我们现在想取出来的图片的边长（二维码图片是正方形的）设置为400像素
         /**
          options.outHeight = 400;
@@ -490,9 +500,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         //开始解析
         Result result = null;
         try {
-            result = reader.decode(binaryBitmap, hints);
+            result = reader.decode(binaryBitmap);
         } catch (Exception e) {
-            // TODO: handle exception
+            throw new RuntimeException(e);
         }
 
         return result;

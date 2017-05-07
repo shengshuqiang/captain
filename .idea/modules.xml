@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Morse.iml" filepath="$PROJECT_DIR$/Morse.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/keyboard/keyboard.iml" filepath="$PROJECT_DIR$/keyboard/keyboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/popupwindow/popupwindow.iml" filepath="$PROJECT_DIR$/popupwindow/popupwindow.iml" />
       <module fileurl="file://$PROJECT_DIR$/zxing/zxing.iml" filepath="$PROJECT_DIR$/zxing/zxing.iml" />
     </modules>
   </component>

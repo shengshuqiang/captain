@@ -6,12 +6,12 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.google.zxing.client.android.Intents;
@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -38,6 +39,8 @@ import static android.content.Context.WINDOW_SERVICE;
  */
 
 public class Utils {
+    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
     public static final String MORSE_ASSETS_FILE_NAME = "asys";
 
     public static String getFromAssets(Context context, String fileName) {
@@ -61,20 +64,17 @@ public class Utils {
     }
 
     public static String encode(String key, String bytesStr) {
-        byte[] keyBytes = key.getBytes();
-        byte[] byteStrsBytes = bytesStr2ByteArray(bytesStr);
-        byte[] encodeStrBytes = new byte[byteStrsBytes.length];
-        for (int i = 0; i < byteStrsBytes.length; i++) {
-            encodeStrBytes[i] = (byte) (byteStrsBytes[i] ^ keyBytes[i % keyBytes.length]);
+        char[] keyChars = key.toCharArray();
+        char[] byteStrsChars = bytesStr.toCharArray();
+        char[] encodeStrChars = new char[byteStrsChars.length];
+        for (int i = 0; i < byteStrsChars.length; i++) {
+            encodeStrChars[i] = (char) (byteStrsChars[i] ^ keyChars[i % keyChars.length]);
         }
 
-//        Log.d("SSU", "keyBytes=" + Arrays.toString(keyBytes));
-//            Log.d("SSU", "strBytes[" + strBytes.length + "]=" + Arrays.toString(strBytes));
-//            Log.d("SSU", "encodeStrBytes[" + encodeStrBytes.length + "]=" + Arrays.toString(encodeStrBytes));
-
-        String encodebytesStr = bytes2bytesStr(encodeStrBytes);
-//        Log.d("SSU", "str[" + bytesStr.length() + "]=" + bytesStr);
-//        Log.d("SSU", "encodeStr[" + encodebytesStr.length() + "]=" + encodebytesStr);
+        String encodebytesStr = new String(encodeStrChars);
+        Log.d("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
+        Log.d("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
+        Log.d("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
 
         return encodebytesStr;
     }
@@ -133,7 +133,8 @@ public class Utils {
     }
 
     public static String bytes2bytesStr(byte[] bytes) {
-        return Arrays.toString(bytes);
+        return new String(bytes);
+//        return Arrays.toString(bytes);
     }
 
     public static byte[] bytesStr2ByteArray(String bytesStr) {

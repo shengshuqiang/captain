@@ -4,7 +4,8 @@ import android.content.Context;
 
 import com.example.shengshuqiang.morse.mvp.IMVPContract;
 import com.example.shengshuqiang.morse.mvp.MVPPresenter;
-import com.example.shengshuqiang.morse.mvpmodule.MorseMVPLoadRequest;
+import com.example.shengshuqiang.morse.mvpmodule.IMorseMessageRequest;
+import com.example.shengshuqiang.morse.mvpmodule.MorseMVPRequest;
 import com.example.shengshuqiang.morse.mvpmodule.MorseMessageData;
 import com.example.shengshuqiang.morse.mvpview.MorseMVPAdapter;
 import com.example.shengshuqiang.morse.mvpview.MorseMVPListData;
@@ -18,14 +19,16 @@ import java.util.List;
 public class MorseMVPPresenter extends MVPPresenter {
 
     private Context context;
+    private IMorseMessageRequest morseMessageRequest;
 
-    public MorseMVPPresenter(Context context) {
+    public MorseMVPPresenter(Context context, IMorseMessageRequest morseMessageRequest) {
         this.context = context;
+        this.morseMessageRequest = morseMessageRequest;
     }
 
     public void start() {
 
-        mvpModule.loadData(new MorseMVPLoadRequest(), new IMVPContract.IMVPLoaderCallbacks<MorseMessageData>() {
+        mvpModule.loadData(new MorseMVPRequest(morseMessageRequest), new IMVPContract.IMVPLoaderCallbacks<MorseMessageData>() {
             @Override
             public void onSuccess(MorseMessageData morseMessageItemData) {
                 List<MorseMVPAdapter.IMorseMVPAdapterItemData> list = (null != morseMessageItemData ? morseMessageItemData.getItemList() : null);
