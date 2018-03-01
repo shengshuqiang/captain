@@ -11,6 +11,6 @@ public class MVPHelper {
         mvpPresenter.setMVPViewAndModule(mvpView, mvpModule);
         mvpModule.setMVPPresenter(mvpPresenter);
 
-        mvpPresenter.start();
+//        mvpPresenter.start();
     }
 }

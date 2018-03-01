@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/trip_hplus_customizekeyboard_keyboard_key_pressed_bg" android:state_pressed="true"></item>
+    <item android:drawable="@drawable/trip_hplus_customizekeyboard_keyboard_key_bg"></item>
+</selector>

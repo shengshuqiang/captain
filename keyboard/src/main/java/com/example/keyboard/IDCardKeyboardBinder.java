@@ -4,8 +4,6 @@ package com.example.keyboard;
 
 import android.app.Activity;
 
-import com.meituan.widget.R;
-
 /**
  * 身份证输入法绑定器
  *

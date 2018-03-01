@@ -15,6 +15,8 @@ public class MorseMVPAdapter extends Adapter<MorseMVPAdapter.IMorseMVPAdapterIte
 
     public static final int VIEW_TYPE_COUNT = 1;
 
+    private NormalItemView.OnNormalItemViewClickListener onNormalItemViewClickListener;
+
     @Override
     public int getViewTypeCount() {
         return VIEW_TYPE_COUNT;
@@ -42,6 +44,28 @@ public class MorseMVPAdapter extends Adapter<MorseMVPAdapter.IMorseMVPAdapterIte
 
                 if (convertView == null) {
                     normalItemView = new NormalItemView(parent.getContext());
+                    normalItemView.setOnNormalItemViewClickListener(new NormalItemView.OnNormalItemViewClickListener() {
+                        @Override
+                        public void onClick(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                            if (onNormalItemViewClickListener != null) {
+                                onNormalItemViewClickListener.onClick(normalItemView, normalItemViewData);
+                            }
+                        }
+
+                        @Override
+                        public void onEdit(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                            if (onNormalItemViewClickListener != null) {
+                                onNormalItemViewClickListener.onEdit(normalItemView, normalItemViewData);
+                            }
+                        }
+
+                        @Override
+                        public void onDelete(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                            if (onNormalItemViewClickListener != null) {
+                                onNormalItemViewClickListener.onDelete(normalItemView, normalItemViewData);
+                            }
+                        }
+                    });
                 } else {
                     normalItemView = (NormalItemView) convertView;
                 }
@@ -52,6 +76,10 @@ public class MorseMVPAdapter extends Adapter<MorseMVPAdapter.IMorseMVPAdapterIte
         }
 
         return super.getView(position, convertView, parent);
+    }
+
+    public void setOnNormalItemViewClickListener(NormalItemView.OnNormalItemViewClickListener onNormalItemViewClickListener) {
+        this.onNormalItemViewClickListener = onNormalItemViewClickListener;
     }
 
     public interface IMorseMVPAdapterItemData {

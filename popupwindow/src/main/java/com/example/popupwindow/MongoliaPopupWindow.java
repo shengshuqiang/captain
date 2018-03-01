@@ -1,7 +1,6 @@
-// Copyright (C) 2015 Meituan
+package com.example.popupwindow;// Copyright (C) 2015 Meituan
 // All rights reserved
-package com.meituan.widget.popupwindow;
-
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,8 +14,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
-
-import com.meituan.widget.R;
 
 /**
  * 背景为蒙层的PopupWindow,
@@ -202,6 +199,10 @@ public class MongoliaPopupWindow {
             return;
         }
 
+        if (((Activity) context).isFinishing()) {
+            return;
+        }
+
         this.outAnim = outAnim;
 
         popupWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
@@ -280,6 +281,10 @@ public class MongoliaPopupWindow {
     public void show(View view, Animation inAnim, Animation outAnim) {
         if (isShowing()) {
             dismiss();
+            return;
+        }
+
+        if (((Activity) context).isFinishing()) {
             return;
         }
 

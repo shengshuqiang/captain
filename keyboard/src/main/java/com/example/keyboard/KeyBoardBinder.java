@@ -11,7 +11,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.os.Build;
-import android.text.Editable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -24,8 +23,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
-import com.meituan.widget.R;
 
 import java.lang.reflect.Method;
 
@@ -61,11 +58,10 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
  * Date: 2015-11-02
  * Time: 11:44
  */
-public abstract class KeyBoardBinder {
+public abstract class KeyBoardBinder implements KeyboardActionListener.IFoucusEditTextProvider{
     /* 滚动布局动画时间，和键盘弹出时间相等*/
     private static final int ANIM_DUTION = 250;
-    /* 删除按键key*/
-    private static final int DEL_KEY = 60001;
+
     private Activity activity;
     /* 自定义键盘载体*/
     private PopupWindow popupWindow;
@@ -205,7 +201,7 @@ public abstract class KeyBoardBinder {
             Keyboard keyboard = new Keyboard(activity, getKeyboardResId());
             keyboardView.setKeyboard(keyboard);
             keyboardView.setPreviewEnabled(false);
-            keyboardView.setOnKeyboardActionListener(new KeyboardActionListener());
+            keyboardView.setOnKeyboardActionListener(new KeyboardActionListener(this));
 
             // 键盘载体PopupWindow
             popupWindow = new PopupWindow(activity);
@@ -345,7 +341,8 @@ public abstract class KeyBoardBinder {
      *
      * @return
      */
-    private EditText getCurrentFocusEditText() {
+    @Override
+    public EditText getForcusEditText() {
         View focusCurrent = activity.getWindow().getCurrentFocus();
         if (focusCurrent instanceof EditText) {
             EditText edittext = (EditText) focusCurrent;
@@ -396,7 +393,7 @@ public abstract class KeyBoardBinder {
     private class KeyBoardViewTouchInterceptor implements View.OnTouchListener {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            EditText editText = getCurrentFocusEditText();
+            EditText editText = getForcusEditText();
             if (null == editText) {
                 return false;
             }
@@ -433,77 +430,6 @@ public abstract class KeyBoardBinder {
             hideSoftInputMethod(view);
 
             return true;
-        }
-    }
-
-    /**
-     * 自定义键盘按键监听
-     */
-    private class KeyboardActionListener implements KeyboardView.OnKeyboardActionListener {
-        @Override
-        public void onKey(int primaryCode, int[] keyCodes) {
-            EditText editText = getCurrentFocusEditText();
-            if (null == editText) {
-                return;
-            }
-
-            Editable editable = editText.getText();
-            if (null == editable) {
-                return;
-            }
-
-            int start = editText.getSelectionStart();
-            int end = editText.getSelectionEnd();
-            if (-1 == start || -1 == end) {
-                // 选中状态异常
-                return;
-            }
-
-            if (start < end) {
-                // 选中多个
-                if (primaryCode == DEL_KEY) {
-                    editable.delete(start, end);
-                } else {
-                    editable.replace(start, end, Character.toString((char) primaryCode));
-                }
-            } else if (start == end) {
-                // 未选中
-                if (primaryCode == DEL_KEY) {
-                    if (start > 0) {
-                        editable.delete(start - 1, end);
-                    }
-                } else {
-                    editable.insert(start, Character.toString((char) primaryCode));
-                }
-            }
-        }
-
-        @Override
-        public void onPress(int arg0) {
-        }
-
-        @Override
-        public void onRelease(int primaryCode) {
-        }
-
-        @Override
-        public void onText(CharSequence text) {
-        }
-
-        @Override
-        public void swipeDown() {
-        }
-
-        @Override
-        public void swipeLeft() {
-        }
-
-        @Override
-        public void swipeRight() {
-        }
-
-        @Override
-        public void swipeUp() {
         }
     }
 }

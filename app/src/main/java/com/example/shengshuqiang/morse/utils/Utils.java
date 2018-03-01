@@ -26,6 +26,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -72,9 +74,9 @@ public class Utils {
         }
 
         String encodebytesStr = new String(encodeStrChars);
-        Log.d("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
-        Log.d("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
-        Log.d("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
+        Log.e("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
+        Log.e("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
+        Log.e("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
 
         return encodebytesStr;
     }
@@ -98,7 +100,7 @@ public class Utils {
     }
 
     public static void saveBitmap(Context context, Bitmap bitmap) {
-        File file = new File(Environment.getExternalStorageDirectory(), "morse_qrcode.png");
+        File file = new File(Environment.getExternalStorageDirectory() + "/1", "morse_qrcode.png");
         if (file.exists()) {
             file.delete();
         }
@@ -187,6 +189,24 @@ public class Utils {
         return null;
     }
 
+    public static boolean isEmpty(Map map) {
+        if (null == map) {
+            return true;
+        }
 
+        return map.isEmpty();
+    }
+
+    public static boolean isEmpty(Collection collection) {
+        if (null == collection) {
+            return true;
+        }
+
+        return collection.isEmpty();
+    }
+
+    public static <T> boolean isEmpty(T... items) {
+        return items == null || items.length == 0;
+    }
 
 }

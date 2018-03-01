@@ -30,6 +30,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -171,6 +172,13 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
                 startActivityForResult(intent, ALBUM_REQUEST_CODE);
             }
         });
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                decodeBitmap(Environment.getExternalStorageDirectory() + "/1/morse_qrcode.png");
+            }
+        }, 300);
     }
 
     @Override
@@ -193,10 +201,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         resultView = findViewById(R.id.result_view);
         statusView = (TextView) findViewById(R.id.status_view);
 
-//        handler = null;
-        if (handler == null) {
-            handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
-        }
+        handler = null;
         lastResult = null;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -444,16 +449,22 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
                         cursor.close();
                     }
                 }
+                decodeBitmap(imgPath);
 
-                //获取解析结果
-                Result result = parseQRcodeBitmap(imgPath);
-//                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
-
-                decodeOrStoreSavedBitmap(null, result);
 
             }
-            Log.d("SSU", "resultCode=" + resultCode + ", intent=" + intent.toString());
+            Log.e("SSU", "resultCode=" + resultCode + ", intent=" + intent.toString());
         }
+    }
+
+    private void decodeBitmap(String imgPath) {
+        //获取解析结果
+        Result result = parseQRcodeBitmap(imgPath);
+//                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
+        if (handler == null) {
+            handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+        }
+        decodeOrStoreSavedBitmap(null, result);
     }
 
 

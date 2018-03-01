@@ -4,22 +4,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.example.shengshuqiang.morse.mvp.MVPHelper;
 import com.example.shengshuqiang.morse.mvp.MVPView;
 import com.example.shengshuqiang.morse.mvpmodule.IMorseMessageRequest;
 import com.example.shengshuqiang.morse.mvpmodule.MorseMVPModule;
 import com.example.shengshuqiang.morse.mvpmodule.MorseMessageData;
+import com.example.shengshuqiang.morse.mvpmodule.MorseMessageItemData;
 import com.example.shengshuqiang.morse.mvppresenter.MorseMVPPresenter;
+import com.example.shengshuqiang.morse.mvppresenter.MorseMessageItemActionData;
 import com.example.shengshuqiang.morse.utils.Utils;
+import com.example.shengshuqiang.morse.widgets.MorseItemDetailInfoPopupWindow;
+import com.example.shengshuqiang.morse.widgets.PasswordPopupWindow;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 
@@ -30,6 +35,14 @@ public class QRActivity extends AppCompatActivity implements IMorseMessageReques
 
     private CountDownLatch latch;
     private MorseMessageData morseMessageData;
+    private Exception morseMessageException;
+
+    private MVPView mvpView;
+
+    private PasswordPopupWindow passwordPopupWindow;
+    private MorseItemDetailInfoPopupWindow itemDetailInfoPopupWindow;
+    private MorseMVPPresenter mvpPresenter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,75 +50,63 @@ public class QRActivity extends AppCompatActivity implements IMorseMessageReques
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        morseMessageData = new MorseMessageData();
 
         Context context = QRActivity.this;
-        MVPView mvpView = (MVPView) findViewById(R.id.mvp_view);
-        MVPHelper.init(mvpView, new MorseMVPPresenter(context, this), new MorseMVPModule());
+        mvpView = (MVPView) findViewById(R.id.mvp_view);
+        mvpPresenter = new MorseMVPPresenter(context, this);
+        MVPHelper.init(mvpView, mvpPresenter, new MorseMVPModule());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.scan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                startActivity(new Intent(QRActivity.this, CaptureActivity.class));
+                mvpPresenter.start();
             }
         });
 
-        try {
-            String str = Utils.getFromAssets(context, Utils.MORSE_ASSETS_FILE_NAME);
-            Gson gson = new Gson();
-            MorseMessageData morseMessageData = gson.fromJson(str, MorseMessageData.class);
-            str = gson.toJson(morseMessageData);
-            String encodeStr = Utils.encode("560569", str);
-            Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
-            Utils.saveBitmap(context, qrCodeBitmap);
-//            Log.d("SSU", "str=" + str + "\nencodeStr=" + encodeStr);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+        findViewById(R.id.add).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                showItemDetailInfoPopupWindow(null, MorseItemDetailInfoPopupWindow.MODE.NEW);
+            }
+        });
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.create_qrcode) {
-            QRActivity context = QRActivity.this;
-            String str = Utils.getFromAssets(context, Utils.MORSE_ASSETS_FILE_NAME);
-            String encodeStr = Utils.encode("560569", str);
-            Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
-            Utils.saveBitmap(context, qrCodeBitmap);
-            Log.d("SSU", "encodeStr=" + encodeStr);
-//            String decodeStr = Utils.encode("560569", encodeStr);
-//            Log.d("SSU", "decodeStr=" + new String(Utils.bytesStr2ByteArray(decodeStr)));
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        findViewById(R.id.produce).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPasswordPopupWindow();
+            }
+        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (MORSE_MESSAGE_REQUEST_CODE == requestCode) {
             if (RESULT_OK == resultCode) {
-                String morseMessageStr = data.getStringExtra(Intents.Scan.RESULT);
-                String morseMessageDecodeStr = Utils.encode("560569", morseMessageStr);
-                Log.d("SSU", "morseMessageDecodeStr=" + morseMessageDecodeStr);
-                morseMessageData = new Gson().fromJson(morseMessageDecodeStr, MorseMessageData.class);
-                latch.countDown();
+                final String morseMessageStr = data.getStringExtra(Intents.Scan.RESULT);
+                showPasswordPopupWindow();
+
+                passwordPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                    @Override
+                    public void onDismiss() {
+                        String password = passwordPopupWindow.getPassword();
+                        String morseMessageDecodeStr = Utils.encode(password, morseMessageStr);
+                        Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr);
+                        morseMessageData = null;
+                        morseMessageException = null;
+                        try {
+                            morseMessageData = new Gson().fromJson(morseMessageDecodeStr, MorseMessageData.class);
+                        } catch (JsonSyntaxException e) {
+                            morseMessageException = e;
+                            Toast.makeText(QRActivity.this, "密码无效", Toast.LENGTH_SHORT).show();
+                        }
+                        latch.countDown();
+                    }
+                });
             }
         }
 
@@ -113,7 +114,7 @@ public class QRActivity extends AppCompatActivity implements IMorseMessageReques
     }
 
     @Override
-    public MorseMessageData getData() {
+    public MorseMessageData getData() throws Exception {
         if (latch != null) {
             latch.countDown();
         }
@@ -128,9 +129,83 @@ public class QRActivity extends AppCompatActivity implements IMorseMessageReques
 
         }
 
-
+        if (morseMessageException != null) {
+            throw morseMessageException;
+        }
         return morseMessageData;
     }
 
+    private void showPasswordPopupWindow() {
+        if (passwordPopupWindow == null) {
+            passwordPopupWindow = new PasswordPopupWindow(QRActivity.this);
+            passwordPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    try {
+                        Context context = QRActivity.this;
+//                            String str = Utils.getFromAssets(context, Utils.MORSE_ASSETS_FILE_NAME);
+                        String morseMessageDecodeStr = new Gson().toJson(morseMessageData);
+                        String password = passwordPopupWindow.getPassword();
+                        String encodeStr = Utils.encode(password, morseMessageDecodeStr);
+                        Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
+                        Utils.saveBitmap(context, qrCodeBitmap);
+                        Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                passwordPopupWindow.show(mvpView);
+            }
+        }, 300);
+
+    }
+
+    private void showItemDetailInfoPopupWindow(MorseMessageItemData data, MorseItemDetailInfoPopupWindow.MODE mode) {
+        if (itemDetailInfoPopupWindow == null) {
+            itemDetailInfoPopupWindow = new MorseItemDetailInfoPopupWindow(QRActivity.this);
+            itemDetailInfoPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    if (itemDetailInfoPopupWindow.isOperateDismiss()) {
+                        MorseItemDetailInfoPopupWindow.MODE mode = itemDetailInfoPopupWindow.getMode();
+                        MorseMessageItemData morseMessageItemData = itemDetailInfoPopupWindow.getMorseMessageItemData();
+                        switch (mode) {
+                            case READ:
+                                // do nothing
+                                break;
+
+                            case WRITE:
+                                //
+                                mvpPresenter.doAction(new MorseMessageItemActionData(MorseMVPPresenter.EDIT_ITEM_ACTION_ID, morseMessageItemData));
+                                break;
+
+                            case NEW:
+                                mvpPresenter.doAction(new MorseMessageItemActionData(MorseMVPPresenter.ADD_ITEM_ACTION_ID, morseMessageItemData));
+                                break;
+
+                            case DEL:
+                                mvpPresenter.doAction(new MorseMessageItemActionData(MorseMVPPresenter.DELETE_ITEM_ACTION_ID, morseMessageItemData));
+                                break;
+                        }
+                    }
+                }
+            });
+        }
+
+        itemDetailInfoPopupWindow.setData(data, mode);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                itemDetailInfoPopupWindow.show(mvpView);
+            }
+        }, 300);
+    }
 
 }

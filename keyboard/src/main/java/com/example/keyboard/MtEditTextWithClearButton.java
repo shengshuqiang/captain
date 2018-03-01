@@ -12,9 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 
-import com.meituan.widget.R;
-
-
 /**
  * 带清除按钮的EditText
  */

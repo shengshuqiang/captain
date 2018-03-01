@@ -20,7 +20,7 @@ public class MorseMVPRequest implements IMVPContract.IMVPLoadRequest<MorseMessag
     }
 
     @Override
-    public MorseMessageData getData() {
+    public MorseMessageData getData() throws Exception {
         return morseMessageRequest.getData();
     }
 }

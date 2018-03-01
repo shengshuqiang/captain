@@ -1,0 +1,33 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyboard_group"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/trip_hplus_customizekeyboard_divider"
+    android:showDividers="beginning|middle"
+    android:background="#f8f8f8"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/complete"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:paddingRight="15dp"
+        android:background="@drawable/trip_hplus_customizekeyboard_keyboard_key_selector"
+        android:gravity="right|center_vertical"
+        android:textColor="#06c1ae"
+        android:textSize="15sp"
+        android:text="完成"/>
+
+    <android.inputmethodservice.KeyboardView
+        android:id="@+id/keyboardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/trip_hplus_customizekeyboard_divider"
+        android:keyBackground="@drawable/trip_hplus_customizekeyboard_keyboard_key_selector"
+        android:keyTextColor="#333333"
+        android:keyTextSize="23sp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+</LinearLayout>

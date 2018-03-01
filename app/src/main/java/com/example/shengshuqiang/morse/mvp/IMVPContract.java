@@ -48,7 +48,7 @@ public interface IMVPContract {
 
         int getID();
 
-        DATA getData();
+        DATA getData() throws Exception;
     }
 
     interface IMVPLoaderCallbacks<DATA> {

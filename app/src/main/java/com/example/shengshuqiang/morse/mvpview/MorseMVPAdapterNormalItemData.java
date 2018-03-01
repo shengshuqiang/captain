@@ -15,12 +15,12 @@ public class MorseMVPAdapterNormalItemData implements MorseMVPAdapter.IMorseMVPA
 
     @Override
     public String getTitle() {
-        return data.key;
+        return data.userName;
     }
 
     @Override
     public String getDesc() {
-        return data.value;
+        return data.password;
     }
 
     @Override

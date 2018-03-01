@@ -1,5 +1,7 @@
 package com.example.shengshuqiang.morse.mvp;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 
 import java.util.concurrent.ExecutorService;
@@ -12,13 +14,14 @@ import java.util.concurrent.Executors;
 public abstract class MVPModule implements IMVPContract.IMVPModule {
 
     protected IMVPContract.IMVPPresenter mvpPresenter;
+    private Handler mainHandler;
 
     private ExecutorService executorService;
 
     private SparseArray<IMVPContract.IMVPLoaderCallbacks> loaderCallbacksSparseArray;
 
     public MVPModule() {
-
+        mainHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -70,14 +73,23 @@ public abstract class MVPModule implements IMVPContract.IMVPModule {
                 exception = ex;
             }
 
-            IMVPContract.IMVPLoaderCallbacks<DATA> loaderCallbacks = getLoaderCallbacks(loadRequest);
-            if (loaderCallbacks != null) {
-                if (exception != null) {
-                    loaderCallbacks.onError(exception);
-                } else {
-                    loaderCallbacks.onSuccess(data);
+            final DATA resultData = data;
+            final Exception resultException = exception;
+
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    IMVPContract.IMVPLoaderCallbacks<DATA> loaderCallbacks = getLoaderCallbacks(loadRequest);
+                    if (loaderCallbacks != null) {
+                        if (resultException != null) {
+                            loaderCallbacks.onError(resultException);
+                        } else {
+                            loaderCallbacks.onSuccess(resultData);
+                        }
+                    }
                 }
-            }
+            });
+
         }
     }
 }
