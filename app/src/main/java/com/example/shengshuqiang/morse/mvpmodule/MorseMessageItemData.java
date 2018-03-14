@@ -13,10 +13,18 @@ public class MorseMessageItemData {
     // 备注
     public String remarks;
 
+    public MorseMessageItemData() {
+    }
+
     public MorseMessageItemData(String userName, String password, String remarks) {
         this.userName = userName;
         this.password = password;
         this.remarks = remarks;
+    }
+
+    @Override
+    public String toString() {
+        return "MorseMessageItemData { userName=" + userName + ", password=" + password + ", remarks=" + remarks + "}";
     }
 }
 

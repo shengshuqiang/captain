@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
@@ -21,18 +22,20 @@ import com.example.shengshuqiang.morse.R;
 public class NormalItemView extends LinearLayout {
 
     private TextView titleTxtView;
+    private TextView passwordTxtView;
     private TextView descTxtView;
     private View operateView;
     private View editView;
     private View deleteView;
 
-    private INormalItemViewData normalItemViewData;
+    private MorseMVPAdapterNormalItemData normalItemViewData;
     private OnNormalItemViewClickListener onNormalItemViewClickListener;
     private float eventX;
     private float eventY;
     private Scroller scroller;
     // 操作view是否打开（左滑展开）
     private boolean isOperateOpen = false;
+    private ViewConfiguration viewConfiguration;
 
     public NormalItemView(Context context) {
         this(context, null);
@@ -41,6 +44,7 @@ public class NormalItemView extends LinearLayout {
     public NormalItemView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
+        viewConfiguration = ViewConfiguration.get(context);
         scroller = new Scroller(context);
 
         setPadding(50, 15, 50, 15);
@@ -50,6 +54,7 @@ public class NormalItemView extends LinearLayout {
         inflate(context, R.layout.normal_item_view, this);
 
         titleTxtView = (TextView) findViewById(R.id.title);
+        passwordTxtView = (TextView) findViewById(R.id.password);
         descTxtView = (TextView) findViewById(R.id.desc);
 
         operateView = findViewById(R.id.operate);
@@ -91,7 +96,7 @@ public class NormalItemView extends LinearLayout {
         operateView.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.AT_MOST), heightMeasureSpec);
 
         Log.e("SSU", "NormalItemView#onMeasure: widthMeasureSpec=" + MeasureSpec.toString(widthMeasureSpec) + ", heightMeasureSpec= " + MeasureSpec.toString(heightMeasureSpec)
-        + ", width=" + getMeasuredWidth() + ", height=" + getMeasuredHeight() + ", operateViewWidth=" + operateView.getMeasuredWidth());
+                + ", width=" + getMeasuredWidth() + ", height=" + getMeasuredHeight() + ", operateViewWidth=" + operateView.getMeasuredWidth());
 
     }
 
@@ -102,7 +107,19 @@ public class NormalItemView extends LinearLayout {
         float y = event.getY();
         int scrollX = getScrollX();
         int scrollY = getScrollY();
-        float deltaX = eventX - x;
+        float deltaX;
+        float deltaY;
+        if (eventX > 0 && eventY > 0) {
+            deltaX = eventX - x;
+            deltaY = eventY - y;
+        } else {
+            deltaX = 0;
+            deltaY = 0;
+        }
+
+        int scaledTouchSlop = viewConfiguration.getScaledTouchSlop();
+        boolean isScrolling = Math.abs(deltaX) > scaledTouchSlop || Math.abs(deltaY) > scaledTouchSlop;
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 eventX = x;
@@ -110,27 +127,28 @@ public class NormalItemView extends LinearLayout {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                float deltaY = eventY - y;
-                if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                    int scrollToX;
-                    int operateViewWidth = operateView.getWidth();
-                    if (!isOperateOpen && deltaX >= 0) {
-                        // 左移，最大距离为operateView宽度，最小为0
-                        scrollToX = (int) Math.max(0, Math.min(deltaX, operateViewWidth));
-                        scrollTo(scrollToX, scrollY);
-                        getParent().requestDisallowInterceptTouchEvent(true);
+                if (isScrolling) {
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        int scrollToX;
+                        int operateViewWidth = operateView.getWidth();
+                        if (!isOperateOpen && deltaX >= 0) {
+                            // 左移，最大距离为operateView宽度，最小为0
+                            scrollToX = (int) Math.max(0, Math.min(deltaX, operateViewWidth));
+                            scrollTo(scrollToX, scrollY);
+                            getParent().requestDisallowInterceptTouchEvent(true);
 
-                        Log.e("SSU", "NormalItemView#onTouchEvent move left:deltaX=" + deltaX + ", deltaY=" + deltaY +", scrollX=" + scrollX + ", scrollTo(" + scrollToX + "," + scrollY + ")");
-                    } else if (isOperateOpen && deltaX < 0) {
-                        // 右移，最大距离为operateView宽度，最小为0
-                        scrollToX = (int) Math.max(0, Math.min(operateViewWidth + deltaX, operateViewWidth));
-                        scrollTo(scrollToX, scrollY);
-                        getParent().requestDisallowInterceptTouchEvent(true);
+                            Log.e("SSU", "NormalItemView#onTouchEvent move left:deltaX=" + deltaX + ", deltaY=" + deltaY + ", scrollX=" + scrollX + ", scrollTo(" + scrollToX + "," + scrollY + ")");
+                        } else if (isOperateOpen && deltaX < 0) {
+                            // 右移，最大距离为operateView宽度，最小为0
+                            scrollToX = (int) Math.max(0, Math.min(operateViewWidth + deltaX, operateViewWidth));
+                            scrollTo(scrollToX, scrollY);
+                            getParent().requestDisallowInterceptTouchEvent(true);
 
-                        Log.e("SSU", "NormalItemView#onTouchEvent move right:deltaX=" + deltaX + ", deltaY=" + deltaY +", scrollX=" + scrollX + ", scrollTo(" + scrollToX + "," + scrollY + ")");
+                            Log.e("SSU", "NormalItemView#onTouchEvent move right:deltaX=" + deltaX + ", deltaY=" + deltaY + ", scrollX=" + scrollX + ", scrollTo(" + scrollToX + "," + scrollY + ")");
+                        }
+                    } else {
+                        getParent().requestDisallowInterceptTouchEvent(false);
                     }
-                } else {
-                    getParent().requestDisallowInterceptTouchEvent(false);
                 }
 
                 break;
@@ -150,6 +168,11 @@ public class NormalItemView extends LinearLayout {
 
         Log.e("SSU", "NormalItemView#onTouchEvent:ScrollX=" + getScrollX() + ", ScrollY=" + scrollY
                 + ", event=" + MotionEvent.actionToString(action) + ", x=" + x + ", y=" + y);
+        if (isScrolling) {
+            event.setAction(MotionEvent.ACTION_CANCEL);
+        }
+        Log.e("SSU", "NormalItemView#onTouchEvent:ScrollX=" + getScrollX() + ", ScrollY=" + scrollY
+                + ", event=" + MotionEvent.actionToString(action));
 
         super.onTouchEvent(event);
 
@@ -206,34 +229,32 @@ public class NormalItemView extends LinearLayout {
         this.onNormalItemViewClickListener = onNormalItemViewClickListener;
     }
 
-    public void setData(INormalItemViewData normalItemViewData) {
+    public void setData(MorseMVPAdapterNormalItemData normalItemViewData) {
         if (normalItemViewData == this.normalItemViewData) {
             return;
         }
 
         if (normalItemViewData != null) {
             titleTxtView.setText(normalItemViewData.getTitle());
-            descTxtView.setText(normalItemViewData.getDesc());
+            passwordTxtView.setText(normalItemViewData.getPassword());
+            descTxtView.setText(normalItemViewData.getRemarks());
 
             setVisibility(VISIBLE);
         } else {
             setVisibility(GONE);
         }
 
+        scrollTo(0, 0);
+
         this.normalItemViewData = normalItemViewData;
     }
 
-    public interface INormalItemViewData {
-        String getTitle();
-
-        String getDesc();
-    }
-
     public interface OnNormalItemViewClickListener {
-        void onClick(NormalItemView normalItemView, INormalItemViewData normalItemViewData);
+        void onClick(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData);
 
-        void onEdit(NormalItemView normalItemView, INormalItemViewData normalItemViewData);
+        void onEdit(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData);
 
-        void onDelete(NormalItemView normalItemView, INormalItemViewData normalItemViewData);
+        void onDelete(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData);
     }
+
 }

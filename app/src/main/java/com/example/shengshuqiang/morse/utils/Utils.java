@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -99,8 +101,10 @@ public class Utils {
         return null;
     }
 
-    public static void saveBitmap(Context context, Bitmap bitmap) {
-        File file = new File(Environment.getExternalStorageDirectory() + "/1", "morse_qrcode.png");
+    public static void saveBitmap(Context context, View view, Bitmap bitmap) {
+        String path = Environment.getExternalStorageDirectory() + "/morse_qrcode.png";
+        String message = "二维码保存成功。\n" + path;
+        File file = new File(path);
         if (file.exists()) {
             file.delete();
         }
@@ -112,15 +116,19 @@ public class Utils {
 
             Toast.makeText(context, file.getPath(), Toast.LENGTH_SHORT).show();
         } catch (FileNotFoundException e) {
+            message = "二维码保存失败";
             e.printStackTrace();
         } finally {
             try {
                 out.flush();
                 out.close();
             } catch (IOException e) {
+                message = "二维码保存失败";
                 e.printStackTrace();
             }
         }
+
+        showMessage(view, message);
     }
 
     private static int getQRCodeSmallerDimension(Context context) {
@@ -207,6 +215,10 @@ public class Utils {
 
     public static <T> boolean isEmpty(T... items) {
         return items == null || items.length == 0;
+    }
+
+    public static void showMessage(View view, String msg) {
+        Snackbar.make(view, msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
 }

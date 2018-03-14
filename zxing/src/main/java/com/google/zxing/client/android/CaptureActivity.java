@@ -172,13 +172,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
                 startActivityForResult(intent, ALBUM_REQUEST_CODE);
             }
         });
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                decodeBitmap(Environment.getExternalStorageDirectory() + "/1/morse_qrcode.png");
-            }
-        }, 300);
     }
 
     @Override
@@ -513,7 +506,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         try {
             result = reader.decode(binaryBitmap);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+//            throw new RuntimeException(e);
         }
 
         return result;

@@ -20,13 +20,26 @@
             android:textSize="16sp"/>
 
         <TextView
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:singleLine="true"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:clickable="false"
+            android:longClickable="false"
+            android:contextClickable="false"
+            android:inputType="textPassword"/>
+
+        <TextView
             android:id="@+id/desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:singleLine="true"
             android:textColor="@android:color/darker_gray"
-            android:textSize="14sp"/>
+            android:textSize="12sp"/>
     </LinearLayout>
 
     <LinearLayout

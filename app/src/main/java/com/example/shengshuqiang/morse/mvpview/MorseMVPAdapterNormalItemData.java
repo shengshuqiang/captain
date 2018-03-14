@@ -6,21 +6,23 @@ import com.example.shengshuqiang.morse.mvpmodule.MorseMessageItemData;
  * Created by shengshuqiang on 2017/4/30.
  */
 
-public class MorseMVPAdapterNormalItemData implements MorseMVPAdapter.IMorseMVPAdapterItemData, NormalItemView.INormalItemViewData {
-    private MorseMessageItemData data;
+public class MorseMVPAdapterNormalItemData implements MorseMVPAdapter.IMorseMVPAdapterItemData {
+    public MorseMessageItemData data;
 
     public MorseMVPAdapterNormalItemData(MorseMessageItemData data) {
         this.data = data;
     }
 
-    @Override
     public String getTitle() {
         return data.userName;
     }
 
-    @Override
-    public String getDesc() {
+    public String getPassword() {
         return data.password;
+    }
+
+    public String getRemarks() {
+        return data.remarks;
     }
 
     @Override

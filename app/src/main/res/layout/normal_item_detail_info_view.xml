@@ -76,7 +76,7 @@
             android:textSize="14sp"/>
 
         <EditText
-            android:id="@+id/desc"
+            android:id="@+id/remarks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/darker_gray"

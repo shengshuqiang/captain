@@ -46,21 +46,21 @@ public class MorseMVPAdapter extends Adapter<MorseMVPAdapter.IMorseMVPAdapterIte
                     normalItemView = new NormalItemView(parent.getContext());
                     normalItemView.setOnNormalItemViewClickListener(new NormalItemView.OnNormalItemViewClickListener() {
                         @Override
-                        public void onClick(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                        public void onClick(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData) {
                             if (onNormalItemViewClickListener != null) {
                                 onNormalItemViewClickListener.onClick(normalItemView, normalItemViewData);
                             }
                         }
 
                         @Override
-                        public void onEdit(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                        public void onEdit(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData) {
                             if (onNormalItemViewClickListener != null) {
                                 onNormalItemViewClickListener.onEdit(normalItemView, normalItemViewData);
                             }
                         }
 
                         @Override
-                        public void onDelete(NormalItemView normalItemView, NormalItemView.INormalItemViewData normalItemViewData) {
+                        public void onDelete(NormalItemView normalItemView, MorseMVPAdapterNormalItemData normalItemViewData) {
                             if (onNormalItemViewClickListener != null) {
                                 onNormalItemViewClickListener.onDelete(normalItemView, normalItemViewData);
                             }

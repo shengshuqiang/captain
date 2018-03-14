@@ -1,9 +1,7 @@
 package com.example.shengshuqiang.morse.data;
 
 import com.example.shengshuqiang.morse.mvpmodule.MorseMessageItemData;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
+import com.example.shengshuqiang.morse.widgets.MorseItemDetailInfoView;
 
 /**
  * 摩斯信息单元中间产物
@@ -22,44 +20,44 @@ public class MorseMessageIntermediateItemData {
         // 改 -> 改、读、删
         MODIFY;
 
-        public int getEditOperateVisibility() {
-            int visibility = GONE;
+        public boolean isEditOperateVisibility() {
+            boolean visibility = false;
 
             switch (this) {
                 case READ:
-                    visibility = VISIBLE;
+                    visibility = true;
                     break;
 
                 case MODIFY:
-                    visibility = GONE;
+                    visibility = false;
                     break;
 
                 case ADD:
-                    visibility = GONE;
+                    visibility = false;
                     break;
             }
 
             return visibility;
         }
 
-        public int getDelOperateVisibility() {
+        public boolean isDelOperateVisibility() {
             if (this == MODIFY) {
-                return VISIBLE;
+                return true;
             }
 
-            return GONE;
+            return false;
         }
 
-        public int getOkOperateVisibility() {
-            return VISIBLE;
+        public boolean isOkOperateVisibility() {
+            return true;
         }
 
-        public int getCancelOperateVisibility() {
+        public boolean isCancelOperateVisibility() {
             if (this == MODIFY || this == ADD) {
-                return VISIBLE;
+                return true;
             }
 
-            return GONE;
+            return false;
         }
 
         public boolean isUserNameEditable() {
@@ -70,7 +68,7 @@ public class MorseMessageIntermediateItemData {
             return (this == MODIFY || this == ADD);
         }
 
-        public boolean isDescEditable() {
+        public boolean isRemarksEditable() {
             return (this == MODIFY || this == ADD);
         }
     }
@@ -79,12 +77,49 @@ public class MorseMessageIntermediateItemData {
     public MorseMessageItemData itemData;
 
     public MorseMessageIntermediateItemData(STATUS status) {
-        this(status, null);
+        this(status, new MorseMessageItemData());
     }
 
     public MorseMessageIntermediateItemData(STATUS status, MorseMessageItemData itemData) {
         this.status = status;
         this.itemData = itemData;
+    }
+
+    public void bindView(MorseItemDetailInfoView.IBindView bindView) {
+        String userName = (null != itemData ? itemData.userName : null);
+        bindView.setUserName(userName);
+
+        String password = (null != itemData ? itemData.password : null);
+        bindView.setPassword(password);
+
+        String remarks = (null != itemData ? itemData.remarks : null);
+        bindView.setRemarks(remarks);
+
+        boolean userNameEditable = status.isUserNameEditable();
+        bindView.setUserNameEditable(userNameEditable);
+
+        boolean passwordEditable = status.isPasswordEditable();
+        bindView.setPasswrodEditable(passwordEditable);
+
+        boolean remarksEditable = status.isRemarksEditable();
+        bindView.setRemarksEditable(remarksEditable);
+
+        boolean editOperateVisibility = status.isEditOperateVisibility();
+        bindView.setEditVisible(editOperateVisibility);
+
+        boolean deleteOperateVisibility = status.isDelOperateVisibility();
+        bindView.setDeleteVisible(deleteOperateVisibility);
+
+        boolean okOperateVisibility = status.isOkOperateVisibility();
+        bindView.setOKVisible(okOperateVisibility);
+
+        boolean cancelOperateVisibility = status.isCancelOperateVisibility();
+        bindView.setCancelVisible(cancelOperateVisibility);
+    }
+
+    @Override
+    public String toString() {
+        return "MorseMessageIntermediateItemData { status=" + status + ", itemData=" + itemData + "}";
     }
 
     public static MorseMessageIntermediateItemData readMorseMessageItemData(MorseMessageItemData itemData) {

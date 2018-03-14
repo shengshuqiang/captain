@@ -48,4 +48,8 @@ public class PasswordInputView extends LinearLayout implements KeyboardActionLis
     public String getPassword() {
         return editText.getText().toString();
     }
+
+    public void clear() {
+        editText.setText(null);
+    }
 }

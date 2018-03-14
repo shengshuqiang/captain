@@ -1,14 +1,13 @@
 package com.example.shengshuqiang.morse.widgets;
 
+import android.app.Service;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.popupwindow.MongoliaPopupWindow;
-import com.example.shengshuqiang.morse.mvpmodule.MorseMessageItemData;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
+import com.example.shengshuqiang.morse.data.MorseMessageIntermediateItemData;
 
 /**
  * 信息弹窗
@@ -21,41 +20,35 @@ import static android.view.View.VISIBLE;
 
 public class MorseItemDetailInfoPopupWindow extends MongoliaPopupWindow {
     private MorseItemDetailInfoView morseItemDetailInfoView;
-    private MorseMessageItemData messageItemData;
-    private String userName;
-    private MODE mode;
-    private boolean isOperateDismiss = false;
+    // 是否为有效关闭，区别返回键
+    private boolean isValidClose = false;
 
-    public MorseItemDetailInfoPopupWindow(Context context) {
+
+    public MorseItemDetailInfoPopupWindow(final Context context) {
         super(context);
 
         morseItemDetailInfoView = new MorseItemDetailInfoView(context);
         morseItemDetailInfoView.setOnDetailInfoClick(new MorseItemDetailInfoView.OnDetailInfoClick() {
             @Override
-            public void onEditClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageItemData data) {
-                setData(data, MODE.WRITE);
+            public void onEditClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageIntermediateItemData data) {
+
             }
 
             @Override
-            public void onDelClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageItemData data) {
-                mode = MODE.DEL;
-                messageItemData = morseItemDetailInfoView.getOldData();
-                isOperateDismiss = true;
+            public void onDelClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageIntermediateItemData data) {
+                isValidClose = true;
                 dismiss();
             }
 
             @Override
-            public void onOKClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageItemData data) {
-                messageItemData = morseItemDetailInfoView.getNewData();
-                isOperateDismiss = true;
+            public void onOKClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageIntermediateItemData data) {
+                isValidClose = true;
                 dismiss();
             }
 
             @Override
-            public void onCancelClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageItemData data) {
-                mode = MODE.READ;
-                messageItemData = morseItemDetailInfoView.getOldData();
-                isOperateDismiss = true;
+            public void onCancelClick(MorseItemDetailInfoView itemDetailInfoView, MorseMessageIntermediateItemData data) {
+                isValidClose = true;
                 dismiss();
             }
         });
@@ -65,30 +58,25 @@ public class MorseItemDetailInfoPopupWindow extends MongoliaPopupWindow {
     @Override
     public void show(View view) {
         super.show(view);
-        isOperateDismiss = false;
+
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }, 300);
     }
 
-    public void setData(MorseMessageItemData data, MODE mode) {
-        this.mode = mode;
-        messageItemData = data;
-        morseItemDetailInfoView.setData(data, mode);
-
-        userName = (data != null ? data.userName : null);
+    public void setData(MorseMessageIntermediateItemData intermediateItemData) {
+        morseItemDetailInfoView.setData(intermediateItemData);
     }
 
-    public MorseMessageItemData getMorseMessageItemData() {
-        return messageItemData;
+    public MorseMessageIntermediateItemData getIntermediateItemData() {
+        return morseItemDetailInfoView.getIntermediateItemData();
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public MODE getMode() {
-        return mode;
-    }
-
-    public boolean isOperateDismiss() {
-        return isOperateDismiss;
+    public boolean isValidClose() {
+        return isValidClose;
     }
 }
