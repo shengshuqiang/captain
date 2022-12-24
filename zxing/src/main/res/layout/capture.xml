@@ -193,16 +193,18 @@
 
   </LinearLayout>
 
-  <Button
-      android:id="@+id/open_album"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+  <ImageView
+      android:id="@+id/album"
+      android:layout_width="100dp"
+      android:layout_height="100dp"
+      android:scaleType="centerInside"
       android:layout_gravity="bottom|center_horizontal"
       android:layout_marginBottom="100dp"
       android:padding="10dp"
-      android:background="@android:color/holo_blue_light"
-      android:text="打开相册"
-      android:textColor="@color/status_text"/>
+      android:background="@drawable/button_bg"
+      android:src="@drawable/album_btn"
+      android:layout_marginRight="9dp"
+      />
 
   <TextView android:id="@+id/status_view"
             android:layout_width="wrap_content"

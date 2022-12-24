@@ -85,7 +85,7 @@ import java.util.Map;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends BaseCameraActivity implements SurfaceHolder.Callback {
+public final class CaptureActivity extends BasePermissionActivity implements SurfaceHolder.Callback {
 
     private static final String TAG = CaptureActivity.class.getSimpleName();
 
@@ -126,6 +126,7 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
 
     private Button openAlbumBtn;
     private boolean isFirstOnResume = true;
+    private boolean isClickOpenAlbum = false;
 
     ViewfinderView getViewfinderView() {
         return viewfinderView;
@@ -154,28 +155,39 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        findViewById(R.id.open_album).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.album).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent();
-//                /* 开启Pictures画面Type设定为image */
-//                intent.setType("image/*");
-//                /* 使用Intent.ACTION_GET_CONTENT这个Action */
-//                intent.setAction(Intent.ACTION_GET_CONTENT);
-//                /* 取得相片后返回本画面 */
-//                startActivityForResult(intent, ALBUM_REQUEST_CODE);
-                Intent intent = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, ALBUM_REQUEST_CODE);
+                isClickOpenAlbum = true;
+                handleRequstPermissionAndReadWriteFile();
             }
         });
+    }
+
+    @Override
+    public void onReadWriteFile() {
+        isClickOpenAlbum = false;
+        // Intent intent = new Intent();
+        //  /* 开启Pictures画面Type设定为image */
+        //  intent.setType("image/*");
+        //  /* 使用Intent.ACTION_GET_CONTENT这个Action */
+        //  intent.setAction(Intent.ACTION_GET_CONTENT);
+        // /* 取得相片后返回本画面 */
+        // startActivityForResult(intent, ALBUM_REQUEST_CODE);
+        Intent intent = new Intent(
+                Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, ALBUM_REQUEST_CODE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        if (isClickOpenAlbum) {
+            // 权限设置返回后打开相册
+            onReadWriteFile();
+        }
         if (!isFirstOnResume) {
             return;
         }
@@ -291,7 +303,7 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);
+            handleRequstPermissionAndCamera();
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
             surfaceHolder.addCallback(this);
@@ -451,7 +463,7 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
 
 
             }
-            Log.e("SSU", "resultCode=" + resultCode + ", intent=" + intent.toString());
+            Log.e("SSU", "resultCode=" + resultCode + ", intent=" + String.valueOf(intent));
         }
     }
 
@@ -500,6 +512,9 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
          */
         options.inJustDecodeBounds = false;
         bitmap = BitmapFactory.decodeFile(bitmapPath, options);
+        if (bitmap == null) {
+            return null;
+        }
         //新建一个RGBLuminanceSource对象，将bitmap图片传给此对象
         RGBLuminanceSource rgbLuminanceSource = toRGBLuminanceSource(bitmap);
         //将图片转换成二进制图片
@@ -575,7 +590,7 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
         }
         if (!hasSurface) {
             hasSurface = true;
-            initCamera(holder);
+            handleRequstPermissionAndCamera();
         }
     }
 
@@ -875,9 +890,6 @@ public final class CaptureActivity extends BaseCameraActivity implements Surface
     }
 
     private void initCamera(SurfaceHolder surfaceHolder) {
-        if (!checkPermissionAndCamera()) {
-            return;
-        }
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
         }

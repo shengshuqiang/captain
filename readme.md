@@ -1,1 +1,2 @@
-1. MorseMessageData加入数据去重判断
+# 命令行
+1. Android依赖信息：` ./gradlew captain:dependencies > log_dependencies.txt `

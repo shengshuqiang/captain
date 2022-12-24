@@ -1028,8 +1028,17 @@ drawable abc_textfield_search_activated_mtrl_alpha
 drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
+drawable album_btn
+drawable album_normal
+drawable album_press
 drawable avd_hide_password
 drawable avd_show_password
+drawable back_btn
+drawable back_btn_normal
+drawable back_btn_press
+drawable button_bg
+drawable button_bg_normal
+drawable button_bg_press
 drawable design_bottom_navigation_item_background
 drawable design_fab_background
 drawable design_ic_visibility
@@ -1082,6 +1091,7 @@ id action_text
 id actions
 id activity_chooser_view_content
 id add
+id album
 id alertTitle
 id app_picker_list_item_icon
 id app_picker_list_item_label
@@ -1172,7 +1182,6 @@ id normal
 id notification_background
 id notification_main_column
 id notification_main_column_container
-id open_album
 id outline
 id packed
 id page_number_view

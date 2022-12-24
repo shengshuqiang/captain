@@ -3,13 +3,31 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="captain/src/main/res/drawable/ic_menu_camera.xml" value="0.20625" />
+        <entry key="captain/src/main/res/drawable/ic_menu_gallery.xml" value="0.20625" />
+        <entry key="captain/src/main/res/drawable/ic_menu_slideshow.xml" value="0.20625" />
+        <entry key="captain/src/main/res/drawable/side_nav_bar.xml" value="0.20625" />
         <entry key="captain/src/main/res/layout/activity_main.xml" value="0.13385416666666666" />
+        <entry key="captain/src/main/res/layout/activity_qr.xml" value="0.7597989949748744" />
         <entry key="captain/src/main/res/layout/content_main.xml" value="0.13385416666666666" />
+        <entry key="captain/src/main/res/layout/content_qr.xml" value="0.19010416666666666" />
+        <entry key="captain/src/main/res/layout/fragment_gallery.xml" value="0.22552083333333334" />
+        <entry key="captain/src/main/res/layout/fragment_home.xml" value="0.22552083333333334" />
+        <entry key="captain/src/main/res/layout/grid_item.xml" value="0.19010416666666666" />
+        <entry key="captain/src/main/res/layout/nav_header_base.xml" value="0.22552083333333334" />
         <entry key="captain/src/main/res/layout/normal_item_detail_info_view.xml" value="0.13385416666666666" />
         <entry key="captain/src/main/res/layout/normal_item_view.xml" value="0.13385416666666666" />
+        <entry key="captain/src/main/res/menu/activity_main_drawer.xml" value="0.22552083333333334" />
+        <entry key="captain/src/main/res/menu/base.xml" value="0.22552083333333334" />
         <entry key="keyboard/src/main/res/layout/trip_hplus_customizekeyboard_id_card_keyboard_layout.xml" value="0.13385416666666666" />
         <entry key="keyboard/src/main/res/layout/trip_hplus_customizekeyboard_keyboard_layout.xml" value="0.13385416666666666" />
         <entry key="popupwindow/src/main/res/layout/password_popup_window.xml" value="0.13385416666666666" />
+        <entry key="zxing/src/main/res/drawable/back_btn.xml" value="0.24166666666666667" />
+        <entry key="zxing/src/main/res/drawable/button_bg.xml" value="0.24166666666666667" />
+        <entry key="zxing/src/main/res/drawable/mlens_album_btn.xml" value="0.24166666666666667" />
+        <entry key="zxing/src/main/res/drawable/mlens_back_btn.xml" value="0.24166666666666667" />
+        <entry key="zxing/src/main/res/drawable/mlens_button_bg_normal.xml" value="0.24166666666666667" />
+        <entry key="zxing/src/main/res/drawable/mlens_button_bg_press.xml" value="0.24166666666666667" />
         <entry key="zxing/src/main/res/layout/activity_base_camera.xml" value="0.19010416666666666" />
         <entry key="zxing/src/main/res/layout/app_picker_list_item.xml" value="0.13385416666666666" />
         <entry key="zxing/src/main/res/layout/fragment_second.xml" value="0.19010416666666666" />
