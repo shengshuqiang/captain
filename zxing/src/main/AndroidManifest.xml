@@ -33,12 +33,12 @@
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
         android:logo="@drawable/launcher_icon">
         <activity
             android:name=".BasePermissionActivity"/>
         <activity
             android:name=".CaptureActivity"
+            android:label="二维马"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="sensorPortrait"
             android:stateNotNeeded="true"

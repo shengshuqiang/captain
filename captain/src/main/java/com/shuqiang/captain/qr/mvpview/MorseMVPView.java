@@ -84,6 +84,8 @@ public class MorseMVPView extends MVPView {
         });
         listView.setAdapter(adapter);
         TextView descTxtView = new TextView(context);
+        descTxtView.setPadding(100, 100, 100, 100);
+        descTxtView.setLineSpacing(30,1);
         descTxtView.setText("1. 点击中间➕按钮添加账号密码信息。" +
                 "\n2. 点击右侧➤按钮输入加密密码和同样二次确认加密密码生成账号密码信息二维码图片。" +
                 "\n3. 点击左侧🔍按钮扫码或者打开相册选择账号密码信息二维码图片，输入加密密码即可显示。");

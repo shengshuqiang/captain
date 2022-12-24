@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -112,7 +114,8 @@ public class Utils {
             file.mkdirs();
         }
 
-        file = new File(path + "/" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-captain-qrcode.png");
+        String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长二维马.png";
+        file = new File(path + "/" + imageName);
         if (file.exists()) {
             file.delete();
         }
@@ -123,23 +126,33 @@ public class Utils {
             out = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 30, out);
 
-            showMessage(view, message + "\n" + file.getPath());
+            showMessage(view, "账号密码信息二维码保存成功，请您到 相册/图库 中查看");
             Log.e("SSU", message + "\n" + file.getPath());
         } catch (FileNotFoundException e) {
             message = "二维码保存失败";
+            showMessage(view, "账号密码信息二维码保存失败");
             e.printStackTrace();
         } finally {
             try {
                 out.flush();
                 out.close();
             } catch (IOException e) {
-                message = "二维码保存失败";
+                showMessage(view, "账号密码信息二维码保存失败");
                 e.printStackTrace();
             }
         }
-
-        Log.e("SSU", message);
-
+        // 下面的步骤必须有，不然在相册里找不到图片，若不需要让用户知道你保存了图片，可以不写下面的代码。
+        // 把文件插入到系统图库
+//        try {
+//            MediaStore.Images.Media.insertImage(context.getContentResolver(),
+//                    file.getAbsolutePath(), imageName, null);
+//            showMessage(view, "保存成功，请您到 相册/图库 中查看");
+//        } catch (FileNotFoundException e) {
+//            showMessage(view,  "保存失败");
+//            e.printStackTrace();
+//        }
+        // 最后通知图库更新
+        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
     }
 
     private static int getQRCodeSmallerDimension(Context context) {

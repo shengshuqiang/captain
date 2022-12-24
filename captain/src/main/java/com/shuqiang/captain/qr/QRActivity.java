@@ -116,7 +116,7 @@ public class QRActivity extends AppCompatActivity {
                     return;
                 }
                 if (!TextUtils.isEmpty(producePwd)) {
-                    showPasswordPopupWindow("请输入确认密码", new PopupWindow.OnDismissListener() {
+                    showPasswordPopupWindow("请输入二次确认密码", new PopupWindow.OnDismissListener() {
                         @Override
                         public void onDismiss() {
                             String password = passwordPopupWindow.getPassword();

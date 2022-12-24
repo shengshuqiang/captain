@@ -55,6 +55,9 @@ public class MorseItemDetailInfoView extends LinearLayout {
         okView = findViewById(R.id.ok);
         cancelView = findViewById(R.id.cancel);
         userNameEditText = (EditText) findViewById(R.id.user_name);
+        userNameEditText.setFocusable(true);
+        userNameEditText.setFocusableInTouchMode(true);
+        userNameEditText.requestFocus();
         passwordEditText = (EditText) findViewById(R.id.password);
         remarksEditTxt = (EditText) findViewById(R.id.remarks);
 
