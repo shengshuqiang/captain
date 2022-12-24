@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Morse.iml" filepath="$PROJECT_DIR$/Morse.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/keyboard/keyboard.iml" filepath="$PROJECT_DIR$/keyboard/keyboard.iml" />
-      <module fileurl="file://$PROJECT_DIR$/popupwindow/popupwindow.iml" filepath="$PROJECT_DIR$/popupwindow/popupwindow.iml" />
-      <module fileurl="file://$PROJECT_DIR$/zxing/zxing.iml" filepath="$PROJECT_DIR$/zxing/zxing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" filepath="$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" filepath="$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" filepath="$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" />
     </modules>
   </component>
 </project>

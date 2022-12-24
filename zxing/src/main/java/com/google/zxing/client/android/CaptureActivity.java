@@ -16,9 +16,7 @@
 
 package com.google.zxing.client.android;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -30,7 +28,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -88,7 +85,7 @@ import java.util.Map;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends Activity implements SurfaceHolder.Callback {
+public final class CaptureActivity extends BaseCameraActivity implements SurfaceHolder.Callback {
 
     private static final String TAG = CaptureActivity.class.getSimpleName();
 
@@ -128,6 +125,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     private AmbientLightManager ambientLightManager;
 
     private Button openAlbumBtn;
+    private boolean isFirstOnResume = true;
 
     ViewfinderView getViewfinderView() {
         return viewfinderView;
@@ -177,6 +175,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (!isFirstOnResume) {
+            return;
+        }
+        isFirstOnResume = false;
 
         // historyManager must be initialized here to update the history preference
         historyManager = new HistoryManager(this);
@@ -337,7 +340,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         inactivityTimer.onPause();
         ambientLightManager.stop();
         beepManager.close();
-        cameraManager.closeDriver();
+        if (cameraManager != null) {
+            cameraManager.closeDriver();
+        }
         //historyManager = null; // Keep for onActivityResult
         if (!hasSurface) {
             SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
@@ -862,7 +867,17 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         }
     }
 
+    @Override
+    public void openCamera() {
+        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+        SurfaceHolder surfaceHolder = surfaceView.getHolder();
+        initCamera(surfaceHolder);
+    }
+
     private void initCamera(SurfaceHolder surfaceHolder) {
+        if (!checkPermissionAndCamera()) {
+            return;
+        }
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
         }
@@ -907,7 +922,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     private void resetStatusView() {
         resultView.setVisibility(View.GONE);
         statusView.setText(R.string.msg_default_status);
-        statusView.setVisibility(View.VISIBLE);
+        statusView.setVisibility(View.GONE);
         viewfinderView.setVisibility(View.VISIBLE);
         lastResult = null;
     }

@@ -2,10 +2,16 @@
 
 buildscript {
     repositories {
-        jcenter()
+        mavenLocal()
+        maven {
+            url 'http://depot.sankuai.com/nexus/content/groups/public/'
+        }
+        maven {
+            url "http://pixel.sankuai.com/repository/mtdp"
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -14,7 +20,13 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        mavenLocal()
+        maven {
+            url 'http://depot.sankuai.com/nexus/content/groups/public/'
+        }
+        maven {
+            url "http://pixel.sankuai.com/repository/mtdp"
+        }
     }
 }
 
