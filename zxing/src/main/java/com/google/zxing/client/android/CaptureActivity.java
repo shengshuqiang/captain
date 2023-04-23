@@ -69,9 +69,14 @@ import com.google.zxing.client.android.result.supplement.SupplementalInfoRetriev
 import com.google.zxing.client.android.share.ShareActivity;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.luck.picture.lib.basic.PictureSelector;
+import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.interfaces.OnResultCallbackListener;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Hashtable;
@@ -174,10 +179,25 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
         //  intent.setAction(Intent.ACTION_GET_CONTENT);
         // /* 取得相片后返回本画面 */
         // startActivityForResult(intent, ALBUM_REQUEST_CODE);
-        Intent intent = new Intent(
-                Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, ALBUM_REQUEST_CODE);
+//        Intent intent = new Intent(
+//                Intent.ACTION_PICK,
+//                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult(intent, ALBUM_REQUEST_CODE);
+
+        PictureSelector.create(this)
+                .openGallery(SelectMimeType.ofImage())
+                .setImageEngine(GlideEngine.createGlideEngine())
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
     }
 
     @Override

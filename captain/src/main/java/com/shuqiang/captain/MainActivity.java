@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             super();
             this.context = mContext;
 
-            list.add(new Item("二维马", R.drawable.zxing, QRActivity.class));
+            list.add(new Item("密码二维马", R.drawable.zxing, QRActivity.class));
 
             // 一个的话直接跳
             if (list.size() == 1) {

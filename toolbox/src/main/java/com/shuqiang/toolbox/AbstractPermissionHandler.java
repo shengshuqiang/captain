@@ -98,7 +98,7 @@ public abstract class AbstractPermissionHandler implements ActivityCompat.OnRequ
                 tip = "未知";
                 break;
         }
-        return "您未开启船长App的“" + tip + "”访问权限，请在系统设置中开启";
+        return "您未开启船长 App 的“" + tip + "”访问权限，请在系统设置中开启";
     }
 
     /**

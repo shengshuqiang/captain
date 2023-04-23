@@ -38,7 +38,7 @@
             android:name=".BasePermissionActivity"/>
         <activity
             android:name=".CaptureActivity"
-            android:label="二维马"
+            android:label="密码二维马"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="sensorPortrait"
             android:stateNotNeeded="true"

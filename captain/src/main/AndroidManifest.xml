@@ -23,7 +23,7 @@
 
     <activity
         android:name="com.shuqiang.captain.qr.QRActivity"
-        android:label="二维马"
+        android:label="密码二维马"
         android:theme="@style/AppTheme.NoActionBar"></activity>
 
 </application>

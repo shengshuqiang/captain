@@ -47,9 +47,6 @@ import static android.content.Context.WINDOW_SERVICE;
 
 public class Utils {
     public static final float DIFF = 0.5f;
-    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
-    public static final String MORSE_ASSETS_FILE_NAME = "asys";
 
     public static String getFromAssets(Context context, String fileName) {
         try {
@@ -71,14 +68,21 @@ public class Utils {
         return null;
     }
 
+    /**
+     *  信息加解密，因为采用的是对称加密方案，再次加密即为解密。
+     * @param key 加密密码
+     * @param bytesStr 待加密字符串
+     * @return
+     */
     public static String encode(String key, String bytesStr) {
         char[] keyChars = key.toCharArray();
         char[] byteStrsChars = bytesStr.toCharArray();
         char[] encodeStrChars = new char[byteStrsChars.length];
+        // 按单字节遍历待加密字符串，使用加密密码按序号取模进行单字节加密
         for (int i = 0; i < byteStrsChars.length; i++) {
             encodeStrChars[i] = (char) (byteStrsChars[i] ^ keyChars[i % keyChars.length]);
         }
-
+        // 加密后字符数组转字符串
         String encodebytesStr = new String(encodeStrChars);
         Log.e("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
         Log.e("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
@@ -114,7 +118,7 @@ public class Utils {
             file.mkdirs();
         }
 
-        String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长二维马.png";
+        String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长App密码二维马.png";
         file = new File(path + "/" + imageName);
         if (file.exists()) {
             file.delete();

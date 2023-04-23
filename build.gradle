@@ -2,6 +2,12 @@
 
 buildscript {
     repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
         mavenLocal()
         maven {
             url 'http://depot.sankuai.com/nexus/content/groups/public/'
@@ -20,6 +26,12 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
         mavenLocal()
         maven {
             url 'http://depot.sankuai.com/nexus/content/groups/public/'
