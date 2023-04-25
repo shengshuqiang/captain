@@ -153,6 +153,9 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        返回键
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+//        getActionBar().setDisplayShowHomeEnabled(false);
         setContentView(R.layout.capture);
 
         hasSurface = false;
@@ -186,7 +189,19 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 //                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //        startActivityForResult(intent, ALBUM_REQUEST_CODE);
 
-        WXPictureSelector.show(this);
+//        仿微信图片选择器
+        WXPictureSelector.show(this).forResult(new OnResultCallbackListener<LocalMedia>() {
+            @Override
+            public void onResult(ArrayList<LocalMedia> result) {
+                if (result != null && result.size() > 0)
+                decodeBitmap(result.get(0).getRealPath());
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
     }
 
     @Override
@@ -432,6 +447,8 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
         } else if (R.id.menu_help == itemId) {
             intent.setClassName(this, HelpActivity.class.getName());
             startActivity(intent);
+        } else if (android.R.id.home == itemId) {
+            onBackPressed();
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -469,8 +486,6 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
                     }
                 }
                 decodeBitmap(imgPath);
-
-
             }
             Log.e("SSU", "resultCode=" + resultCode + ", intent=" + String.valueOf(intent));
         }

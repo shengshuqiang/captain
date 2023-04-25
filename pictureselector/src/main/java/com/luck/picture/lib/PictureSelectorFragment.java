@@ -641,6 +641,7 @@ public class PictureSelectorFragment extends PictureCommonFragment
         return isPreload;
     }
 
+    // 相册列表重排序，将"船长二维马"放到第一位
     private void resortList(List<LocalMediaFolder> result) {
         LocalMediaFolder captainFolder = null;
         for (int i = 0; i < result.size(); i++) {
@@ -853,6 +854,11 @@ public class PictureSelectorFragment extends PictureCommonFragment
                         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.ps_anim_modal_in);
                         SELECT_ANIM_DURATION = (int) animation.getDuration();
                         selectedView.startAnimation(animation);
+                    }
+
+                    // 如果选择最大数量为 1，选中直接关闭页面返回
+                    if (selectorConfig.maxSelectNum == 1) {
+                        dispatchTransformResult();
                     }
                 }
                 return selectResultCode;

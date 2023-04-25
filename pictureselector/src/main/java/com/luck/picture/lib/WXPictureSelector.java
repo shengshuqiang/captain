@@ -1,5 +1,7 @@
 package com.luck.picture.lib;
 
+import static com.shuqiang.toolbox.Contants.QR_DIR;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -34,23 +36,15 @@ public final class WXPictureSelector {
     public WXPictureSelector() {
     }
 
-    public static void show(Context context) {
-        PictureSelector.create(context)
+    public static PictureSelectionModel show(Context context) {
+        return PictureSelector.create(context)
             .openGallery(SelectMimeType.ofImage())
             .setImageEngine(GlideEngine.createGlideEngine())
             .setSelectorUIStyle(buildWXStyle(context))
             .isWithSelectVideoImage(false)
-            .forResult(new OnResultCallbackListener<LocalMedia>() {
-                @Override
-                public void onResult(ArrayList<LocalMedia> result) {
-
-                }
-
-                @Override
-                public void onCancel() {
-
-                }
-            });
+            .isPreloadFirst(false)
+            .setDefaultAlbumName(QR_DIR)
+            .setMaxSelectNum(1);
     }
     
     private static PictureSelectorStyle buildWXStyle(Context context) {

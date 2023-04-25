@@ -1006,6 +1006,9 @@ public final class R {
         public static int abc_textfield_search_default_mtrl_alpha = 0x7f090059;
         public static int abc_textfield_search_material = 0x7f09005a;
         public static int abc_vector_test = 0x7f09005b;
+        public static int back_btn = 0x7f090061;
+        public static int back_btn_normal = 0x7f090062;
+        public static int back_btn_press = 0x7f090063;
         public static int btn_checkbox_checked_mtrl = 0x7f090064;
         public static int btn_checkbox_checked_to_unchecked_mtrl_animation = 0x7f090065;
         public static int btn_checkbox_unchecked_mtrl = 0x7f090066;
@@ -1014,6 +1017,7 @@ public final class R {
         public static int btn_radio_off_to_on_mtrl_animation = 0x7f090069;
         public static int btn_radio_on_mtrl = 0x7f09006a;
         public static int btn_radio_on_to_off_mtrl_animation = 0x7f09006b;
+        public static int launcher_icon = 0x7f090078;
         public static int notification_action_background = 0x7f09007c;
         public static int notification_bg = 0x7f09007d;
         public static int notification_bg_low = 0x7f09007e;

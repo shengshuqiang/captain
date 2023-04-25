@@ -158,10 +158,12 @@ public class TitleBar extends RelativeLayout implements View.OnClickListener {
         if (StyleUtils.checkStyleValidity(backgroundColor)) {
             setBackgroundColor(backgroundColor);
         }
-        int backResId = titleBarStyle.getTitleLeftBackResource();
-        if (StyleUtils.checkStyleValidity(backResId)) {
-            ivLeftBack.setImageResource(backResId);
-        }
+//        int backResId = titleBarStyle.getTitleLeftBackResource();
+//        if (StyleUtils.checkStyleValidity(backResId)) {
+//            ivLeftBack.setImageResource(backResId);
+//        }
+//        统一返回键
+        ivLeftBack.setImageResource(R.drawable.back_btn);
         String titleDefaultText = StyleUtils.checkStyleValidity(titleBarStyle.getTitleDefaultTextResId())
                 ? getContext().getString(titleBarStyle.getTitleDefaultTextResId()) : titleBarStyle.getTitleDefaultText();
         if (StyleUtils.checkTextValidity(titleDefaultText)) {
