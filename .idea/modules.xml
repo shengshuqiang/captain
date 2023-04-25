@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" filepath="$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" filepath="$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" filepath="$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" filepath="$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" filepath="$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" />

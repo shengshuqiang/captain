@@ -69,6 +69,8 @@ import com.google.zxing.client.android.result.supplement.SupplementalInfoRetriev
 import com.google.zxing.client.android.share.ShareActivity;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.luck.picture.lib.WXPictureSelector;
+import com.luck.picture.lib.engine.GlideEngine;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.SelectMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
@@ -184,20 +186,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 //                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //        startActivityForResult(intent, ALBUM_REQUEST_CODE);
 
-        PictureSelector.create(this)
-                .openGallery(SelectMimeType.ofImage())
-                .setImageEngine(GlideEngine.createGlideEngine())
-                .forResult(new OnResultCallbackListener<LocalMedia>() {
-                    @Override
-                    public void onResult(ArrayList<LocalMedia> result) {
-
-                    }
-
-                    @Override
-                    public void onCancel() {
-
-                    }
-                });
+        WXPictureSelector.show(this);
     }
 
     @Override

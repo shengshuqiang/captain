@@ -1,2 +1,3 @@
 include ':captain', ':keyboard', ':popupwindow', ':zxing'
-include ':toolbox'
+include ':toolbox', ':pictureselector'
+//include ':toolbox'

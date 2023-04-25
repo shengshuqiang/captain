@@ -1228,6 +1228,7 @@ public final class R {
         public static int fragment_container = 0x7f0c00a0;
         public static int fragment_container_view_tag = 0x7f0c00a1;
         public static int frost = 0x7f0c00a2;
+        public static int glide_custom_view_target_tag = 0x7f0c00a4;
         public static int gone = 0x7f0c00a5;
         public static int group_divider = 0x7f0c00a6;
         public static int home = 0x7f0c00aa;

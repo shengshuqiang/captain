@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
+
+import com.google.android.material.snackbar.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -40,6 +39,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
 import static android.content.Context.WINDOW_SERVICE;
+import static com.shuqiang.toolbox.Contants.QR_DIR;
 
 /**
  * Created by shengshuqiang on 2017/4/29.
@@ -119,7 +119,12 @@ public class Utils {
         }
 
         String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长App密码二维马.png";
-        file = new File(path + "/" + imageName);
+        file = new File(path + "/" + QR_DIR);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        file = new File(path + "/" + QR_DIR + "/" + imageName);
         if (file.exists()) {
             file.delete();
         }

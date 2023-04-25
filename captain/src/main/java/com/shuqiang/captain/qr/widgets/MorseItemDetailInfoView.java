@@ -3,7 +3,7 @@ package com.shuqiang.captain.qr.widgets;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
