@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/baselibrary/captain.baselibrary.iml" filepath="$PROJECT_DIR$/.idea/modules/baselibrary/captain.baselibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" filepath="$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" filepath="$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" />

@@ -26,6 +26,7 @@
         <entry key="pictureselector/src/main/res/layout/ps_fragment_selector.xml" value="0.33125" />
         <entry key="pictureselector/src/main/res/layout/ps_title_bar.xml" value="0.18177083333333333" />
         <entry key="popupwindow/src/main/res/layout/password_popup_window.xml" value="0.13385416666666666" />
+        <entry key="toolbox/src/main/res/drawable-xxhdpi/back_btn.xml" value="0.18385416666666668" />
         <entry key="zxing/src/main/res/drawable-xxhdpi/back_btn.xml" value="0.1484375" />
         <entry key="zxing/src/main/res/drawable/album_btn.xml" value="0.23385416666666667" />
         <entry key="zxing/src/main/res/drawable/back_btn.xml" value="0.24166666666666667" />

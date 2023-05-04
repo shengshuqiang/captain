@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import captain.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +38,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         ((GridView) findViewById(R.id.gridview)).setAdapter(new GridAdapter(this));
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home){
-            // 返回键
-            onBackPressed();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private static class GridAdapter extends BaseAdapter {
