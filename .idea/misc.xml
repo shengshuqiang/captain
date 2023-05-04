@@ -3,10 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="basecomponent/src/main/res/layout/content_base.xml" value="0.18177083333333333" />
+        <entry key="basecomponent/src/main/res/layout/fragment_first.xml" value="0.18177083333333333" />
+        <entry key="basecomponent/src/main/res/layout/fragment_second.xml" value="0.18177083333333333" />
+        <entry key="baselibrary/src/main/res/drawable/back_btn.xml" value="0.2453125" />
+        <entry key="baselibrary/src/main/res/drawable/ic_launcher_background.xml" value="0.2453125" />
         <entry key="captain/src/main/res/drawable/ic_menu_camera.xml" value="0.20625" />
         <entry key="captain/src/main/res/drawable/ic_menu_gallery.xml" value="0.20625" />
         <entry key="captain/src/main/res/drawable/ic_menu_slideshow.xml" value="0.20625" />
         <entry key="captain/src/main/res/drawable/side_nav_bar.xml" value="0.20625" />
+        <entry key="captain/src/main/res/layout/activity_content.xml" value="0.14739583333333334" />
         <entry key="captain/src/main/res/layout/activity_main.xml" value="0.13385416666666666" />
         <entry key="captain/src/main/res/layout/activity_qr.xml" value="0.7597989949748744" />
         <entry key="captain/src/main/res/layout/content_main.xml" value="0.13385416666666666" />

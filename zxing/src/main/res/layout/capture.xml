@@ -14,12 +14,15 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
   <SurfaceView android:id="@+id/preview_view"
                android:layout_width="fill_parent"
-               android:layout_height="fill_parent"/>
+               android:layout_height="fill_parent"
+      />
 
   <com.google.zxing.client.android.ViewfinderView
       android:id="@+id/viewfinder_view"
@@ -215,4 +218,4 @@
             android:textColor="@color/status_text"
       android:visibility="gone"/>
 
-</merge>
+</FrameLayout>

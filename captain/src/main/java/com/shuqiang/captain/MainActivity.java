@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +15,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.captain.basecomponent.BaseActivity;
 import com.shuqiang.captain.qr.QRActivity;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +27,13 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // 添加默认的返回图标
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.back_btn);
-        // 设置返回键可用
-        getSupportActionBar().setHomeButtonEnabled(true);
 
         ((GridView) findViewById(R.id.gridview)).setAdapter(new GridAdapter(this));
+    }
+
+    @Override
+    protected int getContentLayoutResource() {
+        return R.layout.activity_content;
     }
 
     private static class GridAdapter extends BaseAdapter {

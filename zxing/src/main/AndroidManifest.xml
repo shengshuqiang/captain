@@ -35,15 +35,9 @@
         android:allowBackup="true"
         android:logo="@drawable/launcher_icon">
         <activity
-            android:name=".BasePermissionActivity"/>
-        <activity
             android:name=".CaptureActivity"
-            android:label="密码二维马"
-            android:clearTaskOnLaunch="true"
-            android:screenOrientation="sensorPortrait"
-            android:stateNotNeeded="true"
-            android:theme="@style/CaptureTheme"
-            android:windowSoftInputMode="stateAlwaysHidden">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:label="密码二维马">
             <intent-filter>
                 <action android:name="com.google.zxing.client.android.SCAN" />
 

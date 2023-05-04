@@ -50,6 +50,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.captain.basecomponent.BasePermissionActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -153,10 +154,6 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        返回键
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-//        getActionBar().setDisplayShowHomeEnabled(false);
-        setContentView(R.layout.capture);
 
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
@@ -164,14 +161,18 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
         ambientLightManager = new AmbientLightManager(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        findViewById(R.id.album).setOnClickListener(new View.OnClickListener() {
+        ((View) findViewById(R.id.album)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 isClickOpenAlbum = true;
                 handleRequstPermissionAndReadWriteFile();
             }
         });
+    }
+
+    @Override
+    protected int getContentLayoutResource() {
+        return R.layout.capture;
     }
 
     @Override
@@ -425,8 +426,8 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.capture, menu);
+//        MenuInflater menuInflater = getMenuInflater();
+//        menuInflater.inflate(R.menu.capture, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

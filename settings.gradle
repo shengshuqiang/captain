@@ -1,4 +1,3 @@
 include ':captain', ':keyboard', ':popupwindow', ':zxing'
 include ':toolbox', ':pictureselector'
-include ':baselibrary'
 include ':basecomponent'

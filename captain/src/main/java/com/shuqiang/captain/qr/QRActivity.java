@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupWindow;
 
+import com.captain.basecomponent.PermissionUtils;
 import com.shuqiang.captain.qr.mvp.MVPHelper;
 import com.shuqiang.captain.qr.mvp.MVPView;
 import com.shuqiang.captain.qr.mvpmodule.MorseMVPModule;
@@ -24,7 +25,6 @@ import com.shuqiang.captain.qr.utils.Utils;
 import com.shuqiang.captain.qr.widgets.PasswordPopupWindow;
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
-import com.shuqiang.toolbox.PermissionUtils;
 
 import captain.R;
 

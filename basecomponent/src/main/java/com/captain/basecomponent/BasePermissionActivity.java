@@ -1,13 +1,11 @@
-package com.google.zxing.client.android;
+package com.captain.basecomponent;
 
 import android.app.Activity;
-
-import com.shuqiang.toolbox.PermissionUtils;
 
 /**
  * 相机权限封装
  */
-public abstract class BasePermissionActivity extends Activity {
+public abstract class BasePermissionActivity extends BaseActivity {
     private PermissionUtils.CameraPermissionHandler cameraPermissionHandler;
     private PermissionUtils.ExternalStoragePermissionHandler externalStoragePermissionHandler;
 

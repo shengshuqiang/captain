@@ -4,8 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.shuqiang.captain.MainActivity">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -17,20 +16,15 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.shuqiang.captain.MainActivity"
-        tools:showIn="@layout/activity_qr">
-
+        tools:context="com.shuqiang.captain.MainActivity">
         <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -41,26 +35,10 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             >
-
-            <GridView
-                android:id="@+id/gridview"
+            <ViewStub
+                android:id="@+id/content_stub"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="30dp"
-                android:visibility="visible"
-                android:numColumns="3"
-                android:listSelector="#00000000"
-                android:horizontalSpacing="10dp"
-                android:verticalSpacing="10dp"
-                android:scrollbars="none"
-                android:stretchMode="columnWidth"
-                >
-            </GridView>
-
+                android:layout_height="match_parent"/>
         </FrameLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

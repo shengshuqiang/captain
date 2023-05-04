@@ -11,7 +11,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/baselibrary" />
+            <option value="$PROJECT_DIR$/basecomponent" />
             <option value="$PROJECT_DIR$/captain" />
             <option value="$PROJECT_DIR$/keyboard" />
             <option value="$PROJECT_DIR$/pictureselector" />

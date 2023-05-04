@@ -25,14 +25,15 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(path: ':baselibrary')
+    implementation project(path: ':basecomponent')
     implementation project(path: ':toolbox')
+    compile project(':zxing')
+    compile project(':popupwindow')
+
     implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'
     implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'androidx.navigation:navigation-ui:2.0.0'
-    implementation project(path: ':baselibrary')
-    implementation project(path: ':baselibrary')
     compile('androidx.appcompat:appcompat:1.0.0') {
         force = true
     }
@@ -58,8 +59,6 @@ dependencies {
         force = true
     }
     compile 'com.google.zxing:core:3.2.1'
-    compile project(':zxing')
-    compile project(':popupwindow')
 }
 
 configurations {
