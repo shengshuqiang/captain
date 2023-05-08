@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -288,15 +289,15 @@ public class PictureSelectorFragment extends PictureCommonFragment
                             completeSelectView.getLayoutParams()).topToTop = R.id.title_bar;
                     ((ConstraintLayout.LayoutParams)
                             completeSelectView.getLayoutParams()).bottomToBottom = R.id.title_bar;
-                    if (selectorConfig.isPreviewFullScreenMode) {
-                        ((ConstraintLayout.LayoutParams) completeSelectView
-                                .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
-                    }
+//                    if (selectorConfig.isPreviewFullScreenMode) {
+//                        ((ConstraintLayout.LayoutParams) completeSelectView
+//                                .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
+//                    }
                 } else if (completeSelectView.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                    if (selectorConfig.isPreviewFullScreenMode) {
-                        ((RelativeLayout.LayoutParams) completeSelectView
-                                .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
-                    }
+//                    if (selectorConfig.isPreviewFullScreenMode) {
+//                        ((RelativeLayout.LayoutParams) completeSelectView
+//                                .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
+//                    }
                 }
             }
             completeSelectView.setOnClickListener(new View.OnClickListener() {

@@ -36,6 +36,7 @@ apply from: '../publish.gradle'
 
 dependencies {
     compile project(':toolbox')
+    implementation project(path: ':base')
     compile('androidx.activity:activity:1.3.1') {
         force = true
     }

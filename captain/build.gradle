@@ -25,14 +25,15 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(path: ':basecomponent')
+    implementation project(path: ':base')
     implementation project(path: ':toolbox')
     compile project(':zxing')
     compile project(':popupwindow')
 
     implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'
-    implementation 'androidx.navigation:navigation-fragment:2.0.0'
+    implementation 'androidx.navigation:n' +
+            'avigation-fragment:2.0.0'
     implementation 'androidx.navigation:navigation-ui:2.0.0'
     compile('androidx.appcompat:appcompat:1.0.0') {
         force = true

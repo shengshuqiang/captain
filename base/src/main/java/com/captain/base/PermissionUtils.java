@@ -1,4 +1,4 @@
-package com.captain.basecomponent;
+package com.captain.base;
 
 import android.Manifest;
 import android.app.Activity;

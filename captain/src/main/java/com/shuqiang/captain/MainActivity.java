@@ -6,7 +6,6 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,7 +15,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.captain.basecomponent.BaseActivity;
+import com.captain.base.BaseActivity;
 import com.shuqiang.captain.qr.QRActivity;
 import java.util.ArrayList;
 import java.util.List;

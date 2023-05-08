@@ -7,13 +7,15 @@
     <View
         android:id="@+id/top_status_bar"
         android:layout_width="match_parent"
-        android:layout_height="0dp" />
+        android:layout_height="0dp"
+        android:background="@color/colorPrimaryDark"/>
 
     <RelativeLayout
         android:id="@+id/rl_title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_status_bar">
+        android:layout_below="@id/top_status_bar"
+        android:background="@color/colorPrimary">
 
         <ImageView
             android:id="@+id/ps_iv_left_back"
@@ -97,7 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="0.8dp"
         android:layout_below="@id/rl_title_bar"
-        android:background="@color/ps_color_ec"
+        android:background="@color/colorPrimaryDark"
         android:visibility="gone" />
 
 </merge>

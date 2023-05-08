@@ -3,12 +3,15 @@ package com.luck.picture.lib.basic;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import com.captain.base.BaseActivity;
 import com.luck.picture.lib.PictureSelectorFragment;
 import com.luck.picture.lib.R;
 import com.luck.picture.lib.config.SelectorConfig;
@@ -25,16 +28,26 @@ import com.luck.picture.lib.utils.StyleUtils;
  * @date：2021/11/17 9:59 上午
  * @describe：PictureSelectorSupporterActivity
  */
-public class PictureSelectorSupporterActivity extends AppCompatActivity {
+public class PictureSelectorSupporterActivity extends BaseActivity {
     private SelectorConfig selectorConfig;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         initSelectorConfig();
         immersive();
-        setContentView(R.layout.ps_activity_container);
+        super.onCreate(savedInstanceState);
         setupFragment();
+    }
+
+    @Override
+    protected void initToolbar(View appBarLayout, Toolbar toolbar) {
+        // 自定义了标题栏，屏蔽父组件操作
+        appBarLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected int getContentLayoutResource() {
+        return R.layout.ps_activity_container;
     }
 
     private void initSelectorConfig() {
@@ -47,17 +60,17 @@ public class PictureSelectorSupporterActivity extends AppCompatActivity {
         int navigationBarColor = mainStyle.getNavigationBarColor();
         boolean isDarkStatusBarBlack = mainStyle.isDarkStatusBarBlack();
         if (!StyleUtils.checkStyleValidity(statusBarColor)) {
-            statusBarColor = ContextCompat.getColor(this, R.color.ps_color_grey);
+            statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark);
         }
         if (!StyleUtils.checkStyleValidity(navigationBarColor)) {
-            navigationBarColor = ContextCompat.getColor(this, R.color.ps_color_grey);
+            navigationBarColor = ContextCompat.getColor(this, R.color.colorPrimary);
         }
         ImmersiveManager.immersiveAboveAPI23(this, statusBarColor, navigationBarColor, isDarkStatusBarBlack);
     }
 
     private void setupFragment() {
-        FragmentInjectManager.injectFragment(this, PictureSelectorFragment.TAG,
-                PictureSelectorFragment.newInstance());
+        PictureSelectorFragment pictureSelectorFragment = PictureSelectorFragment.newInstance();
+        FragmentInjectManager.injectFragment(this, PictureSelectorFragment.TAG, pictureSelectorFragment);
     }
 
     /**

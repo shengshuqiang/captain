@@ -36,7 +36,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -50,7 +49,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.captain.basecomponent.BasePermissionActivity;
+import com.captain.base.BasePermissionActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -71,9 +70,6 @@ import com.google.zxing.client.android.share.ShareActivity;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.luck.picture.lib.WXPictureSelector;
-import com.luck.picture.lib.engine.GlideEngine;
-import com.luck.picture.lib.basic.PictureSelector;
-import com.luck.picture.lib.config.SelectMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.interfaces.OnResultCallbackListener;
 
@@ -426,6 +422,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+//        去掉菜单项
 //        MenuInflater menuInflater = getMenuInflater();
 //        menuInflater.inflate(R.menu.capture, menu);
         return super.onCreateOptionsMenu(menu);

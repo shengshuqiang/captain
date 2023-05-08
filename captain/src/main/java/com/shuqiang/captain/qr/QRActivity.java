@@ -14,7 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupWindow;
 
-import com.captain.basecomponent.PermissionUtils;
+import com.captain.base.BaseActivity;
+import com.captain.base.BasePermissionActivity;
+import com.captain.base.PermissionUtils;
 import com.shuqiang.captain.qr.mvp.MVPHelper;
 import com.shuqiang.captain.qr.mvp.MVPView;
 import com.shuqiang.captain.qr.mvpmodule.MorseMVPModule;
@@ -28,8 +30,7 @@ import com.google.zxing.client.android.Intents;
 
 import captain.R;
 
-public class QRActivity extends AppCompatActivity {
-    private PermissionUtils.ExternalStoragePermissionHandler externalStoragePermissionHandler;
+public class QRActivity extends BasePermissionActivity {
     public static final int MORSE_MESSAGE_REQUEST_CODE = 0;
 
     private MVPView mvpView;
@@ -41,14 +42,6 @@ public class QRActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_qr);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // 添加默认的返回图标
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.back_btn);
-        // 设置返回键可用
-        getSupportActionBar().setHomeButtonEnabled(true);
 
         Context context = QRActivity.this;
         mvpView = (MVPView) findViewById(R.id.mvp_view);
@@ -74,36 +67,19 @@ public class QRActivity extends AppCompatActivity {
         findViewById(R.id.produce).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (externalStoragePermissionHandler == null) {
-                    externalStoragePermissionHandler = new PermissionUtils.ExternalStoragePermissionHandler(QRActivity.this) {
-                        @Override
-                        public void onReadWriteFile() {
-                            handleSaveQRBmp();
-                        }
-
-                        @Override
-                        protected void onPermissionReject() {
-                            // 屏蔽默认关闭当前页面逻辑，啥都不用干
-                        }
-                    };
-                }
                 externalStoragePermissionHandler.handleRequestPermissionAndWork();
             }
         });
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home){
-            // 返回键
-            onBackPressed();
-        }
-        return super.onOptionsItemSelected(item);
+    public void onReadWriteFile() {
+        handleSaveQRBmp();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        externalStoragePermissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    protected int getContentLayoutResource() {
+        return R.layout.activity_qr;
     }
 
     private void handleSaveQRBmp() {

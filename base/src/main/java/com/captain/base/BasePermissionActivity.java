@@ -1,13 +1,11 @@
-package com.captain.basecomponent;
-
-import android.app.Activity;
+package com.captain.base;
 
 /**
  * 相机权限封装
  */
 public abstract class BasePermissionActivity extends BaseActivity {
-    private PermissionUtils.CameraPermissionHandler cameraPermissionHandler;
-    private PermissionUtils.ExternalStoragePermissionHandler externalStoragePermissionHandler;
+    protected PermissionUtils.CameraPermissionHandler cameraPermissionHandler;
+    protected PermissionUtils.ExternalStoragePermissionHandler externalStoragePermissionHandler;
 
     public BasePermissionActivity() {
         super();
@@ -54,10 +52,14 @@ public abstract class BasePermissionActivity extends BaseActivity {
     /**
      * 打开相机
      */
-    public abstract void openCamera();
+    public void openCamera() {
+        // 有相机权限申请则重写回调
+    };
 
     /**
      * 读写文件
      */
-    public abstract void onReadWriteFile();
+    public void onReadWriteFile() {
+        // 有相机权限申请则重写回调
+    };
 }

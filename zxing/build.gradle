@@ -18,7 +18,7 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':basecomponent')
+    implementation project(path: ':base')
     implementation project(path: ':pictureselector')
 
     implementation 'androidx.appcompat:appcompat:1.0.0'
@@ -31,7 +31,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.0.0-rc02'
     implementation 'com.google.zxing:core:3.2.1'
     implementation 'com.google.zxing:android-core:3.2.1'
-    compile('androidx.core:core:1.0.0') {
+    compile('androidx.core:core:1.3.2') {
         force = true
     }
 }

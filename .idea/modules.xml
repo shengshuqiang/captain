@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/basecomponent/captain.basecomponent.iml" filepath="$PROJECT_DIR$/.idea/modules/basecomponent/captain.basecomponent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/base/captain.base.iml" filepath="$PROJECT_DIR$/.idea/modules/base/captain.base.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" filepath="$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" filepath="$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" />

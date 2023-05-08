@@ -17,6 +17,7 @@ import com.luck.picture.lib.basic.PictureSelectionPreviewModel;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.InjectResourceSource;
 import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.config.SelectModeConfig;
 import com.luck.picture.lib.engine.GlideEngine;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.interfaces.OnInjectActivityPreviewListener;
@@ -44,7 +45,7 @@ public final class WXPictureSelector {
             .isWithSelectVideoImage(false)
             .isPreloadFirst(false)
             .setDefaultAlbumName(QR_DIR)
-            .setMaxSelectNum(1);
+            .setSelectionMode(SelectModeConfig.SINGLE);
     }
     
     private static PictureSelectorStyle buildWXStyle(Context context) {

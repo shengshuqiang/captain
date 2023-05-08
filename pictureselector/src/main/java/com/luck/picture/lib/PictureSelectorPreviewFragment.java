@@ -662,15 +662,15 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
                         .getLayoutParams()).topToTop = R.id.title_bar;
                 ((ConstraintLayout.LayoutParams) completeSelectView
                         .getLayoutParams()).bottomToBottom = R.id.title_bar;
-                if (selectorConfig.isPreviewFullScreenMode) {
-                    ((ConstraintLayout.LayoutParams) completeSelectView
-                            .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
-                }
+//                if (selectorConfig.isPreviewFullScreenMode) {
+//                    ((ConstraintLayout.LayoutParams) completeSelectView
+//                            .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
+//                }
             } else if (completeSelectView.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                if (selectorConfig.isPreviewFullScreenMode) {
-                    ((RelativeLayout.LayoutParams) completeSelectView
-                            .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
-                }
+//                if (selectorConfig.isPreviewFullScreenMode) {
+//                    ((RelativeLayout.LayoutParams) completeSelectView
+//                            .getLayoutParams()).topMargin = DensityUtil.getStatusBarHeight(getContext());
+//                }
             }
         }
 

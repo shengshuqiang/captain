@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.captain.base.BaseActivity;
 import com.luck.picture.lib.PictureOnlyCameraFragment;
 import com.luck.picture.lib.PictureSelectorPreviewFragment;
 import com.luck.picture.lib.PictureSelectorSystemFragment;
@@ -32,21 +33,25 @@ import java.util.ArrayList;
  * @date：2022/2/10 6:07 下午
  * @describe：PictureSelectorTransparentActivity
  */
-public class PictureSelectorTransparentActivity extends AppCompatActivity {
+public class PictureSelectorTransparentActivity extends BaseActivity {
     private SelectorConfig selectorConfig;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         initSelectorConfig();
         immersive();
-        setContentView(R.layout.ps_empty);
+        super.onCreate(savedInstanceState);
         if (isExternalPreview()) {
             // TODO ignore
         } else {
             setActivitySize();
         }
         setupFragment();
+    }
+
+    @Override
+    protected int getContentLayoutResource() {
+        return R.layout.ps_empty;
     }
 
     private void initSelectorConfig() {
@@ -67,12 +72,12 @@ public class PictureSelectorTransparentActivity extends AppCompatActivity {
         int navigationBarColor = mainStyle.getNavigationBarColor();
         boolean isDarkStatusBarBlack = mainStyle.isDarkStatusBarBlack();
         if (!StyleUtils.checkStyleValidity(statusBarColor)) {
-            statusBarColor = ContextCompat.getColor(this, R.color.ps_color_grey);
+            statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark);
         }
         if (!StyleUtils.checkStyleValidity(navigationBarColor)) {
-            navigationBarColor = ContextCompat.getColor(this, R.color.ps_color_grey);
+            navigationBarColor = ContextCompat.getColor(this, R.color.colorPrimary);
         }
-        ImmersiveManager.immersiveAboveAPI23(this, statusBarColor, navigationBarColor, isDarkStatusBarBlack);
+//        ImmersiveManager.immersiveAboveAPI23(this, statusBarColor, navigationBarColor, isDarkStatusBarBlack);
     }
 
     private void setupFragment() {
