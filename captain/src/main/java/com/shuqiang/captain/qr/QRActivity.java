@@ -16,6 +16,7 @@ import android.widget.PopupWindow;
 
 import com.captain.base.BaseActivity;
 import com.captain.base.BasePermissionActivity;
+import com.captain.base.LoadingView;
 import com.captain.base.PermissionUtils;
 import com.shuqiang.captain.qr.mvp.MVPHelper;
 import com.shuqiang.captain.qr.mvp.MVPView;

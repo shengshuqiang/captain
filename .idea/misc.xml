@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="base/src/main/res/drawable/back_btn.xml" value="0.22395833333333334" />
+        <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot.xml" value="0.34739583333333335" />
+        <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot_white.xml" value="0.34739583333333335" />
         <entry key="base/src/main/res/layout/activity_base.xml" value="0.1" />
         <entry key="basecomponent/src/main/res/layout/content_base.xml" value="0.18177083333333333" />
         <entry key="basecomponent/src/main/res/layout/fragment_first.xml" value="0.18177083333333333" />

@@ -50,6 +50,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.captain.base.BasePermissionActivity;
+import com.captain.base.LoadingView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -131,6 +132,8 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
     private Button openAlbumBtn;
     private boolean isFirstOnResume = true;
     private boolean isClickOpenAlbum = false;
+    private LoadingView loadingView;
+
 
     ViewfinderView getViewfinderView() {
         return viewfinderView;
@@ -155,6 +158,8 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
         inactivityTimer = new InactivityTimer(this);
         beepManager = new BeepManager(this);
         ambientLightManager = new AmbientLightManager(this);
+
+        loadingView = findViewById(R.id.loading);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         ((View) findViewById(R.id.album)).setOnClickListener(new View.OnClickListener() {
@@ -490,6 +495,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
     }
 
     private void decodeBitmap(String imgPath) {
+        loadingView.startAnimation();
         //获取解析结果
         Result result = parseQRcodeBitmap(imgPath);
 //                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
@@ -634,6 +640,8 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
      * @param barcode     A greyscale bitmap of the camera data which was decoded.
      */
     public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
+//        loadingView.stopAnimation();
+
         inactivityTimer.onActivity();
         lastResult = rawResult;
         ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);

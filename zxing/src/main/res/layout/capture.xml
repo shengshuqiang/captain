@@ -196,6 +196,19 @@
 
   </LinearLayout>
 
+  <com.captain.base.LoadingView
+      android:id="@+id/loading"
+      android:layout_width="match_parent"
+      android:layout_height="300dp"
+      android:background="@android:color/white"
+      android:gravity="center"
+      android:scaleType="centerInside"
+      android:layout_gravity="bottom|center_horizontal"
+      android:layout_marginBottom="300dp"
+      android:padding="50dp"
+      >
+  </com.captain.base.LoadingView>
+
   <ImageView
       android:id="@+id/album"
       android:layout_width="60dp"
