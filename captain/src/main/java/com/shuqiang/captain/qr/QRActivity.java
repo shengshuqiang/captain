@@ -35,8 +35,11 @@ public class QRActivity extends BasePermissionActivity {
     public static final int MORSE_MESSAGE_REQUEST_CODE = 0;
 
     private MVPView mvpView;
+    // 首次输入密码弹窗
+    private PasswordPopupWindow firstPasswordPopupWindow;
+    // 二次确认输入密码弹窗
+    private PasswordPopupWindow secondPasswordPopupWindow;
 
-    private PasswordPopupWindow passwordPopupWindow;
     private MorseMVPPresenter mvpPresenter;
     private String producePwd;
 
@@ -47,6 +50,8 @@ public class QRActivity extends BasePermissionActivity {
         Context context = QRActivity.this;
         mvpView = (MVPView) findViewById(R.id.mvp_view);
         mvpPresenter = new MorseMVPPresenter(context);
+        firstPasswordPopupWindow = new PasswordPopupWindow(QRActivity.this);
+        secondPasswordPopupWindow = new PasswordPopupWindow(QRActivity.this);
         MVPHelper.init(mvpView, mvpPresenter, new MorseMVPModule());
 
         findViewById(R.id.scan).setOnClickListener(new View.OnClickListener() {
@@ -85,18 +90,18 @@ public class QRActivity extends BasePermissionActivity {
 
     private void handleSaveQRBmp() {
         producePwd = null;
-        showPasswordPopupWindow("请输入密码", new PopupWindow.OnDismissListener() {
+        showPasswordPopupWindow(firstPasswordPopupWindow,"请输入密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
             @Override
-            public void onDismiss() {
-                producePwd = passwordPopupWindow.getPassword();
+            public void onComplete(String password) {
+                producePwd = password;
                 if (producePwd == null) {
                     return;
                 }
                 if (!TextUtils.isEmpty(producePwd)) {
-                    showPasswordPopupWindow("请输入二次确认密码", new PopupWindow.OnDismissListener() {
+                    showPasswordPopupWindow(secondPasswordPopupWindow,"请输入二次确认密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
                         @Override
-                        public void onDismiss() {
-                            String password = passwordPopupWindow.getPassword();
+                        public void onComplete(String password) {
+                            firstPasswordPopupWindow.dismiss();
                             if (password == null) {
                                 return;
                             }
@@ -115,7 +120,7 @@ public class QRActivity extends BasePermissionActivity {
                                     } else {
                                         Utils.showMessage(mvpView, "密码为空，无效");
                                     }
-                                    Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
+//                                    Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -125,9 +130,9 @@ public class QRActivity extends BasePermissionActivity {
                 } else {
                     Utils.showMessage(mvpView, "密码为空，无效!");
                 }
-                Log.e("SSU", "password=" + producePwd);
+//                Log.e("SSU", "password=" + producePwd);
             }
-        });
+        }, false);
     }
 
     @Override
@@ -135,10 +140,9 @@ public class QRActivity extends BasePermissionActivity {
         if (MORSE_MESSAGE_REQUEST_CODE == requestCode) {
             if (RESULT_OK == resultCode) {
                 final String morseMessageStr = data.getStringExtra(Intents.Scan.RESULT);
-                showPasswordPopupWindow("请输入密码", new PopupWindow.OnDismissListener() {
+                showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
                     @Override
-                    public void onDismiss() {
-                        String password = passwordPopupWindow.getPassword();
+                    public void onComplete(String password) {
                         if (password == null) {
                             return;
                         }
@@ -163,12 +167,13 @@ public class QRActivity extends BasePermissionActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void showPasswordPopupWindow(String title, PopupWindow.OnDismissListener dismissListener) {
-        if (passwordPopupWindow == null) {
-            passwordPopupWindow = new PasswordPopupWindow(QRActivity.this);
-        }
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener) {
+        showPasswordPopupWindow(passwordPopupWindow, title, onPasswordCompleteListener, true);
+    }
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss) {
         passwordPopupWindow.setTitle(title);
-        passwordPopupWindow.setOnDismissListener(dismissListener);
+        passwordPopupWindow.setPasswordCompleteDismiss(isPasswordCompleteDismiss);
+        passwordPopupWindow.setOnPasswordCompleteListener(onPasswordCompleteListener);
         passwordPopupWindow.clear();
 
         new Handler().postDelayed(new Runnable() {

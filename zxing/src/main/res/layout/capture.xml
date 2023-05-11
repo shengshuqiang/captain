@@ -205,7 +205,7 @@
       android:scaleType="centerInside"
       android:layout_gravity="bottom|center_horizontal"
       android:layout_marginBottom="300dp"
-      android:padding="50dp"
+      android:layout_marginHorizontal="50dp"
       >
   </com.captain.base.LoadingView>
 
