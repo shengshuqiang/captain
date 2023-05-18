@@ -35,7 +35,7 @@
         android:allowBackup="true"
         android:logo="@drawable/launcher_icon">
         <activity
-            android:name=".CaptureActivity"
+            android:name=".QRScanActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:label="密码二维马">
             <intent-filter>

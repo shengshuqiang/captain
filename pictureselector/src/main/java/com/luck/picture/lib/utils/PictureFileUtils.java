@@ -1,5 +1,7 @@
 package com.luck.picture.lib.utils;
 
+import static com.shuqiang.toolbox.Contants.QR_DIR;
+
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
@@ -20,6 +22,13 @@ import androidx.core.content.FileProvider;
 import com.luck.picture.lib.config.FileSizeUnit;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.config.SelectorConfig;
+import com.luck.picture.lib.config.SelectorProviders;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.entity.LocalMediaFolder;
+import com.luck.picture.lib.interfaces.OnQueryAllAlbumListener;
+import com.luck.picture.lib.interfaces.OnQueryDataResultListener;
+import com.luck.picture.lib.loader.LocalMediaPageLoader;
 import com.luck.picture.lib.manager.PictureCacheManager;
 
 import java.io.BufferedInputStream;
@@ -31,6 +40,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -46,6 +57,54 @@ public class PictureFileUtils {
     private static final String POSTFIX_MP4 = ".mp4";
     private static final String POSTFIX_AMR = ".amr";
 
+    public interface LastQRImgPathLoader {
+        void loadPath(LocalMedia lastLocalMedia);
+    }
+
+    /**
+     * 加载最新存储图片
+     *
+     * @param context
+     * @param lastQRImgPathLoader
+     */
+    public static void loadLastQRImgPath(Context context, LastQRImgPathLoader lastQRImgPathLoader) {
+        SelectorConfig selectorConfig = SelectorProviders.getInstance().getSelectorConfig();
+        LocalMediaPageLoader loader = new LocalMediaPageLoader(context, selectorConfig);
+        loader.loadAllAlbum(new OnQueryAllAlbumListener<LocalMediaFolder>() {
+            @Override
+            public void onComplete(List<LocalMediaFolder> result) {
+                LocalMediaFolder captainFolder = null;
+                for (int i = 0; i < result.size(); i++) {
+                    LocalMediaFolder folder = result.get(i);
+                    if (folder.getFolderName().contains(QR_DIR)) {
+                        captainFolder = folder;
+                        break;
+                    }
+                }
+                if (captainFolder != null) {
+                    long firstBucketId = captainFolder.getBucketId();
+                    int page = 1;
+                    loader.loadPageMediaData(firstBucketId, page, page * selectorConfig.pageSize,
+                            new OnQueryDataResultListener<LocalMedia>() {
+                                @Override
+                                public void onComplete(ArrayList<LocalMedia> result, boolean isHasMore) {
+                                    LocalMedia lastLocalMedia = null;
+                                    // 获取最新到二维码，即时间戳最大
+                                    for (int i = 0; i < result.size(); i++) {
+                                        LocalMedia localMedia = result.get(i);
+                                        if (lastLocalMedia == null || lastLocalMedia.getDateAddedTime() < localMedia.getDateAddedTime()) {
+                                            lastLocalMedia = localMedia;
+                                        }
+                                    }
+                                    lastQRImgPathLoader.loadPath(lastLocalMedia);
+                                }
+                            });
+                } else {
+                    lastQRImgPathLoader.loadPath(null);
+                }
+            }
+        });
+    }
     /**
      * @param context
      * @param chooseMode

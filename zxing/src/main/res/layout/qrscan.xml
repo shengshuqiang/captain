@@ -209,6 +209,18 @@
       >
   </com.captain.base.LoadingView>
 
+  <TextView android:id="@+id/file_name"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|center_horizontal"
+      android:background="@android:color/white"
+      android:textSize="18dp"
+      android:text="@string/msg_default_status"
+      android:textColor="@color/ps_color_black"
+      android:layout_marginBottom="500dp"
+      android:layout_marginHorizontal="50dp"
+      android:visibility="gone"/>
+
   <ImageView
       android:id="@+id/album"
       android:layout_width="60dp"

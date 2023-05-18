@@ -61,27 +61,31 @@
             android:id="@+id/user_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColor="@android:color/black"
+            android:inputType="textVisiblePassword"
             android:hint="账号"
-            android:textSize="16sp"/>
+            android:textSize="22dp"/>
 
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColor="@android:color/darker_gray"
+            android:inputType="textVisiblePassword"
             android:hint="密码"
-            android:textSize="14sp"/>
+            android:textSize="18dp"/>
 
         <EditText
             android:id="@+id/remarks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/darker_gray"
+            android:inputType="textPhonetic"
+            android:layout_marginTop="10dp"
             android:hint="备注"
-            android:textSize="12sp"/>
+            android:textSize="18dp"/>
     </LinearLayout>
 
 

@@ -43,11 +43,11 @@ import java.util.Map;
  *
  * @author dswitkin@google.com (Daniel Switkin)
  */
-public final class CaptureActivityHandler extends Handler {
+public final class QRScanActivityHandler extends Handler {
 
-    private static final String TAG = CaptureActivityHandler.class.getSimpleName();
+    private static final String TAG = QRScanActivityHandler.class.getSimpleName();
 
-    private final CaptureActivity activity;
+    private final QRScanActivity activity;
     private final DecodeThread decodeThread;
     private State state;
     private final CameraManager cameraManager;
@@ -58,11 +58,11 @@ public final class CaptureActivityHandler extends Handler {
         DONE
     }
 
-    CaptureActivityHandler(CaptureActivity activity,
-                           Collection<BarcodeFormat> decodeFormats,
-                           Map<DecodeHintType, ?> baseHints,
-                           String characterSet,
-                           CameraManager cameraManager) {
+    QRScanActivityHandler(QRScanActivity activity,
+                          Collection<BarcodeFormat> decodeFormats,
+                          Map<DecodeHintType, ?> baseHints,
+                          String characterSet,
+                          CameraManager cameraManager) {
         this.activity = activity;
         decodeThread = new DecodeThread(activity, decodeFormats, baseHints, characterSet,
                 new ViewfinderResultPointCallback(activity.getViewfinderView()));

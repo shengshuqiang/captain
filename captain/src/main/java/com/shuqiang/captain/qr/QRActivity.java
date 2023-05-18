@@ -5,19 +5,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupWindow;
 
-import com.captain.base.BaseActivity;
 import com.captain.base.BasePermissionActivity;
-import com.captain.base.LoadingView;
-import com.captain.base.PermissionUtils;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.utils.PictureFileUtils;
 import com.shuqiang.captain.qr.mvp.MVPHelper;
 import com.shuqiang.captain.qr.mvp.MVPView;
 import com.shuqiang.captain.qr.mvpmodule.MorseMVPModule;
@@ -26,7 +20,7 @@ import com.shuqiang.captain.qr.mvppresenter.MorseMVPPresenter;
 import com.shuqiang.captain.qr.mvppresenter.MorseMessageItemActionData;
 import com.shuqiang.captain.qr.utils.Utils;
 import com.shuqiang.captain.qr.widgets.PasswordPopupWindow;
-import com.google.zxing.client.android.CaptureActivity;
+import com.google.zxing.client.android.QRScanActivity;
 import com.google.zxing.client.android.Intents;
 
 import captain.R;
@@ -57,9 +51,7 @@ public class QRActivity extends BasePermissionActivity {
         findViewById(R.id.scan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(QRActivity.this, CaptureActivity.class);
-                intent.setAction(Intents.Scan.ACTION);
-                startActivityForResult(intent, MORSE_MESSAGE_REQUEST_CODE);
+                gotoCaptureActivity();
             }
         });
 
@@ -74,6 +66,32 @@ public class QRActivity extends BasePermissionActivity {
             @Override
             public void onClick(View view) {
                 externalStoragePermissionHandler.handleRequestPermissionAndWork();
+            }
+        });
+
+        // 打开最新默认图片
+        openLastQRImage();
+    }
+
+    private void gotoCaptureActivity() {
+        gotoCaptureActivity(null);
+    }
+    private void gotoCaptureActivity(String qrImagePath) {
+        Intent intent = new Intent(QRActivity.this, QRScanActivity.class);
+        intent.setAction(Intents.Scan.ACTION);
+        if (qrImagePath != null) {
+            intent.putExtra(QRScanActivity.QR_IMAGE_PATH, qrImagePath);
+        }
+        startActivityForResult(intent, MORSE_MESSAGE_REQUEST_CODE);
+    }
+
+    private void openLastQRImage() {
+        PictureFileUtils.loadLastQRImgPath(this, new PictureFileUtils.LastQRImgPathLoader() {
+            @Override
+            public void loadPath(LocalMedia lastLocalMedia) {
+                if(lastLocalMedia != null) {
+                    gotoCaptureActivity(lastLocalMedia.getRealPath());
+                }
             }
         });
     }

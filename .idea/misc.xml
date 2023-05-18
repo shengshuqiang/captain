@@ -50,10 +50,13 @@
         <entry key="zxing/src/main/res/drawable/mlens_button_bg_normal.xml" value="0.24166666666666667" />
         <entry key="zxing/src/main/res/drawable/mlens_button_bg_press.xml" value="0.24166666666666667" />
         <entry key="zxing/src/main/res/layout-ldpi/capture.xml" value="0.79375" />
+        <entry key="zxing/src/main/res/layout-ldpi/qrscan.xml" value="1.29375" />
         <entry key="zxing/src/main/res/layout/activity_base_camera.xml" value="0.19010416666666666" />
         <entry key="zxing/src/main/res/layout/app_picker_list_item.xml" value="0.13385416666666666" />
         <entry key="zxing/src/main/res/layout/capture.xml" value="0.13229166666666667" />
         <entry key="zxing/src/main/res/layout/fragment_second.xml" value="0.19010416666666666" />
+        <entry key="zxing/src/main/res/layout/qrscan.xml" value="0.215625" />
+        <entry key="zxing/src/main/res/layout/search_book_contents.xml" value="0.215625" />
         <entry key="zxing/src/main/res/menu/capture.xml" value="0.13229166666666667" />
         <entry key="zxing/src/main/res/menu/encode.xml" value="0.11666666666666667" />
         <entry key="zxing/src/main/res/xml/preferences.xml" value="0.21770833333333334" />

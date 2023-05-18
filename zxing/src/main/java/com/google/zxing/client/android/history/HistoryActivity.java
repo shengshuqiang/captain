@@ -34,7 +34,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import com.google.zxing.client.android.CaptureActivity;
+import com.google.zxing.client.android.QRScanActivity;
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.client.android.R;
 
@@ -81,7 +81,7 @@ public final class HistoryActivity extends ListActivity {
   @Override
   protected void onListItemClick(ListView l, View v, int position, long id) {
     if (adapter.getItem(position).getResult() != null) {
-      Intent intent = new Intent(this, CaptureActivity.class);
+      Intent intent = new Intent(this, QRScanActivity.class);
       intent.putExtra(Intents.History.ITEM_NUMBER, position);
       setResult(Activity.RESULT_OK, intent);
       finish();

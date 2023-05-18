@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textColor="@android:color/black"
-            android:textSize="16sp"/>
+            android:textSize="22dp"/>
 
         <TextView
             android:id="@+id/password"
@@ -26,7 +26,7 @@
             android:layout_marginTop="5dp"
             android:singleLine="true"
             android:textColor="@android:color/darker_gray"
-            android:textSize="14sp"
+            android:textSize="18dp"
             android:clickable="false"
             android:longClickable="false"
             android:contextClickable="false"
@@ -39,7 +39,7 @@
             android:layout_marginTop="5dp"
             android:singleLine="true"
             android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"/>
+            android:textSize="18dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -51,8 +51,8 @@
 
         <ImageView
             android:id="@+id/edit"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:padding="10dp"
             android:scaleType="fitXY"
             android:src="@android:drawable/ic_menu_edit"
@@ -60,8 +60,8 @@
 
         <ImageView
             android:id="@+id/delete"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:padding="10dp"
             android:scaleType="fitXY"
             android:layout_marginLeft="5dp"

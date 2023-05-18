@@ -23,7 +23,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.zxing.client.android.CaptureActivity;
+import com.google.zxing.client.android.QRScanActivity;
 import com.google.zxing.client.android.R;
 import com.google.zxing.client.android.wifi.WifiConfigManager;
 import com.google.zxing.client.result.ParsedResult;
@@ -39,9 +39,9 @@ public final class WifiResultHandler extends ResultHandler {
 
   private static final String TAG = WifiResultHandler.class.getSimpleName();
 
-  private final CaptureActivity parent;
+  private final QRScanActivity parent;
 
-  public WifiResultHandler(CaptureActivity activity, ParsedResult result) {
+  public WifiResultHandler(QRScanActivity activity, ParsedResult result) {
     super(activity, result);
     parent = activity;
   }

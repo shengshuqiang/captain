@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 import com.captain.base.BasePermissionActivity;
 import com.captain.base.LoadingView;
+import com.captain.base.Utils;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -90,9 +91,11 @@ import java.util.Map;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends BasePermissionActivity implements SurfaceHolder.Callback {
+public final class QRScanActivity extends BasePermissionActivity implements SurfaceHolder.Callback {
 
-    private static final String TAG = CaptureActivity.class.getSimpleName();
+    private static final String TAG = QRScanActivity.class.getSimpleName();
+    // 二维码路径
+    public static final String QR_IMAGE_PATH = "qrImagePath";
 
     private static final long DEFAULT_INTENT_RESULT_DURATION_MS = 1500L;
     private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
@@ -110,7 +113,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
                     ResultMetadataType.POSSIBLE_COUNTRY);
 
     private CameraManager cameraManager;
-    private CaptureActivityHandler handler;
+    private QRScanActivityHandler handler;
     private Result savedResultToShow;
     private ViewfinderView viewfinderView;
     private TextView statusView;
@@ -133,7 +136,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
     private boolean isFirstOnResume = true;
     private boolean isClickOpenAlbum = false;
     private LoadingView loadingView;
-
+    private TextView fileNameTxtView;
 
     ViewfinderView getViewfinderView() {
         return viewfinderView;
@@ -160,6 +163,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
         ambientLightManager = new AmbientLightManager(this);
 
         loadingView = findViewById(R.id.loading);
+        fileNameTxtView = findViewById(R.id.file_name);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         ((View) findViewById(R.id.album)).setOnClickListener(new View.OnClickListener() {
@@ -169,11 +173,23 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
                 handleRequstPermissionAndReadWriteFile();
             }
         });
+
+        // 如果传入 qrImagePath 参数，则直接调起二维码图片解析
+        final String qrImagePath = getIntent().getStringExtra(QR_IMAGE_PATH);
+        if (qrImagePath != null) {
+            // 因为会设计出相机等初始化，延迟执行
+            Utils.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    decodeBitmap(qrImagePath);
+                }
+            });
+        }
     }
 
     @Override
     protected int getContentLayoutResource() {
-        return R.layout.capture;
+        return R.layout.qrscan;
     }
 
     @Override
@@ -460,6 +476,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         if (resultCode == RESULT_OK && requestCode == HISTORY_REQUEST_CODE && historyManager != null) {
             int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
             if (itemNumber >= 0) {
@@ -495,12 +512,16 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
     }
 
     private void decodeBitmap(String imgPath) {
+        // 显示文件名
+        fileNameTxtView.setText(imgPath.substring(imgPath.lastIndexOf('/') + 1));
+        fileNameTxtView.setVisibility(View.VISIBLE);
+
         loadingView.startAnimation();
         //获取解析结果
         Result result = parseQRcodeBitmap(imgPath);
 //                Toast.makeText(this, "解析结果：" + result.toString(), Toast.LENGTH_LONG).show();
         if (handler == null) {
-            handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+            handler = new QRScanActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
         }
         decodeOrStoreSavedBitmap(null, result);
     }
@@ -931,7 +952,7 @@ public final class CaptureActivity extends BasePermissionActivity implements Sur
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if (handler == null) {
-                handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+                handler = new QRScanActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
             }
             decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
