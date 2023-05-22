@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="captain">
+<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"
+package="captain">
 
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -27,7 +27,13 @@
 
     </activity>
 
+    <activity
+        android:name="com.shuqiang.captain.qr.test.QRTestActivity"
+        android:exported="true"
+        android:label="密码二维马测试页"
+        >
+    </activity>
+
 </application>
 
 </manifest>
-

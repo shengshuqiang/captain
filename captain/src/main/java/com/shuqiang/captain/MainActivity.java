@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import com.captain.base.BaseActivity;
 import com.shuqiang.captain.qr.QRActivity;
+import com.shuqiang.captain.qr.test.QRTestActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 import captain.R;
@@ -44,14 +46,15 @@ public class MainActivity extends BaseActivity {
             super();
             this.context = mContext;
 
+            list.add(new Item("密码二维马测试", R.drawable.zxing, QRTestActivity.class));
             list.add(new Item("密码二维马", R.drawable.zxing, QRActivity.class));
 
             // 一个的话直接跳
-            if (list.size() == 1) {
+//            if (list.size() == 1) {
                 Item item = list.get(0);
                 Intent intent = new Intent(context, item.clzss);
                 context.startActivity(intent);
-            }
+//            }
         }
 
         @Override
