@@ -86,7 +86,7 @@ public class Utils {
         char checkCode = genCheckCode(passward);
         // 校验码放在第一位
         try {
-            return checkCode + symmetricEncode(passward, bytesStr, INVALID_CHECK_CODE);
+            return  symmetricEncode(passward, checkCode + bytesStr, checkCode, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,7 +102,7 @@ public class Utils {
      */
     public static String decode(String passward, String bytesStr) throws Exception {
         char checkCode = genCheckCode(passward);
-        return symmetricEncode(passward, bytesStr, checkCode);
+        return symmetricEncode(passward, bytesStr, checkCode, false);
     }
     /**
      *  信息加解密，因为采用的是对称加密方案，再次加密即为解密。
@@ -110,24 +110,26 @@ public class Utils {
      * @param passward 加密密码
      * @param bytesStr 待加密字符串
      * @param checkCode 密码校验字符串，空则不校验
+     * @param isEncode 是否是加密
      * @return
      */
-    public static String symmetricEncode(String passward, String bytesStr, char checkCode) throws Exception {
+    public static String symmetricEncode(String passward, String bytesStr, char checkCode, boolean isEncode) throws Exception {
         char[] passwardChars = passward.toCharArray();
         char[] byteStrsChars = bytesStr.toCharArray();
         char[] encodeStrChars = new char[byteStrsChars.length];
-        if (checkCode != INVALID_CHECK_CODE && checkCode != encodeStrChars[0]) {
-            throw new Exception("解密校验失败");
-        }
         // 按单字节遍历待加密字符串，使用加密密码按序号取模进行单字节加密
-        for (int i = 1; i < byteStrsChars.length; i++) {
+        for (int i = 0; i < byteStrsChars.length; i++) {
             encodeStrChars[i] = (char) (byteStrsChars[i] ^ passwardChars[i % passwardChars.length]);
+            // 解密
+            if (!isEncode && checkCode != INVALID_CHECK_CODE && checkCode != encodeStrChars[0]) {
+                throw new Exception("解密校验失败");
+            }
         }
         // 加密后字符数组转字符串
         String encodebytesStr = new String(encodeStrChars);
-        Log.e("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
-        Log.e("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
-        Log.e("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
+//        Log.e("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
+//        Log.e("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
+//        Log.e("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
 
         return encodebytesStr;
     }
@@ -173,7 +175,7 @@ public class Utils {
      * @param message
      */
     public static final void saveQRMessage(Context context, String message) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(QR_MESSAGE_KEY, message);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(QR_MESSAGE_KEY, message).commit();
     }
 
     /**
@@ -196,7 +198,11 @@ public class Utils {
         String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长App密码二维马.png";
         file = new File(path + "/" + QR_DIR);
         if (!file.exists()) {
-            file.mkdirs();
+            boolean result = file.mkdirs();
+            if (!result) {
+                showMessage(view, "创建" + file.getPath() + "失败");
+                return;
+            }
         }
 
         file = new File(path + "/" + QR_DIR + "/" + imageName);

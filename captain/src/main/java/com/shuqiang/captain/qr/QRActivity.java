@@ -124,7 +124,7 @@ public class QRActivity extends BasePermissionActivity {
 
     private void handleSaveQRBmp() {
         producePwd = null;
-        showPasswordPopupWindow(firstPasswordPopupWindow,"请输入密码", "和当前密码一样不用二次确认密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
+        showPasswordPopupWindow(firstPasswordPopupWindow,"请输入密码", TextUtils.isEmpty(currentPwd) ? null : "和当前密码一样不用二次确认密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
             @Override
             public void onComplete(String password) {
                 producePwd = password;
@@ -145,6 +145,7 @@ public class QRActivity extends BasePermissionActivity {
                                 if (!TextUtils.equals(producePwd, password)) {
                                     Utils.showMessage(mvpView, "密码无效，两次输入密码不一致!");
                                 } else {
+                                    currentPwd = producePwd;
                                     handleEncodeSaveBitmap(password);
                                 }
                             }
@@ -165,6 +166,7 @@ public class QRActivity extends BasePermissionActivity {
             String encodeStr = null;
             if (!TextUtils.isEmpty(password)) {
                 encodeStr = Utils.encode(password, morseMessageDecodeStr);
+                Utils.saveQRMessage(QRActivity.this, encodeStr);
                 Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
                 Utils.saveBitmap(context, mvpView, qrCodeBitmap);
             } else {
@@ -207,7 +209,6 @@ public class QRActivity extends BasePermissionActivity {
                     if (morseMessageData != null) {
                         // 本次持久存储密码二维码
                         currentPwd = password;
-                        Utils.saveQRMessage(QRActivity.this, qrMessageDecodeStr);
                         mvpPresenter.handleMorseMessageData(morseMessageData);
                     } else {
                         Utils.showMessage(mvpView, "密码无效");

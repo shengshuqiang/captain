@@ -1,11 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+//    将gradle中的编译环境，SDK的版本号修改到29以下, 解决Android 10.0后创建文件createNewFile()和创建文件夹mkdirs()均失败解决方案
+//    https://cloud.tencent.com/developer/article/1914736
+    compileSdkVersion 29
     buildToolsVersion '29.0.3'
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 29
         versionCode 1000010100
         versionName "1.1.100"
         applicationId "com.shuqiang.captain"
