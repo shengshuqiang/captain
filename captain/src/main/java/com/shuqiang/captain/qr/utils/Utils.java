@@ -2,12 +2,15 @@ package com.shuqiang.captain.qr.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Environment;
 
 import com.google.android.material.snackbar.Snackbar;
+
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
@@ -47,6 +50,10 @@ import static com.shuqiang.toolbox.Contants.QR_DIR;
 
 public class Utils {
     public static final float DIFF = 0.5f;
+    // 本次持久缓存二维码密码信息
+    public static final String QR_MESSAGE_KEY = "qr-message-key";
+    // 无效校验字符
+    public static final char INVALID_CHECK_CODE = ' ';
 
     public static String getFromAssets(Context context, String fileName) {
         try {
@@ -70,17 +77,51 @@ public class Utils {
 
     /**
      *  信息加解密，因为采用的是对称加密方案，再次加密即为解密。
-     * @param key 加密密码
+     *
+     * @param passward 加密密码
      * @param bytesStr 待加密字符串
      * @return
      */
-    public static String encode(String key, String bytesStr) {
-        char[] keyChars = key.toCharArray();
+    public static String encode(String passward, String bytesStr) {
+        char checkCode = genCheckCode(passward);
+        // 校验码放在第一位
+        try {
+            return checkCode + symmetricEncode(passward, bytesStr, INVALID_CHECK_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     *  信息加解密，因为采用的是对称加密方案，再次加密即为解密。
+     *
+     * @param passward 加密密码
+     * @param bytesStr 待加密字符串
+     * @return
+     */
+    public static String decode(String passward, String bytesStr) throws Exception {
+        char checkCode = genCheckCode(passward);
+        return symmetricEncode(passward, bytesStr, checkCode);
+    }
+    /**
+     *  信息加解密，因为采用的是对称加密方案，再次加密即为解密。
+     *
+     * @param passward 加密密码
+     * @param bytesStr 待加密字符串
+     * @param checkCode 密码校验字符串，空则不校验
+     * @return
+     */
+    public static String symmetricEncode(String passward, String bytesStr, char checkCode) throws Exception {
+        char[] passwardChars = passward.toCharArray();
         char[] byteStrsChars = bytesStr.toCharArray();
         char[] encodeStrChars = new char[byteStrsChars.length];
+        if (checkCode != INVALID_CHECK_CODE && checkCode != encodeStrChars[0]) {
+            throw new Exception("解密校验失败");
+        }
         // 按单字节遍历待加密字符串，使用加密密码按序号取模进行单字节加密
-        for (int i = 0; i < byteStrsChars.length; i++) {
-            encodeStrChars[i] = (char) (byteStrsChars[i] ^ keyChars[i % keyChars.length]);
+        for (int i = 1; i < byteStrsChars.length; i++) {
+            encodeStrChars[i] = (char) (byteStrsChars[i] ^ passwardChars[i % passwardChars.length]);
         }
         // 加密后字符数组转字符串
         String encodebytesStr = new String(encodeStrChars);
@@ -89,6 +130,23 @@ public class Utils {
         Log.e("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
 
         return encodebytesStr;
+    }
+
+    /**
+     * 生成密码校验码，算法为密码字符串依次抑或，用于判断输入密码是否正确
+     * @param passward
+     * @return
+     */
+    private static char genCheckCode(String passward) {
+        if (!TextUtils.isEmpty(passward)) {
+            char[] pwdChars = passward.toCharArray();
+            char checkCode = pwdChars[0];
+            for (int i = 1; i < pwdChars.length; i++) {
+                checkCode ^= pwdChars[i];
+            }
+            return checkCode;
+        }
+        return INVALID_CHECK_CODE;
     }
 
     public static Bitmap createQRCodeBitmap(Context context, String message) {
@@ -107,6 +165,23 @@ public class Utils {
         }
 
         return null;
+    }
+
+    /**
+     * 本地持久存储密码二维码信息
+     * @param context
+     * @param message
+     */
+    public static final void saveQRMessage(Context context, String message) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(QR_MESSAGE_KEY, message);
+    }
+
+    /**
+     * 读取本地存储密码二维码信息
+     * @param context
+     */
+    public static final String readQRMessage(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(QR_MESSAGE_KEY, "");
     }
 
     public static void saveBitmap(Context context, View view, Bitmap bitmap) {

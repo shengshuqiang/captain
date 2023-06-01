@@ -104,6 +104,8 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
 
     protected PreviewTitleBar titleBar;
 
+    protected TextView fileNameTxtView;
+
     /**
      * if there more
      */
@@ -249,6 +251,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
         screenWidth = DensityUtil.getRealScreenWidth(getContext());
         screenHeight = DensityUtil.getScreenHeight(getContext());
         titleBar = view.findViewById(R.id.title_bar);
+        fileNameTxtView = view.findViewById(R.id.file_name);
         tvSelected = view.findViewById(R.id.ps_tv_selected);
         tvSelectedWord = view.findViewById(R.id.ps_tv_selected_word);
         selectClickArea = view.findViewById(R.id.select_click_area);
@@ -259,7 +262,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
         magicalView.setMagicalContent(viewPager);
         setMagicalViewBackgroundColor();
         setMagicalViewAction();
-        addAminViews(titleBar, tvSelected, tvSelectedWord, selectClickArea, completeSelectView, bottomNarBar);
+        addAminViews(titleBar, fileNameTxtView, tvSelected, tvSelectedWord, selectClickArea, completeSelectView, bottomNarBar);
         onCreateLoader();
         initTitleBar();
         initViewPagerData(mData);
@@ -748,6 +751,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
             }
         });
         titleBar.setTitle((curPosition + 1) + "/" + totalNum);
+        fileNameTxtView.setText(mData.get(curPosition).getFileName());
         titleBar.getImageDelete().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1066,6 +1070,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
                 }
                 titleBar.setTitle(getString(R.string.ps_preview_image_num,
                         curPosition + 1, mData.size()));
+                fileNameTxtView.setText(mData.get(curPosition).getFileName());
                 totalNum = mData.size();
                 curPosition = currentItem;
                 if (viewPager.getAdapter() != null) {
@@ -1263,6 +1268,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
             } else {
                 titleBar.setTitle(videoName);
             }
+            fileNameTxtView.setText(mData.get(curPosition).getFileName());
         }
 
         @Override
@@ -1437,6 +1443,7 @@ public class PictureSelectorPreviewFragment extends PictureCommonFragment {
         public void onPageSelected(int position) {
             curPosition = position;
             titleBar.setTitle((curPosition + 1) + "/" + totalNum);
+            fileNameTxtView.setText(mData.get(curPosition).getFileName());
             if (mData.size() > position) {
                 LocalMedia currentMedia = mData.get(position);
                 notifySelectNumberStyle(currentMedia);

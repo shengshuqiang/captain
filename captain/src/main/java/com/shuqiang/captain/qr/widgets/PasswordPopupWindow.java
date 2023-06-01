@@ -29,6 +29,10 @@ public class PasswordPopupWindow extends MongoliaPopupWindow implements Password
         passwordInputView.setTitle(title);
     }
 
+    public void setSubTitle(String subTitle) {
+        passwordInputView.setSubTitle(subTitle);
+    }
+
     public void setPasswordCompleteDismiss(boolean passwordCompleteDismiss) {
         isPasswordCompleteDismiss = passwordCompleteDismiss;
     }

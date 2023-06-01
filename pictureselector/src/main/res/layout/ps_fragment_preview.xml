@@ -26,6 +26,19 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_height="48dp" />
 
+    <com.luck.picture.lib.widget.MediumBoldTextView
+        android:id="@+id/file_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textColor="@color/ps_color_white"
+        android:textSize="18dp"
+        android:paddingTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"  />
+
 
     <com.luck.picture.lib.widget.PreviewBottomNavBar
         android:id="@+id/bottom_nar_bar"

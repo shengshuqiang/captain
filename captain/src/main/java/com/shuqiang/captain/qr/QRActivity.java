@@ -35,6 +35,9 @@ public class QRActivity extends BasePermissionActivity {
     private PasswordPopupWindow secondPasswordPopupWindow;
 
     private MorseMVPPresenter mvpPresenter;
+    // 当前密码
+    private String currentPwd;
+    // 生成新二维码图片密码
     private String producePwd;
 
     @Override
@@ -69,8 +72,21 @@ public class QRActivity extends BasePermissionActivity {
             }
         });
 
-        // 打开最新默认图片
-        openLastQRImage();
+        handleInitQRMessage();
+    }
+
+    /**
+     * 处理初始密码二维码信息，优从本地持久缓存获取，没有则打开默认文件夹扫描
+     */
+    private void handleInitQRMessage() {
+        // 本次持久存储密码二维码
+        String qrMessage = Utils.readQRMessage(QRActivity.this);
+        if (!TextUtils.isEmpty(qrMessage)) {
+            decodeQRMessage(qrMessage);
+        } else {
+            // 打开最新默认图片
+            openLastQRImage();
+        }
     }
 
     private void gotoCaptureActivity() {
@@ -108,7 +124,7 @@ public class QRActivity extends BasePermissionActivity {
 
     private void handleSaveQRBmp() {
         producePwd = null;
-        showPasswordPopupWindow(firstPasswordPopupWindow,"请输入密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
+        showPasswordPopupWindow(firstPasswordPopupWindow,"请输入密码", "和当前密码一样不用二次确认密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
             @Override
             public void onComplete(String password) {
                 producePwd = password;
@@ -116,35 +132,24 @@ public class QRActivity extends BasePermissionActivity {
                     return;
                 }
                 if (!TextUtils.isEmpty(producePwd)) {
-                    showPasswordPopupWindow(secondPasswordPopupWindow,"请输入二次确认密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
-                        @Override
-                        public void onComplete(String password) {
-                            firstPasswordPopupWindow.dismiss();
-                            if (password == null) {
-                                return;
-                            }
-                            if (!TextUtils.equals(producePwd, password)) {
-                                Utils.showMessage(mvpView, "密码无效，两次输入密码不一致!");
-                            } else {
-                                try {
-                                    Context context = QRActivity.this;
-                                    MorseMessageData morseMessageData = mvpPresenter.getMorseMessageData();
-                                    String morseMessageDecodeStr = morseMessageData.toSerialize();
-                                    String encodeStr = null;
-                                    if (!TextUtils.isEmpty(password)) {
-                                        encodeStr = Utils.encode(password, morseMessageDecodeStr);
-                                        Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
-                                        Utils.saveBitmap(context, mvpView, qrCodeBitmap);
-                                    } else {
-                                        Utils.showMessage(mvpView, "密码为空，无效");
-                                    }
-//                                    Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    if (TextUtils.equals(currentPwd, producePwd)) {
+                        handleEncodeSaveBitmap(password);
+                    } else {
+                        showPasswordPopupWindow(secondPasswordPopupWindow, "请输入二次确认密码", null, new PasswordPopupWindow.OnPasswordCompleteListener() {
+                            @Override
+                            public void onComplete(String password) {
+                                firstPasswordPopupWindow.dismiss();
+                                if (password == null) {
+                                    return;
+                                }
+                                if (!TextUtils.equals(producePwd, password)) {
+                                    Utils.showMessage(mvpView, "密码无效，两次输入密码不一致!");
+                                } else {
+                                    handleEncodeSaveBitmap(password);
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 } else {
                     Utils.showMessage(mvpView, "密码为空，无效!");
                 }
@@ -153,43 +158,74 @@ public class QRActivity extends BasePermissionActivity {
         }, false);
     }
 
+    private void handleEncodeSaveBitmap(String password) {
+        try {
+            Context context = QRActivity.this;
+            String morseMessageDecodeStr = mvpPresenter.getMorseMessageStr();
+            String encodeStr = null;
+            if (!TextUtils.isEmpty(password)) {
+                encodeStr = Utils.encode(password, morseMessageDecodeStr);
+                Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
+                Utils.saveBitmap(context, mvpView, qrCodeBitmap);
+            } else {
+                Utils.showMessage(mvpView, "密码为空，无效");
+            }
+            // Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (MORSE_MESSAGE_REQUEST_CODE == requestCode) {
             if (RESULT_OK == resultCode) {
-                final String morseMessageStr = data.getStringExtra(Intents.Scan.RESULT);
-                showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", new PasswordPopupWindow.OnPasswordCompleteListener() {
-                    @Override
-                    public void onComplete(String password) {
-                        if (password == null) {
-                            return;
-                        }
-                        String morseMessageDecodeStr = null;
-                        if (!TextUtils.isEmpty(password)) {
-                            morseMessageDecodeStr = Utils.encode(password, morseMessageStr);
-                            MorseMessageData morseMessageData = MorseMessageData.toDeserialize(morseMessageDecodeStr);
-                            if (morseMessageData != null) {
-                                mvpPresenter.handleMorseMessageData(morseMessageData);
-                            } else {
-                                Utils.showMessage(mvpView, "密码无效");
-                            }
-                        } else {
-                            Utils.showMessage(mvpView, "密码为空，无效");
-                        }
-                        Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr);
-                    }
-                });
+                String qrMessage = data.getStringExtra(Intents.Scan.RESULT);
+                decodeQRMessage(qrMessage);
             }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
-
-    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener) {
-        showPasswordPopupWindow(passwordPopupWindow, title, onPasswordCompleteListener, true);
+    private void decodeQRMessage(final String qrMessage) {
+        showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", null, new PasswordPopupWindow.OnPasswordCompleteListener() {
+            @Override
+            public void onComplete(String password) {
+                if (password == null) {
+                    return;
+                }
+                String qrMessageDecodeStr = null;
+                if (!TextUtils.isEmpty(password)) {
+                    try {
+                        qrMessageDecodeStr = Utils.decode(password, qrMessage);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Utils.showMessage(mvpView, "密码校验失败");
+                        return;
+                    }
+                    MorseMessageData morseMessageData = MorseMessageData.toDeserialize(qrMessageDecodeStr);
+                    if (morseMessageData != null) {
+                        // 本次持久存储密码二维码
+                        currentPwd = password;
+                        Utils.saveQRMessage(QRActivity.this, qrMessageDecodeStr);
+                        mvpPresenter.handleMorseMessageData(morseMessageData);
+                    } else {
+                        Utils.showMessage(mvpView, "密码无效");
+                    }
+                } else {
+                    Utils.showMessage(mvpView, "密码为空，无效");
+                }
+                Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + qrMessageDecodeStr);
+            }
+        });
     }
-    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss) {
+
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener) {
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, true);
+    }
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss) {
         passwordPopupWindow.setTitle(title);
+        passwordPopupWindow.setSubTitle(subTitle);
         passwordPopupWindow.setPasswordCompleteDismiss(isPasswordCompleteDismiss);
         passwordPopupWindow.setOnPasswordCompleteListener(onPasswordCompleteListener);
         passwordPopupWindow.clear();
@@ -201,6 +237,16 @@ public class QRActivity extends BasePermissionActivity {
             }
         }, 300);
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 本次持久存储密码二维码
+        String morseMessageDecodeStr = mvpPresenter.getMorseMessageStr();
+        if (!TextUtils.isEmpty(currentPwd) && !TextUtils.isEmpty(morseMessageDecodeStr)) {
+            Utils.saveQRMessage(QRActivity.this, Utils.encode(currentPwd, morseMessageDecodeStr));
+        }
     }
 
     @Override

@@ -97,6 +97,10 @@ public class MorseMVPPresenter extends MVPPresenter {
         return morseMessageData;
     }
 
+    public String getMorseMessageStr() {
+        return morseMessageData.toSerialize();
+    }
+
     public static void deleteItemConfirm(Context context, final MorseMessageItemData itemData, final AddConfirmCallBack addConfirmCallBack) {
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(context);
