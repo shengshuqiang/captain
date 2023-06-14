@@ -1,12 +1,19 @@
 package com.shuqiang.captain.qr.test;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.shuqiang.captain.qr.utils.Utils;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.facebook.android.crypto.keychain.AndroidCryptoLibrary;
+import com.facebook.crypto.Crypto;
+import com.facebook.crypto.CryptoConfig;
+import com.facebook.crypto.Entity;
+import com.facebook.crypto.exception.CryptoInitializationException;
+import com.facebook.crypto.exception.KeyChainException;
+import com.facebook.crypto.keychain.KeyChain;
+
+import java.io.IOException;
 
 import captain.R;
 
@@ -22,20 +29,60 @@ public class QRTestActivity extends AppCompatActivity {
     }
 
     private void test() {
-        // TODO 每添加一行数据做一次溢出检查，最好显示还可容纳字符串数量
-        // 最大汉字数
-        Bitmap bitmap1 = Utils.createQRCodeBitmap(this, multipleStr(MAX_BYTES / 2 - 10, "船"));
-        // 最大字母数
-        Bitmap bitmap2 = Utils.createQRCodeBitmap(this, multipleStr(MAX_BYTES * 2 - 100, "S"));
-        Log.i(TAG, "test: bitmap1=" + bitmap1 + ", bitmap2=" + bitmap2);
-//        TODO 正确性自校验
-    }
+        String key = "SSU";
+        String iv = "123";
+        String content = "Hello SSU!";
+        KeyChain keyChain = new KeyChain() {
+            private final byte[] mKey = key.getBytes();
+            private final byte[] mIV = iv.getBytes();
 
-    private String multipleStr(int mult, String str) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < mult; i++) {
-            stringBuilder.append(str);
+            @Override
+            public byte[] getCipherKey() throws KeyChainException {
+                return mKey;
+            }
+
+            @Override
+            public byte[] getMacKey() throws KeyChainException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public byte[] getNewIV() throws KeyChainException {
+                return mIV;
+            }
+
+            @Override
+            public void destroyKeys() {
+                // nothing
+            }
+        };
+        CryptoConfig config = CryptoConfig.KEY_128;
+        Crypto crypto = new Crypto(keyChain, new AndroidCryptoLibrary(), config);
+        byte[] plainBytes = content.getBytes();
+        byte[] encrypted = new byte[0];
+        try {
+            encrypted = crypto.encrypt(plainBytes, new Entity("whatever"));
+        } catch (KeyChainException e) {
+            e.printStackTrace();
+        } catch (CryptoInitializationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return stringBuilder.toString();
+
+        Log.d("SSU", "encrypted=" + encrypted.toString());
+
+        byte[] decrypted = new byte[0];
+        try {
+            decrypted = crypto.decrypt(encrypted, new Entity("whatever"));
+        } catch (KeyChainException e) {
+            e.printStackTrace();
+        } catch (CryptoInitializationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("SSU", "decrypted=" + decrypted.toString());
     }
 }

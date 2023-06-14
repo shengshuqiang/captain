@@ -126,12 +126,13 @@ public class Utils {
             }
         }
         // 加密后字符数组转字符串
-        String encodebytesStr = new String(encodeStrChars);
-//        Log.e("SSU", "byteStrsChars[" + byteStrsChars.length + "]=" + Arrays.toString(byteStrsChars));
-//        Log.e("SSU", "encodeStrChars[" + encodeStrChars.length + "]=" + Arrays.toString(encodeStrChars));
-//        Log.e("SSU", "encodebytesStr[" + encodebytesStr.length() + "]=" + Arrays.toString(encodebytesStr.toCharArray()));
-
-        return encodebytesStr;
+        if (isEncode) {
+            // 加密直接转字符串返回
+            return new String(encodeStrChars);
+        } else {
+            // 解密去掉第一个校验码
+            return new String(encodeStrChars, 1, encodeStrChars.length - 1);
+        }
     }
 
     /**

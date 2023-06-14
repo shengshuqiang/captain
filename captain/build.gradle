@@ -30,8 +30,9 @@ dependencies {
     implementation project(path: ':base')
     implementation project(path: ':toolbox')
     implementation project(path: ':pictureselector')
-    compile project(':zxing')
-    compile project(':popupwindow')
+    implementation project(path: ':zxing')
+    implementation project(path: ':popupwindow')
+    implementation project(path: ':conceal')
 
     implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'

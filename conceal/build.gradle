@@ -1,0 +1,119 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.0'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    repositories {
+      mavenCentral()
+    }
+
+    dependencies {
+        compile 'com.google.code.findbugs:jsr305:3.0.2'
+    }
+
+    compileSdkVersion 23
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+      minSdkVersion 9
+      targetSdkVersion 17
+    }
+
+    sourceSets {
+
+      main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDirs = [
+            'first-party/fbjni/java',
+            'first-party/proguard/annotations',
+            'first-party/soloader',
+            'java']
+        jniLibs.srcDir 'libs'
+        jni.srcDirs = []
+      }
+    }
+
+//    task ndkBuildRelease(type: Exec) {
+//      commandLine "$System.env.ANDROID_NDK/ndk-build",
+//        '-C', file('.').absolutePath,
+//       'NDK_APPLICATION_MK=${PWD}/native/Application.mk',
+//       'NDK_MODULE_PATH=${PWD}/native:${PWD}/first-party/fbjni/native:${PWD}/third-party',
+//       'APP_BUILD_SCRIPT=${PWD}/native/jni/Android.mk'
+//    }
+//
+//    tasks.withType(JavaCompile) {
+//      compileTask -> compileTask.dependsOn ndkBuildRelease
+//    }
+
+    lintOptions {
+      abortOnError false
+    }
+}
+
+// Configure gradle.properties to do maven builds
+if (!project.hasProperty('sonatypeRepo') ||
+    !project.hasProperty('sonatypeUsername') ||
+    !project.hasProperty('sonatypePassword')) {
+  return;
+}
+
+// Maven Push
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+version = "2.0.2"
+group = "com.facebook.conceal"
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: sonatypeRepo) {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+
+        pom.project {
+            name 'Conceal'
+            packaging 'aar'
+            description 'Conceal is an easy to use, performant crypto library for android.'
+            url 'http://facebook.github.io/conceal'
+
+            scm {
+                url 'scm:git@github.com:facebook/conceal.git'
+                connection 'scm:git@github.com:facebook/conceal.git'
+                developerConnection 'scm:git@github.com:facebook/conceal.git'
+            }
+
+            licenses {
+                license {
+                    name 'BSD 2-Clause License'
+                    url 'https://github.com/facebook/conceal/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'subodh'
+                    name 'Subodh Iyengar'
+                    email 'mani.subodh@gmail.com'
+                }
+            }
+        }
+    }
+}

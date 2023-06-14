@@ -1,0 +1,19 @@
+prebuilt_jar(
+  name = 'junit',
+  binary_jar = 'junit-4.11.jar',
+  visibility = [
+    '//:conceal_tests',
+    '//:crypto-test-helper',
+    '//:android_tests',
+  ],
+)
+
+prebuilt_jar(
+  name = 'hamcrest',
+  binary_jar = 'hamcrest-core-1.3.jar',
+  visibility = [
+    '//:conceal_tests',
+    '//:crypto-test-helper',
+    '//:android_tests',
+  ],
+)
