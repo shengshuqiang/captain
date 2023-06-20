@@ -34,15 +34,13 @@ public class QRTestActivity extends AppCompatActivity {
     }
 
     private void test() {
-        String key = "SSU";
-        String iv = "123";
-        String content = "Hello SSU!";
-        Entity entity = Entity.create(Base64.encodeToString(content.getBytes(), Base64.DEFAULT));
+        String pwd = "123456";
+        Entity entity = Entity.create(Base64.encodeToString(pwd.getBytes(), Base64.DEFAULT));
         SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_256);
         Crypto crypto = AndroidConceal.get().createCrypto256Bits(keyChain);
 
 
-        String plain = content;
+        String plain = "Hello SSU!";
         byte[] encrypted = null;
         try {
             encrypted = crypto.encrypt(plain.getBytes(), entity);
