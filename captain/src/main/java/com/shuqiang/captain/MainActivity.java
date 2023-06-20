@@ -46,8 +46,8 @@ public class MainActivity extends BaseActivity {
             super();
             this.context = mContext;
 
-//            list.add(new Item("密码二维马", R.drawable.zxing, QRActivity.class));
             list.add(new Item("密码二维马测试", R.drawable.zxing, QRTestActivity.class));
+            list.add(new Item("密码二维马", R.drawable.zxing, QRActivity.class));
 
             // 一个的话直接跳
 //            if (list.size() == 1) {

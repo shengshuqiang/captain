@@ -18,10 +18,16 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.client.android.encode.QRCodeEncoder;
+import com.google.zxing.common.BitArray;
+import com.google.zxing.common.CharacterSetECI;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.google.zxing.qrcode.decoder.Mode;
+import com.google.zxing.qrcode.decoder.Version;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,6 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -42,6 +49,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
 import static android.content.Context.WINDOW_SERVICE;
+import static com.shuqiang.captain.qr.utils.Encoder.DEFAULT_BYTE_MODE_ENCODING;
+import static com.shuqiang.captain.qr.utils.Encoder.appendModeInfo;
 import static com.shuqiang.toolbox.Contants.QR_DIR;
 
 /**
@@ -54,6 +63,70 @@ public class Utils {
     public static final String QR_MESSAGE_KEY = "qr-message-key";
     // 无效校验字符
     public static final char INVALID_CHECK_CODE = ' ';
+    // 最高二维码版本，用于检测还可以容纳多少字符
+    public static final int MaxVersionNum = 40;
+
+    /**
+     * 获取剩余输入字节数
+     *
+     * @param numInputBits
+     * @return
+     */
+    private static int getLastBytesCountByBitsNum(int numInputBits) {
+        // In the following comments, we use numbers of Version 7-H.
+        final int MaxVersionNum = 40;
+        Version version = Version.getVersionForNumber(MaxVersionNum);
+        // numBytes = 196
+        int numBytes = version.getTotalCodewords();
+        // getNumECBytes = 130
+        Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ErrorCorrectionLevel.L);
+        int numEcBytes = ecBlocks.getTotalECCodewords();
+        // getNumDataBytes = 196 - 130 = 66
+        int numDataBytes = numBytes - numEcBytes;
+        int totalInputBytes = (numInputBits + 7) / 8;
+        return numDataBytes - totalInputBytes;
+    }
+
+    public static int getLastBytesCount(String content) throws WriterException {
+        // Determine what character encoding has been specified by the caller, if any
+        String encoding = QRCodeEncoder.guessAppropriateEncoding(content);
+        if (encoding == null) {
+            encoding = DEFAULT_BYTE_MODE_ENCODING;
+        }
+
+        // Pick an encoding mode appropriate for the content. Note that this will not attempt to use
+        // multiple modes / segments even if that were more efficient. Twould be nice.
+        Mode mode = Encoder.chooseMode(content, encoding);
+
+        // This will store the header information, like mode and
+        // length, as well as "header" segments like an ECI segment.
+        BitArray headerBits = new BitArray();
+
+        // Append ECI segment if applicable
+        if (mode == Mode.BYTE && !DEFAULT_BYTE_MODE_ENCODING.equals(encoding)) {
+            CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding);
+            if (eci != null) {
+                Encoder.appendECI(eci, headerBits);
+            }
+        }
+
+        // (With ECI in place,) Write the mode marker
+        appendModeInfo(mode, headerBits);
+
+        // Collect data within the main segment, separately, to count its size if needed. Don't add it to
+        // main payload yet.
+        BitArray dataBits = new BitArray();
+        Encoder.appendBytes(content, mode, dataBits, encoding);
+
+        // Hard part: need to know version to know how many bits length takes. But need to know how many
+        // bits it takes to know version. First we take a guess at version by assuming version will be
+        // the minimum, 1:
+
+        int provisionalBitsNeeded = headerBits.getSize()
+                + mode.getCharacterCountBits(Version.getVersionForNumber(MaxVersionNum))
+                + dataBits.getSize();
+        return getLastBytesCountByBitsNum(provisionalBitsNeeded);
+    }
 
     public static String getFromAssets(Context context, String fileName) {
         try {

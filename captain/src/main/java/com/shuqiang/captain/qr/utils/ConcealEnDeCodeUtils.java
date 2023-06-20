@@ -1,5 +1,6 @@
 package com.shuqiang.captain.qr.utils;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -17,9 +18,9 @@ import captain.R;
 public final class ConcealEnDeCodeUtils {
 
 
-    public static byte[] encrypt(String pwd, byte[] contentBytes) {
+    public static byte[] encrypt(Context context, String pwd, byte[] contentBytes) {
         Entity entity = Entity.create(Base64.encodeToString(pwd.getBytes(), Base64.DEFAULT));
-        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_256);
+        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(context, CryptoConfig.KEY_256);
         Crypto crypto = AndroidConceal.get().createCrypto256Bits(keyChain);
 
 
@@ -33,9 +34,9 @@ public final class ConcealEnDeCodeUtils {
 //        Log.d("SSU", "encrypted=" + encrypted.length + ", " + encrypted + "encrypted=" + cipher);
         return encrypted;
     }
-    private byte[] decrypted(String pwd, String content) {
+    private byte[] decrypted(Context context, String pwd, String content) {
         Entity entity = Entity.create(Base64.encodeToString(pwd.getBytes(), Base64.DEFAULT));
-        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_256);
+        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(context, CryptoConfig.KEY_256);
         Crypto crypto = AndroidConceal.get().createCrypto256Bits(keyChain);
         byte[] decrypted = null;
         try {

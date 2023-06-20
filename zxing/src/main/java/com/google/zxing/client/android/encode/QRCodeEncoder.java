@@ -374,7 +374,7 @@ public final class QRCodeEncoder {
     return bitmap;
   }
 
-  private static String guessAppropriateEncoding(CharSequence contents) {
+  public static String guessAppropriateEncoding(CharSequence contents) {
     // Very crude at the moment
     for (int i = 0; i < contents.length(); i++) {
       if (contents.charAt(i) > 0xFF) {
