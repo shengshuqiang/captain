@@ -45,6 +45,7 @@ public abstract class BasePermissionActivity extends BaseActivity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         cameraPermissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults);
         externalStoragePermissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }

@@ -3,6 +3,7 @@ package com.shuqiang.keyboard;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -80,7 +81,7 @@ public class MtEditTextWithClearButton extends EditText {
 
             @Override
             public int getOpacity() {
-                return 0;
+                return PixelFormat.UNKNOWN;
             }
 
             @Override

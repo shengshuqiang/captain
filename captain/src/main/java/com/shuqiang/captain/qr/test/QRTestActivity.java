@@ -1,20 +1,25 @@
 package com.shuqiang.captain.qr.test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.facebook.android.crypto.keychain.AndroidConceal;
 import com.facebook.android.crypto.keychain.AndroidCryptoLibrary;
+import com.facebook.android.crypto.keychain.SharedPrefsBackedKeyChain;
 import com.facebook.crypto.Crypto;
 import com.facebook.crypto.CryptoConfig;
 import com.facebook.crypto.Entity;
 import com.facebook.crypto.exception.CryptoInitializationException;
 import com.facebook.crypto.exception.KeyChainException;
 import com.facebook.crypto.keychain.KeyChain;
-
 import java.io.IOException;
 
+import captain.BuildConfig;
 import captain.R;
 
 public class QRTestActivity extends AppCompatActivity {
@@ -32,57 +37,30 @@ public class QRTestActivity extends AppCompatActivity {
         String key = "SSU";
         String iv = "123";
         String content = "Hello SSU!";
-        KeyChain keyChain = new KeyChain() {
-            private final byte[] mKey = key.getBytes();
-            private final byte[] mIV = iv.getBytes();
+        Entity entity = Entity.create(Base64.encodeToString(content.getBytes(), Base64.DEFAULT));
+        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_256);
+        Crypto crypto = AndroidConceal.get().createCrypto256Bits(keyChain);
 
-            @Override
-            public byte[] getCipherKey() throws KeyChainException {
-                return mKey;
-            }
 
-            @Override
-            public byte[] getMacKey() throws KeyChainException {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public byte[] getNewIV() throws KeyChainException {
-                return mIV;
-            }
-
-            @Override
-            public void destroyKeys() {
-                // nothing
-            }
-        };
-        CryptoConfig config = CryptoConfig.KEY_128;
-        Crypto crypto = new Crypto(keyChain, new AndroidCryptoLibrary(), config);
-        byte[] plainBytes = content.getBytes();
-        byte[] encrypted = new byte[0];
+        String plain = content;
+        byte[] encrypted = null;
         try {
-            encrypted = crypto.encrypt(plainBytes, new Entity("whatever"));
-        } catch (KeyChainException e) {
-            e.printStackTrace();
-        } catch (CryptoInitializationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            encrypted = crypto.encrypt(plain.getBytes(), entity);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        String cipher = Base64.encodeToString(encrypted, Base64.DEFAULT);
+        Log.d("SSU", "encrypted=" + encrypted.length + ", " + encrypted + "encrypted=" + cipher);
 
-        Log.d("SSU", "encrypted=" + encrypted.toString());
 
-        byte[] decrypted = new byte[0];
+        byte[] decrypted = null;
         try {
-            decrypted = crypto.decrypt(encrypted, new Entity("whatever"));
-        } catch (KeyChainException e) {
+            byte[] cipherTextBytes = Base64.decode(cipher, Base64.DEFAULT);
+            decrypted = crypto.decrypt(cipherTextBytes, entity);
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (CryptoInitializationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+//            return null;
         }
-
-        Log.d("SSU", "decrypted=" + decrypted.toString());
+        Log.d("SSU", "decrypted=" + decrypted.length + ", " + decrypted + "decrypted=" + new String(decrypted));
     }
 }

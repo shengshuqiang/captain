@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
 //    将gradle中的编译环境，SDK的版本号修改到29以下, 解决Android 10.0后创建文件createNewFile()和创建文件夹mkdirs()均失败解决方案
 //    https://cloud.tencent.com/developer/article/1914736
+//    ndkVersion "22.1.7171670"
     compileSdkVersion 29
     buildToolsVersion '29.0.3'
     defaultConfig {
@@ -32,8 +33,7 @@ dependencies {
     implementation project(path: ':pictureselector')
     implementation project(path: ':zxing')
     implementation project(path: ':popupwindow')
-    implementation project(path: ':conceal')
-
+    implementation 'com.facebook.conceal:conceal:2.0.2@aar'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'
     implementation 'androidx.navigation:n' +

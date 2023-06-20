@@ -1,8 +1,0 @@
-android_binary(
-  name = 'app',
-  manifest = 'AndroidManifest.xml',
-  keystore = '//keystores:debug',
-  deps = [
-    '//:prebuilt_aar',
-  ],
-)
