@@ -36,7 +36,7 @@ public class QRTestActivity extends AppCompatActivity {
         testQRCode(983);
         testQRCode(984);
         testQRCode(985);
-//        testCryptoEnDe();
+        testCryptoEnDe();
     }
 
 //    测试二维码大小
@@ -62,9 +62,10 @@ public class QRTestActivity extends AppCompatActivity {
 //    测试加解密
     private void testCryptoEnDe() {
         String pwd = "123456";
-        Entity entity = Entity.create(Base64.encodeToString(pwd.getBytes(), Base64.DEFAULT));
-        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_256);
-        Crypto crypto = AndroidConceal.get().createCrypto256Bits(keyChain);
+//        Entity entity = Entity.create(Base64.encodeToString(pwd.getBytes(), Base64.DEFAULT));
+        Entity entity = Entity.create(pwd);
+        SharedPrefsBackedKeyChain keyChain = new SharedPrefsBackedKeyChain(this, CryptoConfig.KEY_128);
+        Crypto crypto = AndroidConceal.get().createCrypto128Bits(keyChain);
 
 
         String plain = "Hello SSU!";
