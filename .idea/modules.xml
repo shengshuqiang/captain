@@ -10,6 +10,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" filepath="$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" filepath="$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" filepath="$PROJECT_DIR$/.idea/modules/zxing/captain.zxing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zxing-android-core/captain.zxing-android-core.iml" filepath="$PROJECT_DIR$/.idea/modules/zxing-android-core/captain.zxing-android-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zxing-core/captain.zxing-core.iml" filepath="$PROJECT_DIR$/.idea/modules/zxing-core/captain.zxing-core.iml" />
     </modules>
   </component>
 </project>
