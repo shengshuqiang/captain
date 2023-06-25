@@ -28,6 +28,7 @@ import com.google.zxing.common.CharacterSetECI;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.google.zxing.qrcode.decoder.Mode;
 import com.google.zxing.qrcode.decoder.Version;
+import com.google.zxing.qrcode.encoder.Encoder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,6 +37,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -49,8 +52,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
 import static android.content.Context.WINDOW_SERVICE;
-import static com.shuqiang.captain.qr.utils.Encoder.DEFAULT_BYTE_MODE_ENCODING;
-import static com.shuqiang.captain.qr.utils.Encoder.appendModeInfo;
+import static com.google.zxing.qrcode.encoder.Encoder.DEFAULT_BYTE_MODE_ENCODING;
 import static com.shuqiang.toolbox.Contants.QR_DIR;
 
 /**
@@ -89,7 +91,7 @@ public class Utils {
 
     public static int getLastBytesCount(String content) throws WriterException {
         // Determine what character encoding has been specified by the caller, if any
-        String encoding = QRCodeEncoder.guessAppropriateEncoding(content);
+        Charset encoding = QRCodeEncoder.guessAppropriateEncoding(content).equals("UTF_8") ? StandardCharsets.UTF_8 : null;
         if (encoding == null) {
             encoding = DEFAULT_BYTE_MODE_ENCODING;
         }
@@ -104,14 +106,14 @@ public class Utils {
 
         // Append ECI segment if applicable
         if (mode == Mode.BYTE && !DEFAULT_BYTE_MODE_ENCODING.equals(encoding)) {
-            CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding);
+            CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding.name());
             if (eci != null) {
                 Encoder.appendECI(eci, headerBits);
             }
         }
 
         // (With ECI in place,) Write the mode marker
-        appendModeInfo(mode, headerBits);
+        Encoder.appendModeInfo(mode, headerBits);
 
         // Collect data within the main segment, separately, to count its size if needed. Don't add it to
         // main payload yet.

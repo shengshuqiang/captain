@@ -33,10 +33,14 @@ public class QRTestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrtest);
-        testQRCode(983);
-        testQRCode(984);
-        testQRCode(985);
+//        testQRCode(983);
+//        testQRCode(984);
+//        testQRCode(985);
         testCryptoEnDe();
+    }
+
+    private void testQREncode() {
+
     }
 
 //    测试二维码大小
@@ -68,25 +72,25 @@ public class QRTestActivity extends AppCompatActivity {
         Crypto crypto = AndroidConceal.get().createCrypto128Bits(keyChain);
 
 
-        String plain = "Hello SSU!";
+        String plain = "Hello 盛书强!";
+        byte[] plainTextBytes = plain.getBytes();
         byte[] encrypted = null;
         try {
-            encrypted = crypto.encrypt(plain.getBytes(), entity);
+            encrypted = crypto.encrypt(plainTextBytes, entity);
         } catch (Exception e) {
             e.printStackTrace();
         }
         String cipher = Base64.encodeToString(encrypted, Base64.DEFAULT);
-        Log.d("SSU", "encrypted=" + encrypted.length + ", " + encrypted + "encrypted=" + cipher);
-
+        Log.d("SSU", "plainTextBytes=" + plainTextBytes.length + ", encrypted=" + encrypted.length + ", " + encrypted + "encrypted=" +cipher.length() + "," + cipher);
 
         byte[] decrypted = null;
+        byte[] cipherTextBytes = Base64.decode(cipher, Base64.DEFAULT);
         try {
-            byte[] cipherTextBytes = Base64.decode(cipher, Base64.DEFAULT);
             decrypted = crypto.decrypt(cipherTextBytes, entity);
         } catch (Exception e) {
             e.printStackTrace();
 //            return null;
         }
-        Log.d("SSU", "decrypted=" + decrypted.length + ", " + decrypted + "decrypted=" + new String(decrypted));
+        Log.d("SSU", "cipherTextBytes=" + cipherTextBytes.length + ", decrypted=" + decrypted.length + ", "  + "decrypted="  +new String(decrypted).length() + "," + new String(decrypted));
     }
 }

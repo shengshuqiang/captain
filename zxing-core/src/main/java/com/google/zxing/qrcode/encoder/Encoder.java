@@ -49,7 +49,7 @@ public final class Encoder {
       25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // 0x50-0x5f
   };
 
-  static final Charset DEFAULT_BYTE_MODE_ENCODING = StandardCharsets.ISO_8859_1;
+  public static final Charset DEFAULT_BYTE_MODE_ENCODING = StandardCharsets.ISO_8859_1;
 
   private Encoder() {
   }
@@ -243,7 +243,7 @@ public final class Encoder {
    * Choose the best mode by examining the content. Note that 'encoding' is used as a hint;
    * if it is Shift_JIS, and the input is only double-byte Kanji, then we return {@link Mode#KANJI}.
    */
-  private static Mode chooseMode(String content, Charset encoding) {
+  public static Mode chooseMode(String content, Charset encoding) {
     if (StringUtils.SHIFT_JIS_CHARSET.equals(encoding) && isOnlyDoubleByteKanji(content)) {
       // Choose Kanji mode if all input are double-byte characters
       return Mode.KANJI;
@@ -508,7 +508,7 @@ public final class Encoder {
   /**
    * Append mode info. On success, store the result in "bits".
    */
-  static void appendModeInfo(Mode mode, BitArray bits) {
+  public static void appendModeInfo(Mode mode, BitArray bits) {
     bits.appendBits(mode.getBits(), 4);
   }
 
@@ -527,7 +527,7 @@ public final class Encoder {
   /**
    * Append "bytes" in "mode" mode (encoding) into "bits". On success, store the result in "bits".
    */
-  static void appendBytes(String content,
+  public static void appendBytes(String content,
                           Mode mode,
                           BitArray bits,
                           Charset encoding) throws WriterException {
@@ -628,10 +628,9 @@ public final class Encoder {
     }
   }
 
-  private static void appendECI(CharacterSetECI eci, BitArray bits) {
+  public static void appendECI(CharacterSetECI eci, BitArray bits) {
     bits.appendBits(Mode.ECI.getBits(), 4);
     // This is correct for values up to 127, which is all we need now.
     bits.appendBits(eci.getValue(), 8);
   }
-
 }
