@@ -271,7 +271,7 @@ public class Utils {
             file.mkdirs();
         }
 
-        String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长App密码二维马.png";
+        String imageName = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "-船长App信息二维马.png";
         file = new File(path + "/" + QR_DIR);
         if (!file.exists()) {
             boolean result = file.mkdirs();

@@ -1,12 +1,14 @@
 package com.shuqiang.captain.qr.widgets;
 
 import android.app.AlertDialog;
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Color;
 import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -18,6 +20,7 @@ import com.shuqiang.captain.qr.utils.Utils;
 import captain.R;
 
 /**
+ * 新增/修改单个账号密码表单信息
  * Created by shengshuqiang on 2018/2/20.
  */
 public class MorseItemDetailInfoView extends LinearLayout {
@@ -55,9 +58,19 @@ public class MorseItemDetailInfoView extends LinearLayout {
         okView = findViewById(R.id.ok);
         cancelView = findViewById(R.id.cancel);
         userNameEditText = (EditText) findViewById(R.id.user_name);
-        userNameEditText.setFocusable(true);
-        userNameEditText.setFocusableInTouchMode(true);
-        userNameEditText.requestFocus();
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // 延迟300ms等布局完毕获取焦点唤起输入键盘
+                userNameEditText.setFocusable(true);
+                userNameEditText.setFocusableInTouchMode(true);
+                userNameEditText.requestFocus();
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+            }
+        }, 300);
         passwordEditText = (EditText) findViewById(R.id.password);
         remarksEditTxt = (EditText) findViewById(R.id.remarks);
 
@@ -129,8 +142,6 @@ public class MorseItemDetailInfoView extends LinearLayout {
             }
         });
     }
-
-
 
     private void userNameConfirm() {
         final AlertDialog.Builder normalDialog =

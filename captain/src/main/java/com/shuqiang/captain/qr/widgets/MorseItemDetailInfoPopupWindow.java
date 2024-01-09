@@ -58,14 +58,6 @@ public class MorseItemDetailInfoPopupWindow extends MongoliaPopupWindow {
     @Override
     public void show(View view) {
         super.show(view);
-
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                InputMethodManager imm = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        }, 300);
     }
 
     public void setData(MorseMessageIntermediateItemData intermediateItemData) {

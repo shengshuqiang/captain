@@ -53,11 +53,7 @@ public class MorseMessageIntermediateItemData {
         }
 
         public boolean isCancelOperateVisibility() {
-            if (this == MODIFY || this == ADD) {
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         public boolean isUserNameEditable() {

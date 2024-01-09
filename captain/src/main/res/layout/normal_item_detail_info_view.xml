@@ -7,10 +7,24 @@
     <LinearLayout
         android:id="@+id/operate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+        android:layout_height="48dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:gravity="right|center_vertical"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/cancel"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_menu_clear_playlist"
+            android:background="@android:color/holo_orange_dark"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"/>
 
         <ImageView
             android:id="@+id/edit"
@@ -25,7 +39,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:scaleType="fitXY"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="10dp"
             android:src="@android:drawable/ic_menu_delete"
             android:background="@android:color/holo_red_dark"/>
 
@@ -34,19 +48,9 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:scaleType="fitXY"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="10dp"
             android:src="@drawable/ic_menu_mark"
             android:background="@android:color/holo_green_dark"/>
-
-        <ImageView
-            android:id="@+id/cancel"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:scaleType="fitXY"
-            android:layout_marginLeft="5dp"
-            android:src="@drawable/ic_menu_clear_playlist"
-            android:background="@android:color/holo_orange_dark"/>
-
 
     </LinearLayout>
 
@@ -63,7 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textColor="@android:color/black"
-            android:inputType="textVisiblePassword"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:hint="账号"
             android:textSize="22dp"/>
 
@@ -87,6 +92,4 @@
             android:hint="备注"
             android:textSize="18dp"/>
     </LinearLayout>
-
-
 </merge>

@@ -25,6 +25,9 @@ import com.google.zxing.client.android.Intents;
 
 import captain.R;
 
+/**
+ *
+ */
 public class QRActivity extends BasePermissionActivity {
     public static final int MORSE_MESSAGE_REQUEST_CODE = 0;
 
@@ -133,6 +136,7 @@ public class QRActivity extends BasePermissionActivity {
                 }
                 if (!TextUtils.isEmpty(producePwd)) {
                     if (TextUtils.equals(currentPwd, producePwd)) {
+                        firstPasswordPopupWindow.dismiss();
                         handleEncodeSaveBitmap(password);
                     } else {
                         showPasswordPopupWindow(secondPasswordPopupWindow, "请输入二次确认密码", null, new PasswordPopupWindow.OnPasswordCompleteListener() {

@@ -51,6 +51,7 @@
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:includeFontPadding="false"
                 android:marqueeRepeatLimit="marquee_forever"
