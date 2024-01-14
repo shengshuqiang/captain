@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">baselibrary</string>
     <!-- Strings used for fragments for navigation -->
+    <string name="privacy_window_message1">我们依据相关法律制定了<a href="https://awp.meituan.com/hfe/fep/fd92d428fed14b83a37e5fc8ad0c2818.html">《隐私政策》</a>，请您在点击同意之前仔细阅读并充分理解相关条款，其中的重点条款已为您标注。</string>
+    <string name="privacy_window_message2">我们将通过<a href="https://awp.meituan.com/hfe/fep/fd92d428fed14b83a37e5fc8ad0c2818.html">《隐私政策》</a>向您说明：</string>
+    <string name="privacy_window_message3">1 为了您可以更好地享受船长App提供的服务，我们会根据您的授权内容，使用对应的必要信息（例如相机、存储等）</string>
+    <string name="privacy_window_message4">2 您可以对上述信息进行访问、更正、删除，我们也提供了专门的个人信息保护联系方式。</string>
+    <string name="privacy_window_message5">3 未经您的授权同意，我们不会将上述信息共享给第三方或用于您未授权的其他用途。</string>
+    <string name="privacy_window_permission_message">为了向您提供更好的服务，我们需要获取以下权限和信息，系统将以弹窗提示征求您的授权。</string>
 
 </resources>

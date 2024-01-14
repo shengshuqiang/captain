@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center_horizontal"
+    android:paddingHorizontal="18dp"
+    android:background="@drawable/privacy_warning_dialog_bg"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/main_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="船长需要您同意本隐私政策"
+        android:paddingHorizontal="20dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:textColor="#E6000000"/>
+
+    <TextView
+        android:id="@+id/sub_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="如果您不同意《隐私政策》，只能浏览部分内容"
+        android:textSize="14sp"
+        android:textColor="#B8000000"
+        android:textColorLink="#0FB12C"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="18dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/disagree"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="39dp"
+            android:gravity="center"
+            android:text="仍不同意"
+            android:paddingHorizontal="6dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginRight="9dp"
+            android:textColor="#E6000000"
+            android:background="@drawable/privacy_btn_disagree" />
+
+        <TextView
+            android:id="@+id/agree"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="39dp"
+            android:gravity="center"
+            android:text="同意并继续"
+            android:paddingHorizontal="6dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/privacy_btn_agree_bg"/>
+
+    </LinearLayout>
+</LinearLayout>

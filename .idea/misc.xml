@@ -6,7 +6,17 @@
         <entry key="base/src/main/res/drawable/back_btn.xml" value="0.22395833333333334" />
         <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot.xml" value="0.34739583333333335" />
         <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot_white.xml" value="0.34739583333333335" />
+        <entry key="base/src/main/res/drawable/maicai_presssed_mask.xml" value="0.1814814814814815" />
+        <entry key="base/src/main/res/drawable/permission_btn_default_bg.xml" value="0.1814814814814815" />
+        <entry key="base/src/main/res/drawable/permission_btn_pressed_bg.xml" value="0.1814814814814815" />
+        <entry key="base/src/main/res/drawable/presssed_mask.xml" value="0.1814814814814815" />
+        <entry key="base/src/main/res/drawable/privacy_bg.xml" value="0.1814814814814815" />
+        <entry key="base/src/main/res/drawable/privacy_btn_agree_bg.xml" value="0.3523076923076923" />
+        <entry key="base/src/main/res/drawable/privacy_btn_disagree.xml" value="0.3523076923076923" />
+        <entry key="base/src/main/res/drawable/privacy_warning_dialog_bg.xml" value="0.3523076923076923" />
         <entry key="base/src/main/res/layout/activity_base.xml" value="0.1" />
+        <entry key="base/src/main/res/layout/privacy_popup_window.xml" value="0.3319746376811594" />
+        <entry key="base/src/main/res/layout/privacy_warning_dialog.xml" value="0.7426545086119554" />
         <entry key="basecomponent/src/main/res/layout/content_base.xml" value="0.18177083333333333" />
         <entry key="basecomponent/src/main/res/layout/fragment_first.xml" value="0.18177083333333333" />
         <entry key="basecomponent/src/main/res/layout/fragment_second.xml" value="0.18177083333333333" />

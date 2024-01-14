@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@android:color/white"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:text="温馨提示"
+            android:textColor="#E6000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="5dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="15dp">
+
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="5dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="亲爱的用户，感谢您使用船长App！"
+                        android:textColor="#E6000000"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/privacy_policy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="6dp"
+                        android:lineSpacingExtra="2dp"
+                        android:text="@string/privacy_window_message1"
+                        android:textColor="#E6000000"
+                        android:textColorLink="#0FB12C"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/privacy_window_permission_message"
+                        android:textColor="#E6000000"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <RelativeLayout style="@style/Permission_Bg">
+
+                    <ImageView
+                        android:id="@+id/camera_icon_view"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginVertical="1dp"
+                        android:src="@drawable/privacy_camera_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/camera_title_view"
+                        style="@style/Permission_Title"
+                        android:layout_toRightOf="@id/camera_icon_view"
+                        android:text="相机"
+                        />
+
+                    <TextView
+                        style="@style/Permission_Content"
+                        android:layout_below="@+id/camera_title_view"
+                        android:text="经授权，我们会在您使用信息二维马扫码服务时，使用您的相机扫码功能。"
+                        android:layout_alignLeft="@id/camera_title_view"
+                        />
+                </RelativeLayout>
+
+                <RelativeLayout style="@style/Permission_Bg">
+
+                    <ImageView
+                        android:id="@+id/photos_icon_view"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginVertical="1dp"
+                        android:src="@drawable/privacy_photos_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/photos_title_view"
+                        style="@style/Permission_Title"
+                        android:layout_toRightOf="@id/photos_icon_view"
+                        android:text="相册"
+                        />
+
+                    <TextView
+                        style="@style/Permission_Content"
+                        android:layout_below="@+id/photos_title_view"
+                        android:layout_alignLeft="@id/photos_title_view"
+                        android:text="经授权，我们会在您使用信息二维马查看服务时，使用您的相册选择加密二维码图片。"
+                        />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/privacy_policy_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="6dp"
+                    android:text="@string/privacy_window_message2"
+                    android:textColor="#E6000000"
+                    android:textColorLink="#0FB12C"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="6dp"
+                    android:text="@string/privacy_window_message3"
+                    android:textColor="#E6000000"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="6dp"
+                    android:text="@string/privacy_window_message4"
+                    android:textColor="#E6000000"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="6dp"
+                    android:text="@string/privacy_window_message5"
+                    android:textColor="#E6000000"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="15dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/permission_disagree_btn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="39dp"
+                android:layout_weight="2"
+                android:layout_marginRight="5dp"
+                android:textStyle="bold"
+                android:background="@drawable/privacy_btn_disagree"
+                android:gravity="center"
+                android:text="不同意"
+                android:textColor="#E6000000"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/permission_agree_btn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="39dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/privacy_btn_agree_bg"
+                android:gravity="center"
+                android:text="同意"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,5 +1,6 @@
 package com.shuqiang.captain.qr;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,10 +9,15 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.captain.base.BasePermissionActivity;
+import com.captain.base.PermissionUtils;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.utils.PictureFileUtils;
+import com.luck.picture.lib.utils.ToastUtils;
 import com.shuqiang.captain.qr.mvp.MVPHelper;
 import com.shuqiang.captain.qr.mvp.MVPView;
 import com.shuqiang.captain.qr.mvpmodule.MorseMVPModule;
@@ -47,35 +53,67 @@ public class QRActivity extends BasePermissionActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Context context = QRActivity.this;
+        FragmentActivity activity = QRActivity.this;
         mvpView = (MVPView) findViewById(R.id.mvp_view);
-        mvpPresenter = new MorseMVPPresenter(context);
-        firstPasswordPopupWindow = new PasswordPopupWindow(QRActivity.this);
-        secondPasswordPopupWindow = new PasswordPopupWindow(QRActivity.this);
+        mvpPresenter = new MorseMVPPresenter(activity);
+        firstPasswordPopupWindow = new PasswordPopupWindow(activity);
+        secondPasswordPopupWindow = new PasswordPopupWindow(activity);
         MVPHelper.init(mvpView, mvpPresenter, new MorseMVPModule());
 
         findViewById(R.id.scan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                gotoCaptureActivity();
+                PermissionUtils.showPolicyDialog(activity, new PermissionUtils.OnPrivacyAgreeListener() {
+                    @Override
+                    public void agree() {
+                        gotoCaptureActivity();
+                    }
+
+                    @Override
+                    public void disAgree() {
+                        ToastUtils.showToast(activity, "同意《船长App隐私政策》后将为您提供更丰富的功能");
+                    }
+                });
             }
         });
 
         findViewById(R.id.add).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mvpPresenter.doAction(new MorseMessageItemActionData(MorseMVPPresenter.ADD_ITEM_ACTION_ID, null));
+                PermissionUtils.showPolicyDialog(activity, new PermissionUtils.OnPrivacyAgreeListener() {
+                    @Override
+                    public void agree() {
+                        mvpPresenter.doAction(new MorseMessageItemActionData(MorseMVPPresenter.ADD_ITEM_ACTION_ID, null));
+                    }
+
+                    @Override
+                    public void disAgree() {
+                        ToastUtils.showToast(activity, "同意《船长App隐私政策》后将为您提供更丰富的功能");
+                    }
+                });
             }
         });
 
         findViewById(R.id.produce).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                externalStoragePermissionHandler.handleRequestPermissionAndWork();
+                PermissionUtils.showPolicyDialog(activity, new PermissionUtils.OnPrivacyAgreeListener() {
+                    @Override
+                    public void agree() {
+                        externalStoragePermissionHandler.handleRequestPermissionAndWork();
+                    }
+
+                    @Override
+                    public void disAgree() {
+                        ToastUtils.showToast(activity, "同意《船长App隐私政策》后将为您提供更丰富的功能");
+                    }
+                });
             }
         });
 
         handleInitQRMessage();
+
+        PermissionUtils.showPolicyDialog(this);
     }
 
     /**

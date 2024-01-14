@@ -37,7 +37,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
-
     // 子组件重写返回内容布局
     protected abstract int getContentLayoutResource();
 

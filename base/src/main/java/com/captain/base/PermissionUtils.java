@@ -1,21 +1,123 @@
 package com.captain.base;
-
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
+import java.util.List;
 
 public final class PermissionUtils {
     // 申请相机权限的requestCode
     private static final int PERMISSION_CAMERA_REQUEST_CODE = 0x00000012;
     // 申请外部存储权限的requestCode
     public static final int PERMISSION_EXTERNAL_STORAGE_REQUEST_CODE = 0x00000013;
+    // 隐私权限弹窗 SharedPreferences key
+    public static final String GRANT_PRIVACY_PERMISSION_PREFS_KEY = "launch_privacy_dialog";
+
+
+    private static final String TAG = "PrivacyDlgHelper";
+    private static int privacyPermissionGrantState = -1;
+
+    public static boolean hasGrantPrivacyPermission(Context context) {
+        // 未初始化== -1 ，初始化后 如果已经显示过，值为1，未显示过 值为0
+        if (privacyPermissionGrantState == -1) {
+            try {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean value = prefs.getBoolean(GRANT_PRIVACY_PERMISSION_PREFS_KEY, false);
+                privacyPermissionGrantState = value ? 1 : 0;
+            } catch (Exception e) {
+                Log.i(TAG, e.toString());
+            }
+        }
+        return privacyPermissionGrantState == 1;
+    }
+
+    static void grantPrivacyPermission(Context context) {
+        try {
+            privacyPermissionGrantState = 1;
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            prefs.edit().putBoolean(GRANT_PRIVACY_PERMISSION_PREFS_KEY, true).commit();
+        } catch (Exception e) {
+            Log.i(TAG, e.toString());
+        }
+    }
+
+    public interface OnPrivacyAgreeListener {
+        void agree();
+        void disAgree();
+    }
+
+    public static void showPolicyDialog(FragmentActivity activity) {
+        showPolicyDialog(activity, null);
+    }
+    public static void showPolicyDialog(FragmentActivity activity, OnPrivacyAgreeListener onPrivacyAgreeListener) {
+        boolean showPrivacyDialog = !PermissionUtils.hasGrantPrivacyPermission(activity);
+        if (showPrivacyDialog) {
+            PrivacyPolicyDialog privacyDialog = new PrivacyPolicyDialog();
+            privacyDialog.setOnDismissListener(dialog -> {
+                dialog.dismiss();
+                if (null != onPrivacyAgreeListener) {
+                    onPrivacyAgreeListener.disAgree();
+                }
+            });
+            privacyDialog.setOnArgeeListener(dialog -> {
+                dialog.dismiss();
+                if (null != onPrivacyAgreeListener) {
+                    onPrivacyAgreeListener.agree();
+                }
+                grantPrivacyPermission(activity);
+            });
+            privacyDialog.show(activity.getSupportFragmentManager(), "PrivacyDialog");
+        } else {
+            if (null != onPrivacyAgreeListener) {
+                onPrivacyAgreeListener.agree();
+            }
+        }
+    }
+
+    // 重启App的方法
+    public static void restartApp(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+        if (intent != null) {
+            ComponentName componentName = intent.getComponent();
+            Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+            context.startActivity(mainIntent);
+            killProcess(context);
+        }
+    }
+
+    // 杀死所有进程
+    public static void killProcess(Context context) {
+        ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (mActivityManager != null) {
+            List<ActivityManager.RunningAppProcessInfo> processList = mActivityManager.getRunningAppProcesses();
+            if (processList != null) {
+                for (ActivityManager.RunningAppProcessInfo process : processList) {
+                    if (process.pid != android.os.Process.myPid() &&
+                            process.processName.contains(context.getPackageName())) {
+                        android.os.Process.killProcess(process.pid);
+                    }
+                }
+            }
+        }
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(0);
+    }
 
     /**
      * 相机权限封装
