@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:src="@drawable/captain" />
+
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"
+        android:textColor="#11181F"
+        android:gravity="center"
+        android:layout_marginTop="5dp"
+        android:text="@string/app_name"
+        />
+    <TextView
+        android:id="@+id/app_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textSize="16dp"
+        android:gravity="center"
+        android:textColor="#898F91"
+        />
+    <TextView
+        android:id="@+id/others"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="14dp"
+        android:gravity="left"
+        android:textColor="#898F91"
+        android:paddingHorizontal="10dp"
+        android:lineSpacingMultiplier="1"
+        android:text="我是盛书强，让手机帮忙干一些力所能及的小事。您可以通过添加微信好友「shengshuqiang01」或者发邮件「shengssu@mail.ustc.edu.cn」与我们联系。"
+        />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:orientation="vertical"
+        android:background="#F5F6FF"
+        />
+</LinearLayout>

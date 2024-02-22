@@ -15,17 +15,24 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-
+        // 初始化布局
+        setContentView(getContentViewResource());
         // 标题栏
         AppBarLayout appBarLayout = findViewById(R.id.appbar);
         Toolbar toolbar = findViewById(R.id.toolbar);
         initToolbar(appBarLayout, toolbar);
+        // 需要重写
+        int contentLayoutResource = getContentLayoutResource();
+        if (contentLayoutResource != 0) {
+            // 设置内容布局
+            ViewStub contentStub = (ViewStub) findViewById(R.id.content_stub);
+            contentStub.setLayoutResource(contentLayoutResource);
+            contentStub.inflate();
+        }
+    }
 
-        // 设置内容布局
-        ViewStub contentStub = (ViewStub) findViewById(R.id.content_stub);
-        contentStub.setLayoutResource(getContentLayoutResource());
-        contentStub.inflate();
+    protected int getContentViewResource() {
+       return R.layout.activity_base;
     }
 
     protected void initToolbar(View appBarLayout, Toolbar toolbar) {
@@ -38,7 +45,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     // 子组件重写返回内容布局
-    protected abstract int getContentLayoutResource();
+    protected int getContentLayoutResource() {
+        return 0;
+    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

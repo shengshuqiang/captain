@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -69,13 +70,17 @@ public final class PermissionUtils {
         if (showPrivacyDialog) {
             PrivacyPolicyDialog privacyDialog = new PrivacyPolicyDialog();
             privacyDialog.setOnDismissListener(dialog -> {
-                dialog.dismiss();
+                if (null != dialog) {
+                    dialog.dismiss();
+                }
                 if (null != onPrivacyAgreeListener) {
                     onPrivacyAgreeListener.disAgree();
                 }
             });
             privacyDialog.setOnArgeeListener(dialog -> {
-                dialog.dismiss();
+                if (null != dialog) {
+                    dialog.dismiss();
+                }
                 if (null != onPrivacyAgreeListener) {
                     onPrivacyAgreeListener.agree();
                 }

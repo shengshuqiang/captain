@@ -32,7 +32,7 @@ import com.google.zxing.client.android.Intents;
 import captain.R;
 
 /**
- *
+ * 密码二维马页面
  */
 public class QRActivity extends BasePermissionActivity {
     public static final int MORSE_MESSAGE_REQUEST_CODE = 0;
@@ -112,8 +112,6 @@ public class QRActivity extends BasePermissionActivity {
         });
 
         handleInitQRMessage();
-
-        PermissionUtils.showPolicyDialog(this);
     }
 
     /**

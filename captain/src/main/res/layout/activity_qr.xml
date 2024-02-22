@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/scan_icon"/>
+            app:srcCompat="@drawable/ic_qr_code"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_menu_add"/>
+            app:srcCompat="@drawable/ic_playlist_add"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/produce"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_menu_send"/>
+            app:srcCompat="@drawable/ic_file_save"/>
 
     </FrameLayout>
 

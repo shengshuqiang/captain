@@ -1,5 +1,5 @@
 include ':captain', ':keyboard', ':popupwindow'
 include ':zxing'
 include ':zxing-core', 'zxing-android-core'
-include ':toolbox', ':pictureselector'
+include ':toolbox', ':pictureselector', ':navigationtabbar'
 include ':base'

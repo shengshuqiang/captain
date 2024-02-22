@@ -54,7 +54,7 @@
             android:layout_height="80dp"
             android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@android:drawable/ic_menu_edit"
+            android:src="@drawable/ic_edit_note"
             android:background="@android:color/holo_blue_bright"/>
 
         <ImageView
@@ -64,7 +64,7 @@
             android:padding="10dp"
             android:scaleType="fitXY"
             android:layout_marginLeft="5dp"
-            android:src="@android:drawable/ic_menu_delete"
+            android:src="@drawable/ic_delete"
             android:background="@android:color/holo_red_dark"/>
     </LinearLayout>
 </merge>

@@ -2,7 +2,11 @@ package com.captain.base;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.view.View;
@@ -14,6 +18,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class Utils {
+    // 美团黄前景
+    public static final int YELLOW_FG_COLOR = 0XFFFE02;
+    // 蓝色背景
+    public static final int BLUE_BG_COLOR = 0X4351AC;
+
+    public static String getAppVersionName(Context context) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            PackageInfo info = pm.getPackageInfo(context.getPackageName(), 0);
+//            int versionCode = info.versionCode;
+            String versionName = info.versionName;
+            return versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "未知";
+    }
     public static void postDelayed(Runnable runnable) {
         new Handler().postDelayed(runnable, 300);
     }
@@ -122,5 +143,66 @@ public class Utils {
         int resourceId =
                 resources.getIdentifier("status_bar_height", "dimen", "android");
         return resourceId > 0 ? resources.getDimensionPixelSize(resourceId) : 0;
+    }
+
+    /**
+     * 判断是否有网络连接
+     * @param context
+     * @return
+     */
+    public static boolean isNetworkConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (mNetworkInfo != null) {
+                return mNetworkInfo.isAvailable();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断 WIFI 网络是否可用
+     * @param context
+     * @return
+     */
+    public static boolean isWifiConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mWiFiNetworkInfo = mConnectivityManager
+                    .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            if (mWiFiNetworkInfo != null) {
+                return mWiFiNetworkInfo.isAvailable();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断 MOBILE 网络是否可用
+     * @param context
+     * @return
+     */
+    public boolean isMobileConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mMobileNetworkInfo = mConnectivityManager
+                    .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+            if (mMobileNetworkInfo != null) {
+                return mMobileNetworkInfo.isAvailable();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * dp2px
+     */
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getApplicationContext().getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }

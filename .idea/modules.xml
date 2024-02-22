@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/base/captain.base.iml" filepath="$PROJECT_DIR$/.idea/modules/base/captain.base.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" filepath="$PROJECT_DIR$/.idea/modules/captain/captain.captain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" filepath="$PROJECT_DIR$/.idea/modules/keyboard/captain.keyboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/navigationtabbar/captain.navigationtabbar.iml" filepath="$PROJECT_DIR$/.idea/modules/navigationtabbar/captain.navigationtabbar.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" filepath="$PROJECT_DIR$/.idea/modules/pictureselector/captain.pictureselector.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" filepath="$PROJECT_DIR$/.idea/modules/popupwindow/captain.popupwindow.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" filepath="$PROJECT_DIR$/.idea/modules/toolbox/captain.toolbox.iml" />

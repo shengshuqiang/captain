@@ -33,6 +33,8 @@ dependencies {
     implementation project(path: ':pictureselector')
     implementation project(path: ':zxing')
     implementation project(path: ':popupwindow')
+    // 经典首页 4 tab 导航
+    implementation project(':navigationtabbar')
     implementation 'com.facebook.conceal:conceal:2.0.2@aar'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'

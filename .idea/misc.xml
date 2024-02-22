@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="base/src/main/res/drawable/back_btn.xml" value="0.22395833333333334" />
+        <entry key="base/src/main/res/drawable/loading_dot.xml" value="0.21388888888888888" />
+        <entry key="base/src/main/res/drawable/loading_dot_white.xml" value="0.21388888888888888" />
         <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot.xml" value="0.34739583333333335" />
         <entry key="base/src/main/res/drawable/maicai_controls_bg_pull_down_dot_white.xml" value="0.34739583333333335" />
         <entry key="base/src/main/res/drawable/maicai_presssed_mask.xml" value="0.1814814814814815" />
@@ -22,18 +24,26 @@
         <entry key="basecomponent/src/main/res/layout/fragment_second.xml" value="0.18177083333333333" />
         <entry key="baselibrary/src/main/res/drawable/back_btn.xml" value="0.2453125" />
         <entry key="baselibrary/src/main/res/drawable/ic_launcher_background.xml" value="0.2453125" />
+        <entry key="captain/src/main/res/drawable/divider.xml" value="0.21203703703703702" />
+        <entry key="captain/src/main/res/drawable/ic_delete_fill0_wght400_grad0_opsz24.xml" value="0.21203703703703702" />
         <entry key="captain/src/main/res/drawable/ic_menu_camera.xml" value="0.20625" />
         <entry key="captain/src/main/res/drawable/ic_menu_gallery.xml" value="0.20625" />
         <entry key="captain/src/main/res/drawable/ic_menu_slideshow.xml" value="0.20625" />
+        <entry key="captain/src/main/res/drawable/ic_person_fill0_wght400_grad0_opsz24.xml" value="0.21203703703703702" />
+        <entry key="captain/src/main/res/drawable/person.xml" value="0.21203703703703702" />
         <entry key="captain/src/main/res/drawable/side_nav_bar.xml" value="0.20625" />
+        <entry key="captain/src/main/res/drawable/tools_power.xml" value="0.21203703703703702" />
         <entry key="captain/src/main/res/layout/activity_content.xml" value="0.14739583333333334" />
         <entry key="captain/src/main/res/layout/activity_main.xml" value="0.13385416666666666" />
         <entry key="captain/src/main/res/layout/activity_qr.xml" value="0.7597989949748744" />
         <entry key="captain/src/main/res/layout/content_main.xml" value="0.13385416666666666" />
         <entry key="captain/src/main/res/layout/content_qr.xml" value="0.19010416666666666" />
+        <entry key="captain/src/main/res/layout/divider.xml" value="0.21458333333333332" />
         <entry key="captain/src/main/res/layout/fragment_gallery.xml" value="0.22552083333333334" />
         <entry key="captain/src/main/res/layout/fragment_home.xml" value="0.22552083333333334" />
         <entry key="captain/src/main/res/layout/grid_item.xml" value="0.19010416666666666" />
+        <entry key="captain/src/main/res/layout/main_shop_tab_layout.xml" value="0.22760416666666666" />
+        <entry key="captain/src/main/res/layout/me_tab_layout.xml" value="0.3177083333333333" />
         <entry key="captain/src/main/res/layout/nav_header_base.xml" value="0.22552083333333334" />
         <entry key="captain/src/main/res/layout/normal_item_detail_info_view.xml" value="0.13385416666666666" />
         <entry key="captain/src/main/res/layout/normal_item_view.xml" value="0.13385416666666666" />

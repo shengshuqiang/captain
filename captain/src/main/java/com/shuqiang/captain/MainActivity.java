@@ -1,155 +1,137 @@
 package com.shuqiang.captain;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Typeface;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.TextView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.captain.base.BaseActivity;
-import com.shuqiang.captain.qr.QRActivity;
-import com.shuqiang.captain.qr.test.QRTestActivity;
+import com.captain.base.PermissionUtils;
+import com.captain.base.Utils;
 
 import java.util.ArrayList;
-import java.util.List;
+
 import captain.R;
+import devlight.io.library.ntb.NavigationTabBar;
 
 public class MainActivity extends BaseActivity {
+    // 主橱窗 Tab
+    private final String MAIN_SHOP_TAB = "MainShopTab";
+    // 我的橱窗 Tab
+    private final String ME_TAB = "MeTab";
+    // Tabs
+    private final String[] TABS = { MAIN_SHOP_TAB, ME_TAB };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((GridView) findViewById(R.id.gridview)).setAdapter(new GridAdapter(this));
+        initUI();
     }
 
     @Override
-    protected int getContentLayoutResource() {
+    protected int getContentViewResource() {
         return R.layout.activity_content;
     }
 
-    private static class GridAdapter extends BaseAdapter {
-        private Context context;
+    private void initUI() {
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        viewPager.setAdapter(new PagerAdapter() {
 
-        private List<Item> list = new ArrayList<>();
-
-        public GridAdapter(Context mContext) {
-            super();
-            this.context = mContext;
-
-//            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
-            list.add(new Item("信息二维马", R.drawable.zxing, QRActivity.class));
-
-            // 一个的话直接跳
-            if (list.size() == 1) {
-                Item item = list.get(0);
-                Intent intent = new Intent(context, item.clzss);
-                context.startActivity(intent);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return list.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return position;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder holder = null;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                convertView = LayoutInflater.from(context).inflate(
-                        R.layout.grid_item, parent, false);
-                holder.titleTxtView = (TextView) convertView.findViewById(R.id.title);
-                holder.titleTxtView.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                holder.iconImgView = (ImageView) convertView.findViewById(R.id.icon);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            final Item item = list.get(position);
-            holder.titleTxtView.setText(item.title);
-            holder.iconImgView.setImageResource(item.iconRes);
-            holder.iconImgView.setOnTouchListener(onTouchListener);
-            holder.iconImgView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, item.clzss);
-                    context.startActivity(intent);
-                }
-            });
-            return convertView;
-        }
-
-        class ViewHolder {
-            TextView titleTxtView;
-            ImageView iconImgView;
-        }
-
-        class Item {
-            String title;
-            int iconRes;
-            Class clzss;
-
-            public Item(String title, int iconRes, Class clzss) {
-                this.title = title;
-                this.iconRes = iconRes;
-                this.clzss = clzss;
-            }
-        }
-
-        public View.OnTouchListener onTouchListener = new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        changeLight((ImageView) view, 0);
-//                    listener.onCustomItemClk(listener.getPostion());
-//                    view.getParent().requestDisallowInterceptTouchEvent(false);//通知父控件勿拦截本控件
-                        // onclick
+            public int getCount() {
+                return TABS.length;
+            }
+
+            @Override
+            public boolean isViewFromObject(final View view, final Object object) {
+                return view.equals(object);
+            }
+
+            @Override
+            public void destroyItem(final View container, final int position, final Object object) {
+                ((ViewPager) container).removeView((View) object);
+            }
+
+            @Override
+            public Object instantiateItem(final ViewGroup container, final int position) {
+                View view;
+                switch (TABS[position]) {
+                    case MAIN_SHOP_TAB:
+                        // 主橱窗 Tab
+                        MainShopTabView mainShopTabView = new MainShopTabView(getBaseContext());
+                        container.addView(mainShopTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+                        view = mainShopTabView;
                         break;
-                    case MotionEvent.ACTION_DOWN:
-                        changeLight((ImageView) view, -80);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        // changeLight(view, 0);
-                        break;
-                    case MotionEvent.ACTION_CANCEL:
-                        changeLight((ImageView) view, 0);
+                    case ME_TAB:
+                        // 我的 Tab
+                        MeTabView meTabView = new MeTabView(getBaseContext());
+                        container.addView(meTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+                        view = meTabView;
                         break;
                     default:
-                        changeLight((ImageView) view, 0);
+                        view = null;
                         break;
                 }
-                return false;
+                return view;
+            }
+        });
+
+        final String[] colors = getResources().getStringArray(R.array.default_preview);
+
+        final NavigationTabBar navigationTabBar = (NavigationTabBar) findViewById(R.id.tab_bar);
+        final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.tools),
+                        Color.parseColor(colors[0]))
+                        .title("首页")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.person),
+                        Color.parseColor(colors[4]))
+                        .title("我的")
+                        .build()
+        );
+        navigationTabBar.setModels(models);
+        navigationTabBar.setViewPager(viewPager, 0);
+
+        //IMPORTANT: ENABLE SCROLL BEHAVIOUR IN COORDINATOR LAYOUT
+        navigationTabBar.setBehaviorEnabled(true);
+
+        navigationTabBar.setOnTabBarSelectedIndexListener(new NavigationTabBar.OnTabBarSelectedIndexListener() {
+            @Override
+            public void onStartTabSelected(final NavigationTabBar.Model model, final int index) {
             }
 
-        };
+            @Override
+            public void onEndTabSelected(final NavigationTabBar.Model model, final int index) {
+                model.hideBadge();
+            }
+        });
+        navigationTabBar.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
 
-        private void changeLight(ImageView imageview, int brightness) {
-            ColorMatrix matrix = new ColorMatrix();
-            matrix.set(new float[]{1, 0, 0, 0, brightness, 0, 1, 0, 0,
-                    brightness, 0, 0, 1, 0, brightness, 0, 0, 0, 1, 0});
-            imageview.setColorFilter(new ColorMatrixColorFilter(matrix));
-        }
+            }
+
+            @Override
+            public void onPageSelected(final int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(final int state) {
+
+            }
+        });
+        // 触发隐私模式弹窗
+        PermissionUtils.showPolicyDialog(this);
+
     }
 }

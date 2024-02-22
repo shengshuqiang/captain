@@ -20,7 +20,7 @@
             android:gravity="center"
             android:text="温馨提示"
             android:textColor="#E6000000"
-            android:textSize="18sp"
+            android:textSize="20dp"
             android:textStyle="bold" />
 
         <ScrollView
@@ -44,9 +44,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="9dp"
                         android:layout_marginBottom="6dp"
-                        android:text="亲爱的用户，感谢您使用船长App！"
+                        android:text="@string/privacy_window_message0"
                         android:textColor="#E6000000"
-                        android:textSize="14sp" />
+                        android:textSize="16dp" />
 
                     <TextView
                         android:id="@+id/privacy_policy"
@@ -56,8 +56,8 @@
                         android:lineSpacingExtra="2dp"
                         android:text="@string/privacy_window_message1"
                         android:textColor="#E6000000"
-                        android:textColorLink="#0FB12C"
-                        android:textSize="14sp" />
+                        android:textColorLink="#4351AC"
+                        android:textSize="16dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -66,7 +66,7 @@
                         android:layout_marginBottom="12dp"
                         android:text="@string/privacy_window_permission_message"
                         android:textColor="#E6000000"
-                        android:textSize="14sp" />
+                        android:textSize="16dp" />
                 </LinearLayout>
 
                 <RelativeLayout style="@style/Permission_Bg">
@@ -123,6 +123,33 @@
                         />
                 </RelativeLayout>
 
+                <RelativeLayout style="@style/Permission_Bg">
+
+                    <ImageView
+                        android:id="@+id/device_icon_view"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginVertical="1dp"
+                        android:src="@drawable/privacy_device_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/device_title_view"
+                        style="@style/Permission_Title"
+                        android:layout_toRightOf="@id/device_icon_view"
+                        android:text="设备"
+                        />
+
+                    <TextView
+                        style="@style/Permission_Content"
+                        android:layout_below="@+id/device_title_view"
+                        android:layout_alignLeft="@id/device_title_view"
+                        android:text="经授权，我们会收集您的设备信息，以便判断网络是否连接，断网下先会打开本地离线化页面，以保障您的使用体验。"
+                        />
+                </RelativeLayout>
+
                 <TextView
                     android:id="@+id/privacy_policy_desc"
                     android:layout_width="wrap_content"
@@ -130,8 +157,8 @@
                     android:layout_marginVertical="6dp"
                     android:text="@string/privacy_window_message2"
                     android:textColor="#E6000000"
-                    android:textColorLink="#0FB12C"
-                    android:textSize="14sp" />
+                    android:textColorLink="#4351AC"
+                    android:textSize="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -139,7 +166,7 @@
                     android:layout_marginVertical="6dp"
                     android:text="@string/privacy_window_message3"
                     android:textColor="#E6000000"
-                    android:textSize="14sp" />
+                    android:textSize="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -147,7 +174,7 @@
                     android:layout_marginVertical="6dp"
                     android:text="@string/privacy_window_message4"
                     android:textColor="#E6000000"
-                    android:textSize="14sp" />
+                    android:textSize="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -155,7 +182,7 @@
                     android:layout_marginVertical="6dp"
                     android:text="@string/privacy_window_message5"
                     android:textColor="#E6000000"
-                    android:textSize="14sp" />
+                    android:textSize="16dp" />
 
             </LinearLayout>
         </ScrollView>
@@ -180,7 +207,7 @@
                 android:gravity="center"
                 android:text="不同意"
                 android:textColor="#E6000000"
-                android:textSize="15sp" />
+                android:textSize="17dp" />
 
             <Button
                 android:id="@+id/permission_agree_btn"
@@ -193,7 +220,7 @@
                 android:gravity="center"
                 android:text="同意"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
+                android:textSize="17dp"
                 android:textStyle="bold" />
 
         </LinearLayout>
