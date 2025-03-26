@@ -4,6 +4,7 @@
     <!-- 判断网络链接状态，用于断网加载离线化页面 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
@@ -15,6 +16,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".LDLWebViewActivity"
+            android:label="乐动力">
+        </activity>
+        <activity
+            android:name=".LLDWebViewActivity"
+            android:process=":lld_webview_process"
+            android:launchMode="singleTask"
+            android:label="乐力动"
+            android:taskAffinity=".lld_webview_process">
         </activity>
     </application>
 </manifest>
