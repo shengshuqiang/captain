@@ -68,7 +68,6 @@ public class MainShopTabView extends FrameLayout {
             this.context = mContext;
 
 //            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
-            list.add(new Item("信息二维马", R.drawable.zxing, QRActivity.class));
             Intent arActivityIntent = new Intent(context, QRActivity.class);
             arActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             list.add(new Item("信息二维马", R.drawable.zxing, arActivityIntent));

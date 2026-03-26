@@ -70,37 +70,36 @@ public final class XhsHtmlParser {
 
         ArrayList<XhsMediaItem> mediaItems = new ArrayList<>();
         String parseStrategy = requestStrategy + " · meta";
-        if (noteObject != null) {
+        String videoUrl = firstNonEmpty(ogVideo, extractVideoUrl(noteObject));
+        if (videoUrl != null && XhsNetworkPolicy.isAllowedMediaUrl(videoUrl)) {
+            mediaItems.add(new XhsMediaItem(
+                    buildMediaId(noteId, 1),
+                    XhsMediaType.VIDEO,
+                    videoUrl,
+                    ogImage,
+                    0,
+                    0,
+                    metaDuration > 0 ? metaDuration : extractVideoDuration(noteObject),
+                    guessExtension(videoUrl, XhsMediaType.VIDEO),
+                    true
+            ));
+            parseStrategy = noteObject != null ? requestStrategy + " · meta + initialState" : requestStrategy + " · meta";
+        } else if (noteObject != null) {
             mediaItems.addAll(extractImageItems(noteObject, noteId));
             parseStrategy = requestStrategy + " · meta + initialState";
         }
-        if (mediaItems.isEmpty()) {
-            String videoUrl = firstNonEmpty(ogVideo, extractVideoUrl(noteObject));
-            if (videoUrl != null && XhsNetworkPolicy.isAllowedMediaUrl(videoUrl)) {
-                mediaItems.add(new XhsMediaItem(
-                        buildMediaId(noteId, 1),
-                        XhsMediaType.VIDEO,
-                        videoUrl,
-                        ogImage,
-                        0,
-                        0,
-                        metaDuration > 0 ? metaDuration : extractVideoDuration(noteObject),
-                        guessExtension(videoUrl, XhsMediaType.VIDEO),
-                        true
-                ));
-            } else if (ogImage != null && XhsNetworkPolicy.isAllowedMediaUrl(ogImage)) {
-                mediaItems.add(new XhsMediaItem(
-                        buildMediaId(noteId, 1),
-                        XhsMediaType.IMAGE,
-                        ogImage,
-                        ogImage,
-                        0,
-                        0,
-                        0,
-                        guessExtension(ogImage, XhsMediaType.IMAGE),
-                        true
-                ));
-            }
+        if (mediaItems.isEmpty() && ogImage != null && XhsNetworkPolicy.isAllowedMediaUrl(ogImage)) {
+            mediaItems.add(new XhsMediaItem(
+                    buildMediaId(noteId, 1),
+                    XhsMediaType.IMAGE,
+                    ogImage,
+                    ogImage,
+                    0,
+                    0,
+                    0,
+                    guessExtension(ogImage, XhsMediaType.IMAGE),
+                    true
+            ));
         }
         if (mediaItems.isEmpty()) {
             throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
