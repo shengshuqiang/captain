@@ -2,11 +2,9 @@ package com.shuqiang.captain;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
-import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,19 +18,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 
-import com.captain.base.BaseActivity;
+import com.captain.base.LDLWebViewActivity;
+import com.captain.base.LLDWebViewActivity;
+import com.captain.base.WebViewActivity;
 import com.shuqiang.captain.qr.QRActivity;
 import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import captain.R;
-import devlight.io.library.ntb.NavigationTabBar;
 
 // 主页面橱窗（九宫格） Tab
 public class MainShopTabView extends FrameLayout {
@@ -73,8 +69,20 @@ public class MainShopTabView extends FrameLayout {
 
 //            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
             list.add(new Item("信息二维马", R.drawable.zxing, QRActivity.class));
-            list.add(new Item("小红书下载", R.drawable.ic_xhs_download, XhsDownloadActivity.class));
-
+            Intent arActivityIntent = new Intent(context, QRActivity.class);
+            arActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            list.add(new Item("信息二维马", R.drawable.zxing, arActivityIntent));
+            Intent ldlIntent = new Intent(context, LDLWebViewActivity.class);
+            ldlIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
+            ldlIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            list.add(new Item("乐动力", R.drawable.ledongli, ldlIntent));
+            Intent lldIntent = new Intent(context, LLDWebViewActivity.class);
+            lldIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
+            lldIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            list.add(new Item("乐力动", R.drawable.ledongli, lldIntent));
+            Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
+            xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            list.add(new Item("小红书下载", R.drawable.ic_xhs_download, xhsdActivityIntent));
 //            // 一个的话直接跳
 //            if (list.size() == 1) {
 //                Item item = list.get(0);
@@ -120,9 +128,7 @@ public class MainShopTabView extends FrameLayout {
             holder.iconImgView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(context, item.clzss);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    context.startActivity(item.intent);
                 }
             });
             return convertView;
@@ -136,12 +142,12 @@ public class MainShopTabView extends FrameLayout {
         class Item {
             String title;
             int iconRes;
-            Class clzss;
+            Intent intent;
 
-            public Item(String title, int iconRes, Class clzss) {
+            public Item(String title, int iconRes, Intent intent) {
                 this.title = title;
                 this.iconRes = iconRes;
-                this.clzss = clzss;
+                this.intent = intent;
             }
         }
 

@@ -32,8 +32,8 @@ public abstract class BasePermissionActivity extends BaseActivity {
     }
 
     /**
-     * 检查权限并拍照
-     * 调用相机前先检查权限
+     * 检查权限并读写文件
+     * 调用读写文件前先检查权限
      */
     protected void handleRequstPermissionAndReadWriteFile() {
         externalStoragePermissionHandler.handleRequestPermissionAndWork();
@@ -61,6 +61,6 @@ public abstract class BasePermissionActivity extends BaseActivity {
      * 读写文件
      */
     public void onReadWriteFile() {
-        // 有相机权限申请则重写回调
+        // 有读写文件权限申请则重写回调
     };
 }
