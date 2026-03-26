@@ -15,9 +15,13 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: "com.jfrog.bintray"
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'maven'
+
+def enablePublishPlugins = project.hasProperty("enablePublishPlugins")
+if (enablePublishPlugins) {
+    apply plugin: 'maven'
+    apply plugin: "com.jfrog.bintray"
+    apply plugin: 'com.github.dcendents.android-maven'
+}
 
 version = "1.2.5"
 
@@ -49,96 +53,98 @@ def siteUrl = 'https://github.com/DevLight-Mobile-Agency/NavigationTabBar'
 def gitUrl = 'https://github.com/DevLight-Mobile-Agency/NavigationTabBar.git'
 group = "devlight.io"
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            //noinspection GroovyAssignabilityCheck
-            project {
-                packaging 'aar'
-
-                // Add your description here
+if (enablePublishPlugins) {
+    install {
+        repositories.mavenInstaller {
+            // This generates POM.xml with proper parameters
+            pom {
                 //noinspection GroovyAssignabilityCheck
-                name 'NavigationTabBar'
-                description = 'Navigation tab bar with colorful interactions.'
-                url siteUrl
+                project {
+                    packaging 'aar'
 
-                // Set your license
-                licenses {
-                    license {
-                        //noinspection GroovyAssignabilityCheck
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'gigamole'
-                        //noinspection GroovyAssignabilityCheck
-                        name 'Basil Miller'
-                        email 'gigamole53@gmail.com'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
+                    // Add your description here
+                    //noinspection GroovyAssignabilityCheck
+                    name 'NavigationTabBar'
+                    description = 'Navigation tab bar with colorful interactions.'
                     url siteUrl
+
+                    // Set your license
+                    licenses {
+                        license {
+                            //noinspection GroovyAssignabilityCheck
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'gigamole'
+                            //noinspection GroovyAssignabilityCheck
+                            name 'Basil Miller'
+                            email 'gigamole53@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection gitUrl
+                        developerConnection gitUrl
+                        url siteUrl
+                    }
                 }
             }
         }
     }
-}
 
-task sourcesJar(type: Jar) {
-    //noinspection GroovyAssignabilityCheck
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    //noinspection GroovyAssignabilityCheck
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    //noinspection GrUnresolvedAccess
-    from javadoc.destinationDir
-}
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        // it is the name that appears in bintray when logged
-        name = "ntb"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
+    task sourcesJar(type: Jar) {
         //noinspection GroovyAssignabilityCheck
-        version {
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
-            }
+        from android.sourceSets.main.java.srcDirs
+        classifier = 'sources'
+    }
+
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        //noinspection GroovyAssignabilityCheck
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        //noinspection GrUnresolvedAccess
+        from javadoc.destinationDir
+    }
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    bintray {
+        user = properties.getProperty("bintray.user")
+        key = properties.getProperty("bintray.apikey")
+
+        configurations = ['archives']
+        pkg {
+            repo = "maven"
+            // it is the name that appears in bintray when logged
+            name = "ntb"
+            websiteUrl = siteUrl
+            vcsUrl = gitUrl
+            licenses = ["Apache-2.0"]
+            publish = true
+            //noinspection GroovyAssignabilityCheck
+            version {
+                gpg {
+                    sign = true //Determines whether to GPG sign the files. The default is false
+                    passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+                }
 //            mavenCentralSync {
 //                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
 //                user = properties.getProperty("bintray.oss.user") //OSS user token
 //                password = properties.getProperty("bintray.oss.password") //OSS user password
 //                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
 //            }
+            }
         }
     }
 }

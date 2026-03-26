@@ -2,6 +2,7 @@
 package="captain">
 
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <!--<uses-permission android:name="android.permission.USE_FINGERPRINT" />-->
 
 <application
@@ -30,11 +31,27 @@ package="captain">
     </activity>
 
     <activity
+        android:name="com.shuqiang.captain.xhs.ui.XhsDownloadActivity"
+        android:exported="true"
+        android:label="小红书下载"
+        android:launchMode="singleTop">
+        <intent-filter>
+            <action android:name="android.intent.action.SEND" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:mimeType="text/plain" />
+        </intent-filter>
+    </activity>
+
+    <activity
         android:name="com.shuqiang.captain.qr.test.QRTestActivity"
         android:exported="true"
         android:label="信息二维马测试页"
         >
     </activity>
+
+    <service
+        android:name="com.shuqiang.captain.xhs.download.XhsDownloadService"
+        android:exported="false" />
 
 </application>
 

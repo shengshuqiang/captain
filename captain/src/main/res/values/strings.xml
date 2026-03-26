@@ -11,4 +11,23 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="xhs_download_page_title">小红书下载</string>
+    <string name="xhs_download_input_hint">粘贴小红书分享文案或公开链接</string>
+    <string name="xhs_download_parse">解析</string>
+    <string name="xhs_download_paste">粘贴</string>
+    <string name="xhs_download_clear">清空</string>
+    <string name="xhs_download_idle_status">粘贴公开分享文案后开始解析，支持直链和短链。</string>
+    <string name="xhs_download_parsing_status">正在解析网页内容，请稍候…</string>
+    <string name="xhs_download_save_default">保存 0 项</string>
+    <string name="xhs_download_open_album">打开相册</string>
+    <string name="xhs_download_select_all">全选</string>
+    <string name="xhs_download_clear_selection">清空选择</string>
+    <string name="xhs_download_continue">继续解析下一条</string>
+    <string name="xhs_download_save_done">保存完成</string>
+    <string name="xhs_download_video_badge">视频</string>
+    <string name="xhs_download_image_badge">图片</string>
+    <string name="xhs_download_notification_channel">小红书下载</string>
+    <string name="xhs_download_notification_title">正在保存小红书资源</string>
+    <string name="xhs_download_notification_done">保存已完成</string>
+    <string name="xhs_download_notification_failed">保存未完成</string>
 </resources>

@@ -25,6 +25,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.captain.base.BaseActivity;
 import com.shuqiang.captain.qr.QRActivity;
+import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,7 @@ public class MainShopTabView extends FrameLayout {
 
 //            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
             list.add(new Item("信息二维马", R.drawable.zxing, QRActivity.class));
+            list.add(new Item("小红书下载", R.drawable.ic_xhs_download, XhsDownloadActivity.class));
 
 //            // 一个的话直接跳
 //            if (list.size() == 1) {

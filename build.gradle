@@ -6,6 +6,10 @@ buildscript {
         google()
         mavenCentral()
         maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+        jcenter()
+        maven {
             url 'https://maven.google.com/'
             name 'Google'
         }
@@ -19,9 +23,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.2'
-        // 首页 4 tab 需要
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -32,6 +33,10 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+        jcenter()
         maven {
             url 'https://maven.google.com/'
             name 'Google'

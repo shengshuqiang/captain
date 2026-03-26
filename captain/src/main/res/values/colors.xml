@@ -3,4 +3,15 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="xhsPageBackground">#F4F6FB</color>
+    <color name="xhsSurface">#FFFFFFFF</color>
+    <color name="xhsTextPrimary">#182230</color>
+    <color name="xhsTextSecondary">#65758B</color>
+    <color name="xhsDivider">#E6EAF2</color>
+    <color name="xhsPrimary">#E64A5B</color>
+    <color name="xhsPrimaryDark">#C83A4A</color>
+    <color name="xhsSelectionMask">#66213846</color>
+    <color name="xhsSuccess">#1C8E57</color>
+    <color name="xhsError">#D64545</color>
+    <color name="xhsWarning">#B26A00</color>
 </resources>
