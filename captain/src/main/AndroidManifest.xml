@@ -44,6 +44,11 @@ package="captain">
     </activity>
 
     <activity
+        android:name="com.shuqiang.captain.xhs.ui.XhsPreviewActivity"
+        android:exported="false"
+        android:label="资源预览" />
+
+    <activity
         android:name="com.shuqiang.captain.qr.test.QRTestActivity"
         android:exported="true"
         android:label="信息二维马测试页"

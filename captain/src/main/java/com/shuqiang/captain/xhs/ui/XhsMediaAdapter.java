@@ -23,15 +23,17 @@ import captain.R;
  * 解析结果选择列表，只负责展示和选中态切换。
  */
 public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaViewHolder> {
-    public interface OnSelectionChangedListener {
+    public interface OnMediaActionListener {
         void onSelectionChanged();
+
+        void onPreviewRequested(int position);
     }
 
     private final ArrayList<XhsMediaItem> items = new ArrayList<>();
-    private final OnSelectionChangedListener onSelectionChangedListener;
+    private final OnMediaActionListener onMediaActionListener;
 
-    public XhsMediaAdapter(OnSelectionChangedListener onSelectionChangedListener) {
-        this.onSelectionChangedListener = onSelectionChangedListener;
+    public XhsMediaAdapter(OnMediaActionListener onMediaActionListener) {
+        this.onMediaActionListener = onMediaActionListener;
     }
 
     public void setItems(List<XhsMediaItem> mediaItems) {
@@ -71,6 +73,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
         private final TextView mediaType;
         private final TextView mediaDuration;
         private final TextView mediaIndex;
+        private final TextView mediaPreview;
         private final TextView mediaSelected;
 
         MediaViewHolder(@NonNull View itemView) {
@@ -81,6 +84,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             mediaType = itemView.findViewById(R.id.media_type);
             mediaDuration = itemView.findViewById(R.id.media_duration);
             mediaIndex = itemView.findViewById(R.id.media_index);
+            mediaPreview = itemView.findViewById(R.id.media_preview);
             mediaSelected = itemView.findViewById(R.id.media_selected);
         }
 
@@ -99,12 +103,20 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             mediaDuration.setText(item.getDisplayDuration());
             mediaDuration.setVisibility(item.getMediaType() == XhsMediaType.VIDEO
                     && !item.getDisplayDuration().isEmpty() ? View.VISIBLE : View.GONE);
+            mediaPreview.setText(item.getMediaType() == XhsMediaType.VIDEO
+                    ? mediaCover.getContext().getString(R.string.xhs_download_play)
+                    : mediaCover.getContext().getString(R.string.xhs_download_preview));
 
-            mediaSelected.setVisibility(item.isSelected() ? View.VISIBLE : View.GONE);
             selectedMask.setVisibility(item.isSelected() ? View.VISIBLE : View.GONE);
             mediaCard.setBackgroundResource(item.isSelected()
                     ? R.drawable.bg_xhs_media_card_selected
                     : R.drawable.bg_xhs_media_card);
+            mediaSelected.setText(item.isSelected()
+                    ? mediaSelected.getContext().getString(R.string.xhs_download_selected)
+                    : mediaSelected.getContext().getString(R.string.xhs_download_select));
+            mediaSelected.setBackgroundResource(item.isSelected()
+                    ? R.drawable.bg_xhs_selected_badge
+                    : R.drawable.bg_xhs_selection_idle);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -113,10 +125,22 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
                     if (adapterPosition == RecyclerView.NO_POSITION) {
                         return;
                     }
+                    if (onMediaActionListener != null) {
+                        onMediaActionListener.onPreviewRequested(adapterPosition);
+                    }
+                }
+            });
+            mediaSelected.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int adapterPosition = getBindingAdapterPosition();
+                    if (adapterPosition == RecyclerView.NO_POSITION) {
+                        return;
+                    }
                     item.setSelected(!item.isSelected());
                     notifyItemChanged(adapterPosition);
-                    if (onSelectionChangedListener != null) {
-                        onSelectionChangedListener.onSelectionChanged();
+                    if (onMediaActionListener != null) {
+                        onMediaActionListener.onSelectionChanged();
                     }
                 }
             });

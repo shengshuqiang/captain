@@ -137,10 +137,15 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         saveButton = findViewById(R.id.save_button);
         mediaListView = findViewById(R.id.media_list);
 
-        mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnSelectionChangedListener() {
+        mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
             @Override
             public void onSelectionChanged() {
                 refreshSelectionSummary();
+            }
+
+            @Override
+            public void onPreviewRequested(int position) {
+                openPreview(position);
             }
         });
         mediaListView.setLayoutManager(new GridLayoutManager(this, 1));
@@ -186,6 +191,12 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             @Override
             public void onClick(View view) {
                 openSavedMedia();
+            }
+        });
+        coverImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openPreview(0);
             }
         });
     }
@@ -467,6 +478,18 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         } catch (Exception e) {
             Toast.makeText(this, "未找到可打开的相册应用", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void openPreview(int position) {
+        if (currentParseResult == null || currentParseResult.getMediaItems() == null
+                || currentParseResult.getMediaItems().isEmpty()) {
+            return;
+        }
+        if (position < 0 || position >= currentParseResult.getMediaItems().size()) {
+            position = 0;
+        }
+        startActivity(XhsPreviewActivity.buildIntent(this,
+                new java.util.ArrayList<>(currentParseResult.getMediaItems()), position));
     }
 
     @Override

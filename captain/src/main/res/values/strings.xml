@@ -26,8 +26,15 @@
     <string name="xhs_download_save_done">保存完成</string>
     <string name="xhs_download_video_badge">视频</string>
     <string name="xhs_download_image_badge">图片</string>
+    <string name="xhs_download_preview">预览</string>
+    <string name="xhs_download_play">播放</string>
+    <string name="xhs_download_select">选择</string>
+    <string name="xhs_download_selected">已选</string>
     <string name="xhs_download_notification_channel">小红书下载</string>
     <string name="xhs_download_notification_title">正在保存小红书资源</string>
     <string name="xhs_download_notification_done">保存已完成</string>
     <string name="xhs_download_notification_failed">保存未完成</string>
+    <string name="xhs_preview_title">资源预览</string>
+    <string name="xhs_preview_close">关闭</string>
+    <string name="xhs_preview_indicator">%1$d / %2$d</string>
 </resources>

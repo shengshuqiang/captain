@@ -22,6 +22,21 @@
         android:visibility="gone" />
 
     <TextView
+        android:id="@+id/media_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_xhs_preview_chip"
+        android:paddingLeft="12dp"
+        android:paddingTop="6dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="6dp"
+        android:textColor="@android:color/white"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        tools:text="预览" />
+
+    <TextView
         android:id="@+id/media_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,15 +89,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|right"
         android:layout_margin="10dp"
-        android:background="@drawable/bg_xhs_selected_badge"
+        android:background="@drawable/bg_xhs_selection_idle"
         android:paddingLeft="8dp"
         android:paddingTop="4dp"
         android:paddingRight="8dp"
         android:paddingBottom="4dp"
-        android:text="已选"
+        android:text="选择"
         android:textColor="@android:color/white"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:visibility="gone"
         tools:visibility="visible" />
 </FrameLayout>
