@@ -1,8 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ============================================ -->
+    <!-- 船长App水果色视觉Token - 品牌色 -->
+    <!-- ============================================ -->
+    <color name="captain_brand_primary">#FF8A8F</color>
+    <color name="captain_brand_accent">#FFB56B</color>
+    <color name="captain_brand_support_success">#78C98C</color>
+
+    <!-- ============================================ -->
+    <!-- 船长App水果色视觉Token - 页面与容器色 -->
+    <!-- ============================================ -->
+    <color name="captain_surface_page">#FFF8F6</color>
+    <color name="captain_surface_hero">#FFE7E3</color>
+    <color name="captain_surface_card">#FFFFFF</color>
+    <color name="captain_surface_card_soft">#FFFDFC</color>
+
+    <!-- ============================================ -->
+    <!-- 船长App水果色视觉Token - 文字色 -->
+    <!-- ============================================ -->
+    <color name="captain_text_primary">#2A2233</color>
+    <color name="captain_text_secondary">#6D6678</color>
+    <color name="captain_text_tertiary">#A7A1AE</color>
+    <color name="captain_text_on_brand">#FFFFFF</color>
+
+    <!-- ============================================ -->
+    <!-- 船长App水果色视觉Token - 反馈与边框色 -->
+    <!-- ============================================ -->
+    <color name="captain_border_soft">#F1E6E3</color>
+    <color name="captain_feedback_error">#E45B5B</color>
+    <color name="captain_feedback_warning">#E8A044</color>
+    <color name="captain_feedback_success">#49A96A</color>
+
+    <!-- ============================================ -->
+    <!-- 旧版颜色 - 保留用于兼容性，逐步迁移 -->
+    <!-- ============================================ -->
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!-- ============================================ -->
+    <!-- 小红书功能模块颜色 - 独立命名空间 -->
+    <!-- ============================================ -->
     <color name="xhsPageBackground">#F4F6FB</color>
     <color name="xhsSurface">#FFFFFFFF</color>
     <color name="xhsTextPrimary">#182230</color>

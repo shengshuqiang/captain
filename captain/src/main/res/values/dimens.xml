@@ -1,6 +1,47 @@
 <resources>
+    <!-- ============================================ -->
+    <!-- 船长App视觉Token - 字号层级 -->
+    <!-- ============================================ -->
+    <dimen name="captain_text_hero">22sp</dimen>
+    <dimen name="captain_text_page_title">20sp</dimen>
+    <dimen name="captain_text_card_title">16sp</dimen>
+    <dimen name="captain_text_body">14sp</dimen>
+    <dimen name="captain_text_caption">12sp</dimen>
+    <dimen name="captain_text_tab">12sp</dimen>
+
+    <!-- ============================================ -->
+    <!-- 船长App视觉Token - 圆角规范 -->
+    <!-- ============================================ -->
+    <dimen name="captain_radius_card_large">20dp</dimen>
+    <dimen name="captain_radius_card">16dp</dimen>
+    <dimen name="captain_radius_button">14dp</dimen>
+    <dimen name="captain_radius_badge">12dp</dimen>
+    <dimen name="captain_radius_avatar">24dp</dimen>
+
+    <!-- ============================================ -->
+    <!-- 船长App视觉Token - 间距规范 -->
+    <!-- ============================================ -->
+    <dimen name="captain_space_page_horizontal">20dp</dimen>
+    <dimen name="captain_space_hero_inner">24dp</dimen>
+    <dimen name="captain_space_card_inner">16dp</dimen>
+    <dimen name="captain_space_block">24dp</dimen>
+    <dimen name="captain_space_card_gap">12dp</dimen>
+    <dimen name="captain_space_inline">8dp</dimen>
+
+    <!-- ============================================ -->
+    <!-- 船长App视觉Token - 尺寸底线 -->
+    <!-- ============================================ -->
+    <dimen name="captain_size_tab_height">66dp</dimen>
+    <dimen name="captain_size_tab_icon">24dp</dimen>
+    <dimen name="captain_size_button_height">44dp</dimen>
+    <dimen name="captain_size_list_item_height">56dp</dimen>
+    <dimen name="captain_size_avatar">72dp</dimen>
+    <dimen name="captain_size_badge">12dp</dimen>
+
+    <!-- ============================================ -->
+    <!-- 旧版尺寸 - 保留用于兼容性 -->
+    <!-- ============================================ -->
     <dimen name="fab_margin">20dp</dimen>
-    <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
