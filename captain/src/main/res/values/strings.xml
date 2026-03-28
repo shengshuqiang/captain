@@ -51,4 +51,10 @@
     <string name="xhs_preview_save_permission_denied">未授予存储权限，无法保存资源</string>
     <string name="xhs_preview_open_pdf_failed">未找到可打开 PDF 的应用</string>
     <string name="xhs_preview_indicator">%1$d / %2$d</string>
+
+    <!-- 船长App主壳层UI -->
+    <string name="captain_hero_title">船长</string>
+    <string name="captain_hero_subtitle">把麻烦的小事，交给船长</string>
+    <string name="grid_item_icon_description">功能图标</string>
+    <string name="feature_icon">功能图标</string>
 </resources>

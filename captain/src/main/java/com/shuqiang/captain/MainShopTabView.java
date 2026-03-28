@@ -54,7 +54,7 @@ public class MainShopTabView extends FrameLayout {
     }
 
     public void init(Context context) {
-        inflate(context, R.layout.main_shop_tab_layout, this);
+        inflate(context, R.layout.main_shop_tab_layout_new, this);
         ((GridView) findViewById(R.id.gridview)).setAdapter(new GridAdapter(context));
     }
 
@@ -113,7 +113,7 @@ public class MainShopTabView extends FrameLayout {
                 convertView = LayoutInflater.from(context).inflate(
                         R.layout.grid_item, parent, false);
                 holder.titleTxtView = (TextView) convertView.findViewById(R.id.title);
-                holder.titleTxtView.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                // 字体样式已在 XML 中通过 style 定义，无需在代码中设置
                 holder.iconImgView = (ImageView) convertView.findViewById(R.id.icon);
                 convertView.setTag(holder);
             } else {
@@ -123,6 +123,7 @@ public class MainShopTabView extends FrameLayout {
             final Item item = list.get(position);
             holder.titleTxtView.setText(item.title);
             holder.iconImgView.setImageResource(item.iconRes);
+            // 字体样式已在 XML 中通过 style 定义，无需在代码中设置
             holder.iconImgView.setOnTouchListener(onTouchListener);
             holder.iconImgView.setOnClickListener(new View.OnClickListener() {
                 @Override
