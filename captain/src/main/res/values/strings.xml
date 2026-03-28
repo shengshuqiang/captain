@@ -55,6 +55,8 @@
     <!-- 船长App主壳层UI -->
     <string name="captain_hero_title">船长</string>
     <string name="captain_hero_subtitle">把麻烦的小事，交给船长</string>
+    <string name="captain_me_intro">我是盛书强，让手机帮忙干一些力所能及的小事。您可以通过添加微信好友「shengshuqiang01」或者发邮件「shengssu@mail.ustc.edu.cn」与我们联系。</string>
     <string name="grid_item_icon_description">功能图标</string>
     <string name="feature_icon">功能图标</string>
+    <string name="captain_privacy_policy_url">https://www.example.com/privacy</string>
 </resources>

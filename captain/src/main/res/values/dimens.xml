@@ -37,6 +37,8 @@
     <dimen name="captain_size_list_item_height">56dp</dimen>
     <dimen name="captain_size_avatar">72dp</dimen>
     <dimen name="captain_size_badge">12dp</dimen>
+    <dimen name="captain_size_icon_small">16dp</dimen>
+    <dimen name="captain_space_badge_padding">4dp</dimen>
 
     <!-- ============================================ -->
     <!-- 旧版尺寸 - 保留用于兼容性 -->

@@ -1,29 +1,19 @@
 package com.shuqiang.captain;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.captain.base.DividerItemDecoration;
 import com.captain.base.Utils;
 import com.captain.base.WebViewActivity;
 import captain.R;
@@ -56,9 +46,8 @@ public class MeTabView extends FrameLayout {
     }
 
     public void init(Context context) {
-//        Log.d("SSU", "init");
-        inflate(context, R.layout.me_tab_layout, this);
-//        版本号
+        inflate(context, R.layout.me_tab_layout_new, this);
+        // 版本号
         ((TextView)findViewById(R.id.app_version)).setText("V" + Utils.getAppVersionName(context));
 
         RecyclerView recyclerView = findViewById(R.id.list_view);
@@ -66,22 +55,12 @@ public class MeTabView extends FrameLayout {
         recyclerView.setAdapter(new RecyclerView.Adapter<ViewHolder>() {
             @Override
             public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-                Log.d("SSU", "onCreateViewHolder");
-                TextView itemTxtView = new TextView(context);
-                int paddingDP = Utils.dip2px(context, 20);
-                itemTxtView.setPadding(paddingDP, paddingDP, paddingDP, paddingDP);
-                itemTxtView.setLineSpacing(30,1);
-                itemTxtView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                itemTxtView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.right_arrow_forward, 0);
-                itemTxtView.setLayoutParams(new ViewGroup.LayoutParams(MATCH_PARENT, Utils.dip2px(context, 80)));
-                itemTxtView.setGravity(Gravity.CENTER_VERTICAL);
-                itemTxtView.setBackgroundColor(Color.WHITE);
-                return new ViewHolder(itemTxtView);
+                View itemView = LayoutInflater.from(context).inflate(R.layout.me_list_item, parent, false);
+                return new ViewHolder(itemView);
             }
 
             @Override
             public void onBindViewHolder(final ViewHolder holder, final int position) {
-                Log.d("SSU", "onBindViewHolder" + ITEMS[position] + ", " + position);
                 holder.setItemName(ITEMS[position]);
                 switch (ITEMS[position]) {
                     case PRIVACY_POLICY_ITEM:
@@ -102,18 +81,24 @@ public class MeTabView extends FrameLayout {
 
             @Override
             public int getItemCount() {
-                Log.d("SSU", "getItemCount" + ITEMS.length);
                 return ITEMS.length;
             }
         });
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        // 添加卡片间距装饰器
+        int cardGap = context.getResources().getDimensionPixelSize(R.dimen.captain_space_card_gap);
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                outRect.bottom = cardGap;
+            }
+        });
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView txtView;
-        public ViewHolder(TextView txtView) {
-            super(txtView);
-            this.txtView = txtView;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            this.txtView = itemView.findViewById(R.id.item_text);
         }
 
         public void setItemName(String name) {
@@ -121,7 +106,7 @@ public class MeTabView extends FrameLayout {
         }
 
         public void setOnClickListener(OnClickListener onClickListener) {
-            this.txtView.setOnClickListener(onClickListener);
+            this.itemView.setOnClickListener(onClickListener);
         }
     }
 }

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/captain_surface_page"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/captain_space_page_horizontal"
+        android:paddingEnd="@dimen/captain_space_page_horizontal"
+        android:paddingTop="@dimen/captain_space_block"
+        android:paddingBottom="@dimen/captain_space_block">
+
+        <!-- ============================================ -->
+        <!-- 品牌卡片 -->
+        <!-- ============================================ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/bg_card_large"
+            android:padding="@dimen/captain_space_card_inner">
+
+            <ImageView
+                android:layout_width="@dimen/captain_size_avatar"
+                android:layout_height="@dimen/captain_size_avatar"
+                android:src="@drawable/captain"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:id="@+id/app_name"
+                style="@style/CaptainText.PageTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:text="@string/app_name" />
+
+            <TextView
+                android:id="@+id/app_version"
+                style="@style/CaptainText.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:paddingStart="@dimen/captain_space_inline"
+                android:paddingEnd="@dimen/captain_space_inline"
+                android:paddingTop="@dimen/captain_space_badge_padding"
+                android:paddingBottom="@dimen/captain_space_badge_padding"
+                android:background="@drawable/bg_badge"
+                android:textColor="@color/captain_text_on_brand" />
+
+        </LinearLayout>
+
+        <!-- ============================================ -->
+        <!-- 简介卡片 -->
+        <!-- ============================================ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_block"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="@dimen/captain_space_card_inner">
+
+            <TextView
+                android:id="@+id/others"
+                style="@style/CaptainText.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/captain_me_intro"
+                android:lineSpacingMultiplier="1.5" />
+
+        </LinearLayout>
+
+        <!-- ============================================ -->
+        <!-- 功能列表 -->
+        <!-- ============================================ -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_block"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
