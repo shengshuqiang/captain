@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:lineSpacingExtra="2dp"
-                    android:text="复制分享文案或从小红书直接分享给船长，先解析预览，再自行勾选保存。"
+                    android:text="@string/xhs_download_intro"
                     android:textColor="@color/xhsTextSecondary"
                     android:textSize="14sp" />
 

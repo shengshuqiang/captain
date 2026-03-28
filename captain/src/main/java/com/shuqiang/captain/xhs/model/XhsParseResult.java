@@ -55,7 +55,7 @@ public class XhsParseResult implements Serializable {
     }
 
     public String getDisplayTitle() {
-        return title == null || title.trim().isEmpty() ? "小红书公开笔记" : title.trim();
+        return title == null || title.trim().isEmpty() ? "网页资源" : title.trim();
     }
 
     public String getCoverUrl() {

@@ -34,12 +34,14 @@ package="captain">
     <activity
         android:name="com.shuqiang.captain.xhs.ui.XhsDownloadActivity"
         android:exported="true"
-        android:label="小红书下载"
+        android:label="@string/xhs_download_page_title"
         android:launchMode="singleTop">
         <intent-filter>
             <action android:name="android.intent.action.SEND" />
+            <action android:name="android.intent.action.SEND_MULTIPLE" />
             <category android:name="android.intent.category.DEFAULT" />
             <data android:mimeType="text/plain" />
+            <data android:mimeType="text/*" />
         </intent-filter>
     </activity>
 

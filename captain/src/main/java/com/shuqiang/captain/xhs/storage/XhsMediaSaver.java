@@ -31,8 +31,9 @@ import okhttp3.Response;
  * 统一封装图片/视频落盘逻辑，兼容 Android 10 前后的存储模型差异。
  */
 public class XhsMediaSaver {
-    private static final String IMAGE_RELATIVE_PATH = Environment.DIRECTORY_PICTURES + "/Captain/Xiaohongshu/";
-    private static final String VIDEO_RELATIVE_PATH = Environment.DIRECTORY_MOVIES + "/Captain/Xiaohongshu/";
+    private static final String IMAGE_RELATIVE_PATH = Environment.DIRECTORY_PICTURES + "/Captain/WebSniffer/";
+    private static final String VIDEO_RELATIVE_PATH = Environment.DIRECTORY_MOVIES + "/Captain/WebSniffer/";
+    private static final String FILE_RELATIVE_PATH = Environment.DIRECTORY_DOWNLOADS + "/Captain/WebSniffer/";
 
     public XhsSaveItemResult save(Context context, XhsParseResult parseResult, XhsMediaItem mediaItem, int selectedIndex)
             throws IOException {
@@ -89,9 +90,13 @@ public class XhsMediaSaver {
     private XhsSaveItemResult saveToPublicDirectory(Context context, XhsMediaItem mediaItem, String displayName)
             throws IOException {
         File publicRoot = Environment.getExternalStoragePublicDirectory(
-                mediaItem.getMediaType() == XhsMediaType.VIDEO ? Environment.DIRECTORY_MOVIES : Environment.DIRECTORY_PICTURES
+                mediaItem.getMediaType() == XhsMediaType.VIDEO
+                        ? Environment.DIRECTORY_MOVIES
+                        : (mediaItem.getMediaType() == XhsMediaType.PDF
+                        ? Environment.DIRECTORY_DOWNLOADS
+                        : Environment.DIRECTORY_PICTURES)
         );
-        File targetDir = new File(publicRoot, "Captain/Xiaohongshu");
+        File targetDir = new File(publicRoot, "Captain/WebSniffer");
         if (!targetDir.exists() && !targetDir.mkdirs()) {
             throw new IOException("mkdirs failed");
         }
@@ -125,9 +130,13 @@ public class XhsMediaSaver {
     }
 
     private Uri getCollectionUri(XhsMediaType mediaType) {
-        return mediaType == XhsMediaType.VIDEO
-                ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        if (mediaType == XhsMediaType.VIDEO) {
+            return MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        }
+        if (mediaType == XhsMediaType.PDF) {
+            return MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+        }
+        return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
     }
 
     private Uri queryExistingUri(ContentResolver resolver, XhsMediaType mediaType, String displayName, String relativePath) {
@@ -145,11 +154,20 @@ public class XhsMediaSaver {
     }
 
     private String getRelativePath(XhsMediaType mediaType) {
-        return mediaType == XhsMediaType.VIDEO ? VIDEO_RELATIVE_PATH : IMAGE_RELATIVE_PATH;
+        if (mediaType == XhsMediaType.VIDEO) {
+            return VIDEO_RELATIVE_PATH;
+        }
+        if (mediaType == XhsMediaType.PDF) {
+            return FILE_RELATIVE_PATH;
+        }
+        return IMAGE_RELATIVE_PATH;
     }
 
     private String buildMimeType(XhsMediaItem mediaItem) {
         String extension = mediaItem.getFileExtension() == null ? "" : mediaItem.getFileExtension().toLowerCase();
+        if (mediaItem.getMediaType() == XhsMediaType.PDF) {
+            return "application/pdf";
+        }
         if (mediaItem.getMediaType() == XhsMediaType.VIDEO) {
             return "video/" + ("m3u8".equals(extension) ? "mp4" : extension);
         }
@@ -162,9 +180,11 @@ public class XhsMediaSaver {
     private String buildDisplayName(String noteId, int selectedIndex, XhsMediaItem mediaItem) {
         String fileExtension = mediaItem.getFileExtension();
         if (fileExtension == null || fileExtension.isEmpty()) {
-            fileExtension = mediaItem.getMediaType() == XhsMediaType.VIDEO ? "mp4" : "jpg";
+            fileExtension = mediaItem.getMediaType() == XhsMediaType.VIDEO
+                    ? "mp4"
+                    : (mediaItem.getMediaType() == XhsMediaType.PDF ? "pdf" : "jpg");
         }
-        return "xhs_" + noteId + "_" + selectedIndex + "." + fileExtension;
+        return "captain_" + noteId + "_" + selectedIndex + "." + fileExtension;
     }
 
     private void copyStream(InputStream inputStream, OutputStream outputStream) throws IOException {

@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Locale;
 
 /**
- * 下载页只允许访问小红书及其媒体白名单域名，避免被任意链接利用。
+ * 页面抓取仍保留小红书直连判断，媒体下载放宽到通用 http/https 资源。
  */
 public final class XhsNetworkPolicy {
     private static final String[] PAGE_HOST_SUFFIXES = {
@@ -27,7 +27,15 @@ public final class XhsNetworkPolicy {
     }
 
     public static boolean isAllowedMediaUrl(String url) {
-        return isAllowedUrl(url, MEDIA_HOST_SUFFIXES);
+        try {
+            URI uri = new URI(forceHttps(url));
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            return host != null && scheme != null
+                    && ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme));
+        } catch (URISyntaxException ignored) {
+            return false;
+        }
     }
 
     public static String forceHttps(String url) {

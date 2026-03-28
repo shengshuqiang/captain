@@ -184,7 +184,7 @@ public class XhsDownloadService extends Service {
                 getString(R.string.xhs_download_notification_channel),
                 NotificationManager.IMPORTANCE_LOW
         );
-        channel.setDescription("小红书公开笔记保存进度");
+        channel.setDescription("网页资源保存进度");
         notificationManager.createNotificationChannel(channel);
     }
 

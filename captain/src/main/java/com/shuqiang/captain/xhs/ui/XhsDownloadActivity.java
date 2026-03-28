@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -85,6 +87,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private XhsMediaAdapter mediaAdapter;
     private String lastSavedUri;
     private boolean autoParsePending;
+    private boolean clipboardPromptHandled;
 
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
@@ -205,15 +208,46 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         if (intent == null) {
             return;
         }
-        String incomingText = intent.getStringExtra(EXTRA_INPUT_TEXT);
-        if (TextUtils.isEmpty(incomingText) && Intent.ACTION_SEND.equals(intent.getAction())) {
-            incomingText = intent.getStringExtra(Intent.EXTRA_TEXT);
-        }
+        String incomingText = extractIncomingText(intent);
         if (!TextUtils.isEmpty(incomingText)) {
             inputView.setText(incomingText);
             inputView.setSelection(incomingText.length());
             autoParsePending = allowAutoParse;
         }
+    }
+
+    /**
+     * 分享入口优先聚合文本和剪贴板内容，兼容不同 App 的发送实现差异。
+     */
+    private String extractIncomingText(Intent intent) {
+        String incomingText = intent.getStringExtra(EXTRA_INPUT_TEXT);
+        if (!TextUtils.isEmpty(incomingText)) {
+            return incomingText;
+        }
+        String action = intent.getAction();
+        if (!Intent.ACTION_SEND.equals(action) && !Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            return null;
+        }
+        CharSequence extraText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
+        if (!TextUtils.isEmpty(extraText)) {
+            return extraText.toString();
+        }
+        ClipData clipData = intent.getClipData();
+        if (clipData == null || clipData.getItemCount() == 0) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < clipData.getItemCount(); i++) {
+            CharSequence itemText = clipData.getItemAt(i).coerceToText(this);
+            if (TextUtils.isEmpty(itemText)) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append('\n');
+            }
+            builder.append(itemText);
+        }
+        return builder.length() == 0 ? null : builder.toString();
     }
 
     @Override
@@ -228,6 +262,8 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                     startParse(true);
                 }
             });
+        } else {
+            maybePromptClipboardParse();
         }
     }
 
@@ -257,6 +293,51 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         inputView.setSelection(text.length());
     }
 
+    private void maybePromptClipboardParse() {
+        if (clipboardPromptHandled || !TextUtils.isEmpty(inputView.getText())) {
+            return;
+        }
+        final String clipboardText = readClipboardText();
+        if (TextUtils.isEmpty(clipboardText) || extractUrlFromText(clipboardText) == null) {
+            return;
+        }
+        clipboardPromptHandled = true;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.xhs_download_clipboard_title)
+                .setMessage(R.string.xhs_download_clipboard_message)
+                .setPositiveButton(R.string.xhs_download_clipboard_parse, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        inputView.setText(clipboardText);
+                        inputView.setSelection(clipboardText.length());
+                        startParse(true);
+                    }
+                })
+                .setNegativeButton(R.string.xhs_download_clipboard_ignore, null)
+                .show();
+    }
+
+    private String readClipboardText() {
+        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboardManager == null || !clipboardManager.hasPrimaryClip()) {
+            return null;
+        }
+        ClipData clipData = clipboardManager.getPrimaryClip();
+        if (clipData == null || clipData.getItemCount() == 0) {
+            return null;
+        }
+        CharSequence text = clipData.getItemAt(0).coerceToText(this);
+        return TextUtils.isEmpty(text) ? null : text.toString();
+    }
+
+    private String extractUrlFromText(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return null;
+        }
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(https?://[^\\s]+)").matcher(text);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
     private void clearCurrentContent() {
         inputView.setText("");
         currentParseResult = null;
@@ -274,7 +355,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         }
         final String rawInput = inputView.getText().toString().trim();
         if (rawInput.isEmpty()) {
-            Toast.makeText(this, "请先粘贴小红书分享文案", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "请先粘贴网页分享文案或链接", Toast.LENGTH_SHORT).show();
             return;
         }
         setUiState(UiState.PARSING, getString(R.string.xhs_download_parsing_status));
@@ -318,17 +399,23 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         resultContainer.setVisibility(View.VISIBLE);
         metaTypeView.setText(parseResult.getPrimaryMediaType().getDisplayName() + " · " + parseResult.getMediaCount() + " 项");
         metaTitleView.setText(parseResult.getDisplayTitle());
-        metaAuthorView.setText("作者：" + (TextUtils.isEmpty(parseResult.getAuthorName()) ? "未知" : parseResult.getAuthorName()));
+        metaAuthorView.setText("来源：" + (TextUtils.isEmpty(parseResult.getAuthorName()) ? "未知站点" : parseResult.getAuthorName()));
         metaSummaryView.setText("来源：" + parseResult.getParseStrategy());
-        Glide.with(this)
-                .load(parseResult.getCoverUrl())
-                .into(coverImageView);
+        if (parseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
+            coverImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            coverImageView.setImageResource(R.drawable.ic_file_save);
+        } else {
+            coverImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            Glide.with(this)
+                    .load(parseResult.getCoverUrl())
+                    .into(coverImageView);
+        }
 
         int spanCount = parseResult.getPrimaryMediaType() == XhsMediaType.VIDEO ? 1 : 3;
         mediaListView.setLayoutManager(new GridLayoutManager(this, spanCount));
         mediaAdapter.setItems(parseResult.getMediaItems());
         refreshSelectionSummary();
-        setUiState(UiState.PARSE_SUCCESS, "解析完成，可勾选后保存到系统相册。");
+        setUiState(UiState.PARSE_SUCCESS, "解析完成，可勾选后保存图片、视频或 PDF。");
     }
 
     private void applyParseError(XhsParserException parserException) {
@@ -458,9 +545,12 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 Uri uri = Uri.parse(lastSavedUri);
-                String mimeType = currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.VIDEO
-                        ? "video/*"
-                        : "image/*";
+                String mimeType = "image/*";
+                if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.VIDEO) {
+                    mimeType = "video/*";
+                } else if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
+                    mimeType = "application/pdf";
+                }
                 intent.setDataAndType(uri, mimeType);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
@@ -470,6 +560,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             }
         }
         try {
+            if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
+                Toast.makeText(this, "请通过上方已保存资源直接打开 PDF", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent fallbackIntent = new Intent(Intent.ACTION_VIEW,
                     currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.VIDEO
                             ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -488,8 +582,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         if (position < 0 || position >= currentParseResult.getMediaItems().size()) {
             position = 0;
         }
-        startActivity(XhsPreviewActivity.buildIntent(this,
-                new java.util.ArrayList<>(currentParseResult.getMediaItems()), position));
+        startActivity(XhsPreviewActivity.buildIntent(this, currentParseResult, position));
     }
 
     @Override

@@ -16,24 +16,46 @@ import okhttp3.Response;
  */
 public class XhsParseRepository {
     private static final String TAG = "XhsParseRepo";
+    private enum ParseRoute {
+        XHS,
+        GENERIC
+    }
 
     public XhsParseResult parse(String rawText, String entrySource) throws XhsParserException {
         long startTime = System.currentTimeMillis();
-        XhsParseInput parseInput = XhsInputParser.parse(rawText, entrySource);
-        String linkType = parseInput.isShortLink() ? "short_link" : "direct_link";
-        String finalUrl = parseInput.isShortLink()
-                ? XhsLinkResolver.resolveFinalUrl(parseInput.getExtractedUrl())
-                : parseInput.getExtractedUrl();
-        if (!XhsNetworkPolicy.isAllowedPageUrl(finalUrl)) {
-            throw new XhsParserException(XhsParseError.INVALID_INPUT);
+        XhsParseInput parseInput = GenericWebInputParser.parse(rawText, entrySource);
+        ParseRoute parseRoute = resolveRoute(parseInput.getExtractedUrl());
+        String finalUrl;
+        String linkType;
+        PageFetchResult pageFetchResult;
+        XhsParseResult parseResult;
+        if (parseRoute == ParseRoute.XHS) {
+            XhsParseInput xhsParseInput = XhsInputParser.parse(rawText, entrySource);
+            linkType = xhsParseInput.isShortLink() ? "short_link" : "direct_link";
+            finalUrl = xhsParseInput.isShortLink()
+                    ? XhsLinkResolver.resolveFinalUrl(xhsParseInput.getExtractedUrl())
+                    : xhsParseInput.getExtractedUrl();
+            if (!XhsNetworkPolicy.isAllowedPageUrl(finalUrl)) {
+                throw new XhsParserException(XhsParseError.INVALID_INPUT);
+            }
+            pageFetchResult = fetchPage(finalUrl);
+            parseResult = XhsHtmlParser.parse(
+                    pageFetchResult.html,
+                    finalUrl,
+                    xhsParseInput.getEntrySource(),
+                    pageFetchResult.strategy
+            );
+        } else {
+            finalUrl = parseInput.getExtractedUrl();
+            linkType = "generic_url";
+            pageFetchResult = fetchGenericPage(finalUrl);
+            parseResult = GenericWebSniffParser.parse(
+                    pageFetchResult.html,
+                    finalUrl,
+                    parseInput.getEntrySource(),
+                    pageFetchResult.strategy
+            );
         }
-        PageFetchResult pageFetchResult = fetchPage(finalUrl);
-        XhsParseResult parseResult = XhsHtmlParser.parse(
-                pageFetchResult.html,
-                finalUrl,
-                parseInput.getEntrySource(),
-                pageFetchResult.strategy
-        );
         Log.d(TAG, "parse finished, entry=" + entrySource
                 + ", linkType=" + linkType
                 + ", noteId=" + parseResult.getNoteId()
@@ -41,6 +63,31 @@ public class XhsParseRepository {
                 + ", mediaCount=" + parseResult.getMediaCount()
                 + ", durationMs=" + (System.currentTimeMillis() - startTime));
         return parseResult;
+    }
+
+    /**
+     * 先按域名做平台路由，避免通过异常回退决定解析链路。
+     */
+    private ParseRoute resolveRoute(String url) {
+        if (XhsInputParser.isDirectLink(url) || XhsInputParser.isShortLink(url)) {
+            return ParseRoute.XHS;
+        }
+        return ParseRoute.GENERIC;
+    }
+
+    private PageFetchResult fetchGenericPage(String pageUrl) throws XhsParserException {
+        PageFetchResult desktopResult = executePageRequest(pageUrl, XhsHttpClient.DESKTOP_USER_AGENT, "desktop");
+        if (desktopResult.hasHtml()) {
+            return desktopResult;
+        }
+        PageFetchResult mobileResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "mobile");
+        if (mobileResult.hasHtml()) {
+            return mobileResult;
+        }
+        if (desktopResult.httpCode == 404 || mobileResult.httpCode == 404) {
+            throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
+        }
+        throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
     }
 
     private PageFetchResult fetchPage(String pageUrl) throws XhsParserException {
@@ -91,6 +138,10 @@ public class XhsParseRepository {
 
         private boolean hasUsefulContent() {
             return XhsHtmlParser.hasUsefulContent(html);
+        }
+
+        private boolean hasHtml() {
+            return html != null && !html.trim().isEmpty();
         }
     }
 }

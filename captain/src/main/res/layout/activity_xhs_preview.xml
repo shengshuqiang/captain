@@ -35,6 +35,21 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/preview_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:background="@drawable/bg_xhs_preview_chip"
+            android:paddingLeft="14dp"
+            android:paddingTop="8dp"
+            android:paddingRight="14dp"
+            android:paddingBottom="8dp"
+            android:text="@string/xhs_preview_save"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:id="@+id/preview_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

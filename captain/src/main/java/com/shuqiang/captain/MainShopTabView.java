@@ -81,7 +81,7 @@ public class MainShopTabView extends FrameLayout {
             list.add(new Item("乐力动", R.drawable.ledongli, lldIntent));
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("小红书下载", R.drawable.ic_xhs_download, xhsdActivityIntent));
+            list.add(new Item("资源嗅探", R.drawable.ic_xhs_download, xhsdActivityIntent));
 //            // 一个的话直接跳
 //            if (list.size() == 1) {
 //                Item item = list.get(0);

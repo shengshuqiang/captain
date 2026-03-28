@@ -92,20 +92,27 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             String previewUrl = item.getCoverUrl() == null || item.getCoverUrl().isEmpty()
                     ? item.getMediaUrl()
                     : item.getCoverUrl();
-            Glide.with(mediaCover.getContext())
-                    .load(previewUrl)
-                    .into(mediaCover);
+            mediaCover.setScaleType(item.getMediaType() == XhsMediaType.PDF
+                    ? ImageView.ScaleType.CENTER_INSIDE
+                    : ImageView.ScaleType.CENTER_CROP);
+            if (item.getMediaType() == XhsMediaType.PDF) {
+                mediaCover.setImageResource(R.drawable.ic_file_save);
+            } else {
+                Glide.with(mediaCover.getContext())
+                        .load(previewUrl)
+                        .into(mediaCover);
+            }
 
-            mediaType.setText(item.getMediaType() == XhsMediaType.VIDEO
-                    ? mediaCover.getContext().getString(R.string.xhs_download_video_badge)
-                    : mediaCover.getContext().getString(R.string.xhs_download_image_badge));
+            mediaType.setText(item.getMediaType().getDisplayName());
             mediaIndex.setText((position + 1) + " / " + totalCount);
             mediaDuration.setText(item.getDisplayDuration());
             mediaDuration.setVisibility(item.getMediaType() == XhsMediaType.VIDEO
                     && !item.getDisplayDuration().isEmpty() ? View.VISIBLE : View.GONE);
             mediaPreview.setText(item.getMediaType() == XhsMediaType.VIDEO
                     ? mediaCover.getContext().getString(R.string.xhs_download_play)
-                    : mediaCover.getContext().getString(R.string.xhs_download_preview));
+                    : (item.getMediaType() == XhsMediaType.PDF
+                    ? mediaCover.getContext().getString(R.string.xhs_download_open)
+                    : mediaCover.getContext().getString(R.string.xhs_download_preview)));
 
             selectedMask.setVisibility(item.isSelected() ? View.VISIBLE : View.GONE);
             mediaCard.setBackgroundResource(item.isSelected()
