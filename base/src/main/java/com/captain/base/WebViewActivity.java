@@ -1,40 +1,17 @@
 package com.captain.base;
 
-import android.Manifest;
-import android.content.Context;
-import android.net.http.SslError;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.util.Base64;
 import android.util.Log;
+import android.text.TextUtils;
 import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Toast;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.PermissionChecker;
-
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class WebViewActivity extends BasePermissionActivity {
     public static final String URL_KEY = "url";
@@ -49,15 +26,31 @@ public class WebViewActivity extends BasePermissionActivity {
     }
 
     @Override
+    protected int getContentLayoutResource() {
+        return R.layout.activity_web_view;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WebView webView = new WebView(this);
         initWebView(webView);
 
-        this.setContentView(webView);
+        FrameLayout webContainer = findViewById(R.id.web_container);
+        webContainer.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+        ));
         String url= getIntent().getStringExtra(URL_KEY);
+        syncToolbarTitle(url);
         Log.d("MCPN", "TestWebViewActivity#loadUrl, url=" + url);
         webView.loadUrl(url);
+    }
+
+    private void syncToolbarTitle(String url) {
+        if (TextUtils.equals(url, getString(R.string.captain_privacy_policy_url))) {
+            setTitle(R.string.privacy_policy_title);
+        }
     }
 
     protected void initWebView(WebView webView) {

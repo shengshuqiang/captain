@@ -6,8 +6,8 @@
     <color name="captain_brand_primary">#F56B7D</color>
     <color name="captain_brand_accent">#FFB24D</color>
     <color name="captain_brand_support_success">#5FBE74</color>
-    <color name="captain_tab_home">#F56B7D</color>
-    <color name="captain_tab_profile">#7D68C6</color>
+    <color name="captain_tab_home">#FFE2E8</color>
+    <color name="captain_tab_profile">#FFF0E2</color>
 
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 页面与容器色 -->
@@ -16,9 +16,9 @@
     <color name="captain_surface_hero">#FFF0EB</color>
     <color name="captain_surface_card">#FFFFFF</color>
     <color name="captain_surface_card_soft">#FFF5F1</color>
-    <color name="captain_surface_tab_bar">#FFFDFC</color>
+    <color name="captain_surface_tab_bar">#00FFFFFF</color>
     <color name="captain_surface_icon_tile">#FFF2EE</color>
-    <color name="captain_surface_toolbar">#FFFDFC</color>
+    <color name="captain_surface_toolbar">#FFFFFF</color>
 
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 文字色 -->

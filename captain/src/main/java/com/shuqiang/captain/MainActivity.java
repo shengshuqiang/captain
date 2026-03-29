@@ -12,8 +12,6 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.appbar.AppBarLayout;
-
 import com.captain.base.BaseActivity;
 import com.captain.base.PermissionUtils;
 
@@ -44,14 +42,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initToolbar(View appBarLayout, Toolbar toolbar) {
         super.initToolbar(appBarLayout, toolbar);
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.captain_surface_toolbar));
-        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.captain_text_primary));
-        toolbar.setNavigationContentDescription(R.string.captain_shell_back);
-        toolbar.setElevation(0f);
-        toolbar.setNavigationIcon(R.drawable.ic_shell_back);
-        if (appBarLayout instanceof AppBarLayout) {
-            ((AppBarLayout) appBarLayout).setElevation(0f);
-        }
         updateShellTitle(0);
     }
 

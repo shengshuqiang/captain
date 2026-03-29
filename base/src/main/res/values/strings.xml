@@ -18,5 +18,6 @@
     <string name="privacy_window_message5">⑶ 未经您的授权同意，我们不会将上述信息共享给第三方或用于您未授权的其他用途。</string>
     <string name="privacy_window_permission_message">为了向您提供更好的服务，我们需要获取以下权限和信息，系统将以弹窗提示征求您的授权。</string>
     <string name="toolbar_navigate_up">返回上一页</string>
+    <string name="privacy_policy_title">隐私政策</string>
 
 </resources>

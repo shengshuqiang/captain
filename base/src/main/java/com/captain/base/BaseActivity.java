@@ -8,7 +8,6 @@ import android.view.ViewStub;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -43,6 +42,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(0xFF241C2D);
         toolbar.setNavigationIcon(R.drawable.ic_toolbar_back);
         toolbar.setNavigationContentDescription(R.string.toolbar_navigate_up);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         toolbar.setElevation(0f);
         if (appBarLayout instanceof AppBarLayout) {
             ((AppBarLayout) appBarLayout).setBackgroundResource(R.drawable.bg_toolbar_surface);
@@ -55,6 +55,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         // 统一所有页面的标题栏返回按钮和标题样式。
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_toolbar_back);
+        actionBar.setHomeActionContentDescription(R.string.toolbar_navigate_up);
         actionBar.setHomeButtonEnabled(true);
     }
 
