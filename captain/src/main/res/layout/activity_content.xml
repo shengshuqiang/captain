@@ -6,19 +6,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar 隐藏，欢迎区在首页 Tab 中实现 -->
+    <!-- 壳层标题栏，提供稳定的标题与返回入口 -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:background="@color/captain_surface_toolbar"
+        android:elevation="0dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="@android:color/transparent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/captain_surface_toolbar"
+            android:paddingStart="@dimen/captain_space_toolbar_horizontal"
+            android:paddingEnd="@dimen/captain_space_toolbar_horizontal"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -64,19 +67,15 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/captain_size_tab_height"
         android:layout_gravity="bottom"
-        app:ntb_badge_size="@dimen/captain_size_badge"
-        app:ntb_active_color="@color/captain_brand_primary"
-        app:ntb_inactive_color="@color/captain_text_tertiary"
+        app:ntb_active_color="@color/captain_text_primary"
+        app:ntb_bg_color="@color/captain_surface_tab_bar"
+        app:ntb_badged="false"
         app:ntb_icon_size_fraction="0.5"
+        app:ntb_inactive_color="@color/captain_text_secondary"
         app:ntb_titled="true"
+        app:ntb_title_size="@dimen/captain_text_tab"
         app:ntb_title_mode="all"
         app:ntb_badge_gravity="top"
-        app:ntb_badge_position="left"
-        app:ntb_badge_title_color="@color/captain_text_on_brand"
-        app:ntb_badge_use_typeface="true"
-        app:ntb_badged="true"
-        app:ntb_typeface="fonts/agency.ttf"/>
+        app:ntb_badge_position="left" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-
 

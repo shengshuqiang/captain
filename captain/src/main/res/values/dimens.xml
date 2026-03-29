@@ -17,6 +17,7 @@
     <dimen name="captain_radius_button">14dp</dimen>
     <dimen name="captain_radius_badge">12dp</dimen>
     <dimen name="captain_radius_avatar">24dp</dimen>
+    <dimen name="captain_radius_icon_tile">18dp</dimen>
 
     <!-- ============================================ -->
     <!-- 船长App视觉Token - 间距规范 -->
@@ -27,6 +28,8 @@
     <dimen name="captain_space_block">24dp</dimen>
     <dimen name="captain_space_card_gap">12dp</dimen>
     <dimen name="captain_space_inline">8dp</dimen>
+    <dimen name="captain_space_toolbar_horizontal">12dp</dimen>
+    <dimen name="captain_space_page_bottom">92dp</dimen>
 
     <!-- ============================================ -->
     <!-- 船长App视觉Token - 尺寸底线 -->
@@ -39,6 +42,11 @@
     <dimen name="captain_size_badge">12dp</dimen>
     <dimen name="captain_size_icon_small">16dp</dimen>
     <dimen name="captain_space_badge_padding">4dp</dimen>
+    <dimen name="captain_size_icon_tile">64dp</dimen>
+    <dimen name="captain_size_feature_icon">40dp</dimen>
+    <dimen name="captain_size_feature_card_min_height">156dp</dimen>
+    <dimen name="captain_size_feature_title_max_width">120dp</dimen>
+    <dimen name="captain_space_feature_title_top">12dp</dimen>
 
     <!-- ============================================ -->
     <!-- 旧版尺寸 - 保留用于兼容性 -->

@@ -3,30 +3,37 @@
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 品牌色 -->
     <!-- ============================================ -->
-    <color name="captain_brand_primary">#FF8A8F</color>
-    <color name="captain_brand_accent">#FFB56B</color>
-    <color name="captain_brand_support_success">#78C98C</color>
+    <color name="captain_brand_primary">#F56B7D</color>
+    <color name="captain_brand_accent">#FFB24D</color>
+    <color name="captain_brand_support_success">#5FBE74</color>
+    <color name="captain_tab_home">#F56B7D</color>
+    <color name="captain_tab_profile">#7D68C6</color>
 
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 页面与容器色 -->
     <!-- ============================================ -->
-    <color name="captain_surface_page">#FFF8F6</color>
-    <color name="captain_surface_hero">#FFE7E3</color>
+    <color name="captain_surface_page">#FFF9F7</color>
+    <color name="captain_surface_hero">#FFF0EB</color>
     <color name="captain_surface_card">#FFFFFF</color>
-    <color name="captain_surface_card_soft">#FFFDFC</color>
+    <color name="captain_surface_card_soft">#FFF5F1</color>
+    <color name="captain_surface_tab_bar">#FFFDFC</color>
+    <color name="captain_surface_icon_tile">#FFF2EE</color>
+    <color name="captain_surface_toolbar">#FFFDFC</color>
 
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 文字色 -->
     <!-- ============================================ -->
-    <color name="captain_text_primary">#2A2233</color>
-    <color name="captain_text_secondary">#6D6678</color>
-    <color name="captain_text_tertiary">#A7A1AE</color>
+    <color name="captain_text_primary">#241C2D</color>
+    <color name="captain_text_secondary">#5E5568</color>
+    <color name="captain_text_tertiary">#7D7488</color>
     <color name="captain_text_on_brand">#FFFFFF</color>
+    <color name="captain_text_on_soft">#7A4252</color>
 
     <!-- ============================================ -->
     <!-- 船长App水果色视觉Token - 反馈与边框色 -->
     <!-- ============================================ -->
-    <color name="captain_border_soft">#F1E6E3</color>
+    <color name="captain_border_soft">#EADDD9</color>
+    <color name="captain_border_strong">#D9C8C3</color>
     <color name="captain_feedback_error">#E45B5B</color>
     <color name="captain_feedback_warning">#E8A044</color>
     <color name="captain_feedback_success">#49A96A</color>

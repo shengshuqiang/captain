@@ -2,16 +2,20 @@ package com.shuqiang.captain;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.appbar.AppBarLayout;
+
 import com.captain.base.BaseActivity;
 import com.captain.base.PermissionUtils;
-import com.captain.base.Utils;
 
 import java.util.ArrayList;
 
@@ -35,6 +39,20 @@ public class MainActivity extends BaseActivity {
     @Override
     protected int getContentViewResource() {
         return R.layout.activity_content;
+    }
+
+    @Override
+    protected void initToolbar(View appBarLayout, Toolbar toolbar) {
+        super.initToolbar(appBarLayout, toolbar);
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.captain_surface_toolbar));
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.captain_text_primary));
+        toolbar.setNavigationContentDescription(R.string.captain_shell_back);
+        toolbar.setElevation(0f);
+        toolbar.setNavigationIcon(R.drawable.ic_shell_back);
+        if (appBarLayout instanceof AppBarLayout) {
+            ((AppBarLayout) appBarLayout).setElevation(0f);
+        }
+        updateShellTitle(0);
     }
 
     private void initUI() {
@@ -62,13 +80,13 @@ public class MainActivity extends BaseActivity {
                 switch (TABS[position]) {
                     case MAIN_SHOP_TAB:
                         // 主橱窗 Tab
-                        MainShopTabView mainShopTabView = new MainShopTabView(getBaseContext());
+                        MainShopTabView mainShopTabView = new MainShopTabView(MainActivity.this);
                         container.addView(mainShopTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                         view = mainShopTabView;
                         break;
                     case ME_TAB:
                         // 我的 Tab
-                        MeTabView meTabView = new MeTabView(getBaseContext());
+                        MeTabView meTabView = new MeTabView(MainActivity.this);
                         container.addView(meTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                         view = meTabView;
                         break;
@@ -80,22 +98,20 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        final String[] colors = getResources().getStringArray(R.array.default_preview);
-
         final NavigationTabBar navigationTabBar = (NavigationTabBar) findViewById(R.id.tab_bar);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.tools),
-                        Color.parseColor(colors[0]))
-                        .title("首页")
+                        ContextCompat.getColor(this, R.color.captain_tab_home))
+                        .title(getString(R.string.captain_shell_title_home))
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.person),
-                        Color.parseColor(colors[4]))
-                        .title("我的")
+                        ContextCompat.getColor(this, R.color.captain_tab_profile))
+                        .title(getString(R.string.captain_shell_title_profile))
                         .build()
         );
         navigationTabBar.setModels(models);
@@ -112,6 +128,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onEndTabSelected(final NavigationTabBar.Model model, final int index) {
                 model.hideBadge();
+                updateShellTitle(index);
             }
         });
         navigationTabBar.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -122,7 +139,7 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onPageSelected(final int position) {
-
+                updateShellTitle(position);
             }
 
             @Override
@@ -133,5 +150,17 @@ public class MainActivity extends BaseActivity {
         // 触发隐私模式弹窗
         PermissionUtils.showPolicyDialog(this);
 
+    }
+
+    private void updateShellTitle(int position) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) {
+            return;
+        }
+        if (position == 1) {
+            actionBar.setTitle(R.string.captain_shell_title_profile);
+        } else {
+            actionBar.setTitle(R.string.captain_shell_title_home);
+        }
     }
 }

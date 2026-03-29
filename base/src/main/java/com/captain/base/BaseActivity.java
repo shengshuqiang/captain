@@ -6,7 +6,9 @@ import android.view.View;
 import android.view.ViewStub;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -37,11 +39,23 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void initToolbar(View appBarLayout, Toolbar toolbar) {
         setSupportActionBar(toolbar);
-        // 添加默认的返回图标
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.back_btn);
-        // 设置返回键可用
-        getSupportActionBar().setHomeButtonEnabled(true);
+        toolbar.setBackgroundResource(R.drawable.bg_toolbar_surface);
+        toolbar.setTitleTextColor(0xFF241C2D);
+        toolbar.setNavigationIcon(R.drawable.ic_toolbar_back);
+        toolbar.setNavigationContentDescription(R.string.toolbar_navigate_up);
+        toolbar.setElevation(0f);
+        if (appBarLayout instanceof AppBarLayout) {
+            ((AppBarLayout) appBarLayout).setBackgroundResource(R.drawable.bg_toolbar_surface);
+            ((AppBarLayout) appBarLayout).setElevation(0f);
+        }
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) {
+            return;
+        }
+        // 统一所有页面的标题栏返回按钮和标题样式。
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_toolbar_back);
+        actionBar.setHomeButtonEnabled(true);
     }
 
     // 子组件重写返回内容布局

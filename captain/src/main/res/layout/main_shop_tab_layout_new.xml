@@ -10,7 +10,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/captain_space_page_bottom">
 
         <!-- ============================================ -->
         <!-- 欢迎区 (Hero Section) -->
@@ -23,12 +24,20 @@
             android:orientation="vertical"
             android:padding="@dimen/captain_space_hero_inner">
 
+            <TextView
+                android:id="@+id/hero_eyebrow"
+                style="@style/CaptainText.Overline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/captain_hero_eyebrow" />
+
             <!-- 品牌标题 -->
             <TextView
                 android:id="@+id/hero_title"
                 style="@style/CaptainText.Hero"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
                 android:text="@string/captain_hero_title"
                 android:layout_marginBottom="@dimen/captain_space_inline" />
 

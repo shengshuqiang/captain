@@ -66,6 +66,14 @@
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
+    <style name="CaptainText.Overline">
+        <item name="android:textSize">@dimen/captain_text_caption</item>
+        <item name="android:textColor">@color/captain_text_on_soft</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
     <style name="CaptainText.CardTitle">
         <item name="android:textSize">@dimen/captain_text_card_title</item>
         <item name="android:textColor">@color/captain_text_primary</item>
@@ -79,7 +87,7 @@
 
     <style name="CaptainText.Caption">
         <item name="android:textSize">@dimen/captain_text_caption</item>
-        <item name="android:textColor">@color/captain_text_tertiary</item>
+        <item name="android:textColor">@color/captain_text_secondary</item>
     </style>
 
 </resources>

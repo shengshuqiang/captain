@@ -6,24 +6,37 @@
     android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/captain_size_feature_card_min_height"
+    android:background="@drawable/bg_card"
+    android:clickable="true"
+    android:focusable="true"
     android:padding="@dimen/captain_space_card_inner">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_height="@dimen/captain_size_avatar"
-        android:layout_width="@dimen/captain_size_avatar"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:clickable="true"
-        android:contentDescription="@string/grid_item_icon_description"/>
+    <FrameLayout
+        android:layout_width="@dimen/captain_size_icon_tile"
+        android:layout_height="@dimen/captain_size_icon_tile"
+        android:background="@drawable/bg_icon_tile"
+        android:foreground="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/captain_size_feature_icon"
+            android:layout_height="@dimen/captain_size_feature_icon"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/grid_item_icon_description"
+            android:scaleType="centerInside" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/title"
-        style="@style/CaptainText.Body"
+        style="@style/CaptainText.CardTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/captain_space_inline"
+        android:layout_marginTop="@dimen/captain_space_feature_title_top"
         android:gravity="center"
+        android:maxWidth="@dimen/captain_size_feature_title_max_width"
         android:maxLines="2"
         android:ellipsize="end"/>
 

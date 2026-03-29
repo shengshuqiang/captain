@@ -2,12 +2,8 @@ package com.shuqiang.captain;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -70,7 +66,7 @@ public class MainShopTabView extends FrameLayout {
 //            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
             Intent arActivityIntent = new Intent(context, QRActivity.class);
             arActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("信息二维马", R.drawable.zxing, arActivityIntent));
+            list.add(new Item("信息二维码", R.drawable.zxing, arActivityIntent));
             Intent ldlIntent = new Intent(context, LDLWebViewActivity.class);
             ldlIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
             ldlIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -113,7 +109,6 @@ public class MainShopTabView extends FrameLayout {
                 convertView = LayoutInflater.from(context).inflate(
                         R.layout.grid_item, parent, false);
                 holder.titleTxtView = (TextView) convertView.findViewById(R.id.title);
-                // 字体样式已在 XML 中通过 style 定义，无需在代码中设置
                 holder.iconImgView = (ImageView) convertView.findViewById(R.id.icon);
                 convertView.setTag(holder);
             } else {
@@ -123,9 +118,7 @@ public class MainShopTabView extends FrameLayout {
             final Item item = list.get(position);
             holder.titleTxtView.setText(item.title);
             holder.iconImgView.setImageResource(item.iconRes);
-            // 字体样式已在 XML 中通过 style 定义，无需在代码中设置
-            holder.iconImgView.setOnTouchListener(onTouchListener);
-            holder.iconImgView.setOnClickListener(new View.OnClickListener() {
+            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     context.startActivity(item.intent);
@@ -151,39 +144,5 @@ public class MainShopTabView extends FrameLayout {
             }
         }
 
-        public View.OnTouchListener onTouchListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        changeLight((ImageView) view, 0);
-//                    listener.onCustomItemClk(listener.getPostion());
-//                    view.getParent().requestDisallowInterceptTouchEvent(false);//通知父控件勿拦截本控件
-                        // onclick
-                        break;
-                    case MotionEvent.ACTION_DOWN:
-                        changeLight((ImageView) view, -80);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        // changeLight(view, 0);
-                        break;
-                    case MotionEvent.ACTION_CANCEL:
-                        changeLight((ImageView) view, 0);
-                        break;
-                    default:
-                        changeLight((ImageView) view, 0);
-                        break;
-                }
-                return false;
-            }
-
-        };
-
-        private void changeLight(ImageView imageview, int brightness) {
-            ColorMatrix matrix = new ColorMatrix();
-            matrix.set(new float[]{1, 0, 0, 0, brightness, 0, 1, 0, 0,
-                    brightness, 0, 0, 1, 0, brightness, 0, 0, 0, 1, 0});
-            imageview.setColorFilter(new ColorMatrixColorFilter(matrix));
-        }
     }
 }

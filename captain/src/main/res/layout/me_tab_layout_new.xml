@@ -14,7 +14,7 @@
         android:paddingStart="@dimen/captain_space_page_horizontal"
         android:paddingEnd="@dimen/captain_space_page_horizontal"
         android:paddingTop="@dimen/captain_space_block"
-        android:paddingBottom="@dimen/captain_space_block">
+        android:paddingBottom="@dimen/captain_space_page_bottom">
 
         <!-- ============================================ -->
         <!-- 品牌卡片 -->

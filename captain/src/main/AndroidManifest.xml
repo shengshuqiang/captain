@@ -27,7 +27,7 @@ package="captain">
 
     <activity
         android:name="com.shuqiang.captain.qr.QRActivity"
-        android:label="信息二维马">
+        android:label="信息二维码">
 
     </activity>
 
@@ -53,7 +53,7 @@ package="captain">
     <activity
         android:name="com.shuqiang.captain.qr.test.QRTestActivity"
         android:exported="true"
-        android:label="信息二维马测试页"
+        android:label="信息二维码测试页"
         >
     </activity>
 
