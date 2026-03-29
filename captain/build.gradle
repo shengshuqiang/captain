@@ -4,8 +4,9 @@ android {
 //    将gradle中的编译环境，SDK的版本号修改到29以下, 解决Android 10.0后创建文件createNewFile()和创建文件夹mkdirs()均失败解决方案
 //    https://cloud.tencent.com/developer/article/1914736
 //    ndkVersion "22.1.7171670"
-    compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    // androidx.activity:1.3.1 requires minCompileSdk 30 under newer AGP metadata checks.
+    compileSdkVersion 30
+    buildToolsVersion '30.0.3'
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29

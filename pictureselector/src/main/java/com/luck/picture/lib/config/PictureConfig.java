@@ -1,17 +1,17 @@
 package com.luck.picture.lib.config;
 
-import com.luck.picture.lib.BuildConfig;
-
 /**
  * @author：luck
  * @data：2017/5/24 1:00
  * @describe : constant
  */
 public final class PictureConfig {
+    // Library BuildConfig no longer exposes APPLICATION_ID on newer AGP.
+    private static final String LIBRARY_PACKAGE = "com.luck.picture.lib";
 
     public static final String SP_NAME = "PictureSpUtils";
 
-    private static final String KEY = BuildConfig.APPLICATION_ID;
+    private static final String KEY = LIBRARY_PACKAGE;
 
     public final static String EXTRA_RESULT_SELECTION = "extra_result_media";
 

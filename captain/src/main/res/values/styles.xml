@@ -17,9 +17,7 @@
     <!-- ============================================ -->
     <!-- 按钮样式 -->
     <!-- ============================================ -->
-    <style name="CaptainButton.Primary">
-        <item name="android:background">@drawable/bg_button_primary</item>
-        <item name="android:textColor">@color/captain_text_on_brand</item>
+    <style name="CaptainButton">
         <item name="android:textSize">@dimen/captain_text_card_title</item>
         <item name="android:minHeight">@dimen/captain_size_button_height</item>
         <item name="android:paddingStart">@dimen/captain_space_card_inner</item>
@@ -27,14 +25,14 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="CaptainButton.Primary">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/captain_text_on_brand</item>
+    </style>
+
     <style name="CaptainButton.Secondary">
         <item name="android:background">@drawable/bg_button_secondary</item>
         <item name="android:textColor">@color/captain_brand_primary</item>
-        <item name="android:textSize">@dimen/captain_text_card_title</item>
-        <item name="android:minHeight">@dimen/captain_size_button_height</item>
-        <item name="android:paddingStart">@dimen/captain_space_card_inner</item>
-        <item name="android:paddingEnd">@dimen/captain_space_card_inner</item>
-        <item name="android:gravity">center</item>
     </style>
 
     <!-- ============================================ -->
@@ -52,6 +50,10 @@
     <!-- ============================================ -->
     <!-- 文字样式 -->
     <!-- ============================================ -->
+    <style name="CaptainText">
+        <item name="android:textColor">@color/captain_text_primary</item>
+    </style>
+
     <style name="CaptainText.Hero">
         <item name="android:textSize">@dimen/captain_text_hero</item>
         <item name="android:textColor">@color/captain_text_primary</item>
