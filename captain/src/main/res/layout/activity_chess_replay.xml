@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/captain_surface_page"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/captain_space_page_horizontal"
+        android:paddingEnd="@dimen/captain_space_page_horizontal"
+        android:paddingTop="@dimen/captain_space_block"
+        android:paddingBottom="@dimen/captain_space_block">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_card_inner">
+
+            <TextView
+                android:id="@+id/replay_summary_text"
+                style="@style/CaptainText.CardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/replay_step_text"
+                style="@style/CaptainText.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_block"
+            android:background="@drawable/bg_card_large"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_card_inner">
+
+            <com.shuqiang.captain.chess.ui.ChessBoardView
+                android:id="@+id/replay_board_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/replay_flip_button"
+                style="@style/CaptainButton.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:text="@string/chess_flip_board" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_block"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_card_inner">
+
+            <TextView
+                style="@style/CaptainText.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chess_move_label" />
+
+            <TextView
+                android:id="@+id/replay_san_text"
+                style="@style/CaptainText.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/captain_text_primary" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_block"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/replay_start_button"
+                style="@style/CaptainButton.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chess_replay_start" />
+
+            <Button
+                android:id="@+id/replay_prev_button"
+                style="@style/CaptainButton.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/chess_replay_prev" />
+
+            <Button
+                android:id="@+id/replay_next_button"
+                style="@style/CaptainButton.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/chess_replay_next" />
+
+            <Button
+                android:id="@+id/replay_end_button"
+                style="@style/CaptainButton.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/chess_replay_end" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

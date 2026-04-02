@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/captain_surface_page"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/captain_space_block">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_hero_gradient"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_hero_inner">
+
+            <TextView
+                style="@style/CaptainText.Overline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Captain chess" />
+
+            <TextView
+                style="@style/CaptainText.Hero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:text="@string/chess_title" />
+
+            <TextView
+                style="@style/CaptainText.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:text="@string/chess_lobby_subtitle" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/captain_space_page_horizontal"
+            android:paddingEnd="@dimen/captain_space_page_horizontal"
+            android:paddingTop="@dimen/captain_space_block">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_large"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <ImageView
+                    android:id="@+id/profile_avatar"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:contentDescription="@string/chess_avatar_preview"
+                    android:src="@drawable/avatar_chess_helmet_red" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/captain_space_card_inner"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/CaptainText.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chess_profile_card_title" />
+
+                    <TextView
+                        android:id="@+id/profile_username"
+                        style="@style/CaptainText.PageTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/edit_profile_button"
+                    style="@style/CaptainButton.Secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_edit_profile" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_block"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <TextView
+                    style="@style/CaptainText.CardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_seat_preference_title" />
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="执白" />
+
+                    <RadioButton
+                        android:id="@+id/radio_black"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="执黑" />
+
+                    <RadioButton
+                        android:id="@+id/radio_random"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="随机" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_block"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <TextView
+                    style="@style/CaptainText.CardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_host_title" />
+
+                <TextView
+                    style="@style/CaptainText.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/chess_host_desc" />
+
+                <Button
+                    android:id="@+id/host_button"
+                    style="@style/CaptainButton.Primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:text="@string/chess_start_host" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_block"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <TextView
+                    style="@style/CaptainText.CardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_join_title" />
+
+                <TextView
+                    style="@style/CaptainText.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/chess_join_desc" />
+
+                <Button
+                    android:id="@+id/scan_button"
+                    style="@style/CaptainButton.Secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:text="@string/chess_scan_devices" />
+
+                <TextView
+                    android:id="@+id/device_empty_text"
+                    style="@style/CaptainText.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:text="@string/chess_device_list_empty" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/device_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:nestedScrollingEnabled="false" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_block"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <TextView
+                    style="@style/CaptainText.CardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_history_title" />
+
+                <TextView
+                    style="@style/CaptainText.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/chess_history_desc" />
+
+                <Button
+                    android:id="@+id/history_button"
+                    style="@style/CaptainButton.Secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:text="@string/chess_open_history" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_block"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/captain_space_card_inner">
+
+                <TextView
+                    style="@style/CaptainText.CardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chess_connection_status" />
+
+                <TextView
+                    android:id="@+id/connection_status_text"
+                    style="@style/CaptainText.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
+
+                <Button
+                    android:id="@+id/resume_game_button"
+                    style="@style/CaptainButton.Primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/captain_space_inline"
+                    android:text="@string/chess_resume_game"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

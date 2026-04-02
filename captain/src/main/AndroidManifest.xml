@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
 package="captain">
 
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" tools:targetApi="s" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="s" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" tools:targetApi="s" />
 <!--<uses-permission android:name="android.permission.USE_FINGERPRINT" />-->
 
 <application
@@ -30,6 +37,31 @@ package="captain">
         android:label="信息二维码">
 
     </activity>
+
+    <activity
+        android:name="com.shuqiang.captain.chess.ui.ChessOnboardingActivity"
+        android:exported="false"
+        android:label="@string/chess_onboarding_title" />
+
+    <activity
+        android:name="com.shuqiang.captain.chess.ui.ChessLobbyActivity"
+        android:exported="false"
+        android:label="@string/chess_title" />
+
+    <activity
+        android:name="com.shuqiang.captain.chess.ui.ChessGameActivity"
+        android:exported="false"
+        android:label="@string/chess_game_title" />
+
+    <activity
+        android:name="com.shuqiang.captain.chess.ui.ChessHistoryActivity"
+        android:exported="false"
+        android:label="@string/chess_history_title" />
+
+    <activity
+        android:name="com.shuqiang.captain.chess.ui.ChessReplayActivity"
+        android:exported="false"
+        android:label="@string/chess_replay_title" />
 
     <activity
         android:name="com.shuqiang.captain.xhs.ui.XhsDownloadActivity"

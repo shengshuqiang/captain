@@ -1,0 +1,14 @@
+package com.shuqiang.captain.chess.model;
+
+public enum ChessTerminationReason {
+    CHECKMATE,
+    STALEMATE,
+    DRAW_AGREEMENT,
+    THREEFOLD_REPETITION_CLAIM,
+    FIVEFOLD_REPETITION_AUTO,
+    FIFTY_MOVE_CLAIM,
+    SEVENTY_FIVE_MOVE_AUTO,
+    INSUFFICIENT_MATERIAL,
+    RESIGNATION,
+    ABORTED
+}

@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import com.captain.base.LDLWebViewActivity;
 import com.captain.base.LLDWebViewActivity;
 import com.captain.base.WebViewActivity;
+import com.shuqiang.captain.chess.ui.ChessLobbyActivity;
 import com.shuqiang.captain.qr.QRActivity;
 import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
 
@@ -78,6 +79,9 @@ public class MainShopTabView extends FrameLayout {
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             list.add(new Item("资源嗅探", R.drawable.download, xhsdActivityIntent));
+            Intent chessLobbyIntent = new Intent(context, ChessLobbyActivity.class);
+            chessLobbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            list.add(new Item("国际象棋", R.drawable.ic_chess_feature, chessLobbyIntent));
 //            // 一个的话直接跳
 //            if (list.size() == 1) {
 //                Item item = list.get(0);

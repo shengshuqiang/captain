@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/captain_space_card_inner">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/history_avatar"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:contentDescription="@string/chess_opponent_label"
+            android:src="@drawable/avatar_chess_helmet_blue" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/captain_space_card_inner"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/history_name"
+                style="@style/CaptainText.CardTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/history_meta"
+                style="@style/CaptainText.Body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/history_time"
+            style="@style/CaptainText.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/history_detail"
+        style="@style/CaptainText.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/captain_space_inline"
+        android:textColor="@color/captain_text_primary" />
+
+    <Button
+        android:id="@+id/history_replay_button"
+        style="@style/CaptainButton.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/captain_space_inline"
+        android:text="@string/chess_replay_action" />
+
+</LinearLayout>

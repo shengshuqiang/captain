@@ -37,6 +37,22 @@
     <color name="captain_feedback_error">#E45B5B</color>
     <color name="captain_feedback_warning">#E8A044</color>
     <color name="captain_feedback_success">#49A96A</color>
+    <color name="captain_feedback_info">#5A8DEE</color>
+
+    <!-- ============================================ -->
+    <!-- 国际象棋模块颜色 -->
+    <!-- ============================================ -->
+    <color name="chess_board_light">#F7E7C9</color>
+    <color name="chess_board_dark">#D6945A</color>
+    <color name="chess_board_selected">#66F56B7D</color>
+    <color name="chess_board_last_move">#66FFB24D</color>
+    <color name="chess_board_legal_move">#8849A96A</color>
+    <color name="chess_board_coordinate">#9B6D5848</color>
+    <color name="chess_board_white_piece">#FFFDF9</color>
+    <color name="chess_board_black_piece">#322923</color>
+    <color name="chess_board_piece_shadow">#2B000000</color>
+    <color name="chess_surface_soft">#FFF3EE</color>
+    <color name="chess_surface_tag">#FFF0E8</color>
 
     <!-- ============================================ -->
     <!-- 旧版颜色 - 保留用于兼容性，逐步迁移 -->

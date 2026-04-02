@@ -25,12 +25,12 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="CaptainButton.Primary">
+    <style name="CaptainButton.Primary" parent="CaptainButton">
         <item name="android:background">@drawable/bg_button_primary</item>
         <item name="android:textColor">@color/captain_text_on_brand</item>
     </style>
 
-    <style name="CaptainButton.Secondary">
+    <style name="CaptainButton.Secondary" parent="CaptainButton">
         <item name="android:background">@drawable/bg_button_secondary</item>
         <item name="android:textColor">@color/captain_brand_primary</item>
     </style>
