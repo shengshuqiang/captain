@@ -228,12 +228,8 @@ public class QRActivity extends BasePermissionActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
     private void decodeQRMessage(final String qrMessage) {
-        showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", null, new PasswordPopupWindow.OnPasswordCompleteListener() {
-            @Override
-            public void onComplete(String password) {
-                handleDecodePassword(qrMessage, password, false);
-            }
-        }, true, biometricPasswordStore.canUseBiometricUnlock(qrMessage) ? new View.OnClickListener() {
+        final boolean canUseBiometricUnlock = biometricPasswordStore.canUseBiometricUnlock(qrMessage);
+        final View.OnClickListener biometricActionClickListener = canUseBiometricUnlock ? new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 biometricPasswordStore.authenticate(QRActivity.this, qrMessage, new QrBiometricPasswordStore.Callback() {
@@ -251,6 +247,7 @@ public class QRActivity extends BasePermissionActivity {
 
                     @Override
                     public void onError(String message) {
+                        firstPasswordPopupWindow.setBiometricActionVisible(biometricPasswordStore.canUseBiometricUnlock(qrMessage));
                         Utils.showMessage(mvpView, message);
                     }
 
@@ -259,7 +256,19 @@ public class QRActivity extends BasePermissionActivity {
                     }
                 });
             }
-        } : null);
+        } : null;
+        String subTitle = null;
+        if (canUseBiometricUnlock) {
+            subTitle = "也可输入密码验证";
+        } else if (biometricPasswordStore.supportsBiometric()) {
+            subTitle = "首次请输入密码，成功后下次可指纹解锁";
+        }
+        showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", subTitle, new PasswordPopupWindow.OnPasswordCompleteListener() {
+            @Override
+            public void onComplete(String password) {
+                handleDecodePassword(qrMessage, password, false);
+            }
+        }, true, biometricActionClickListener, canUseBiometricUnlock);
     }
 
     private boolean handleDecodePassword(String qrMessage, String password, boolean fromBiometric) {
@@ -294,12 +303,15 @@ public class QRActivity extends BasePermissionActivity {
     }
 
     private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener) {
-        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, true, null);
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, true, null, false);
     }
     private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss) {
-        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, isPasswordCompleteDismiss, null);
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, isPasswordCompleteDismiss, null, false);
     }
     private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss, View.OnClickListener onBiometricActionClickListener) {
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, isPasswordCompleteDismiss, onBiometricActionClickListener, false);
+    }
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss, final View.OnClickListener onBiometricActionClickListener, final boolean autoTriggerBiometric) {
         passwordPopupWindow.setTitle(title);
         passwordPopupWindow.setSubTitle(subTitle);
         passwordPopupWindow.setPasswordCompleteDismiss(isPasswordCompleteDismiss);
@@ -312,6 +324,9 @@ public class QRActivity extends BasePermissionActivity {
             @Override
             public void run() {
                 passwordPopupWindow.show(mvpView);
+                if (autoTriggerBiometric && onBiometricActionClickListener != null) {
+                    onBiometricActionClickListener.onClick(mvpView);
+                }
             }
         }, 300);
 

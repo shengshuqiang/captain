@@ -43,8 +43,12 @@ public class QrBiometricPasswordStore {
         this.appContext = context.getApplicationContext();
     }
 
+    public boolean supportsBiometric() {
+        return isBiometricSupported();
+    }
+
     public boolean canUseBiometricUnlock(String qrMessage) {
-        return isBiometricSupported()
+        return supportsBiometric()
                 && !TextUtils.isEmpty(readEncryptedPassword())
                 && TextUtils.equals(hashQrMessage(qrMessage), readQrMessageHash());
     }
@@ -52,7 +56,7 @@ public class QrBiometricPasswordStore {
     public void savePassword(String password, String qrMessage) {
         if (TextUtils.isEmpty(password)
                 || TextUtils.isEmpty(qrMessage)
-                || !isBiometricSupported()
+                || !supportsBiometric()
                 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
