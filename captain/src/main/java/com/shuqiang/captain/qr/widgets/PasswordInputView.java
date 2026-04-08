@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.view.View;
 
 import com.shuqiang.captain.qr.utils.Utils;
 import com.shuqiang.keyboard.KeyboardActionListener;
@@ -20,6 +21,7 @@ public class PasswordInputView extends LinearLayout implements KeyboardActionLis
     private PasswordEditText passwordEditText;
     private TextView titleTxtView;
     private TextView subTitleTxtView;
+    private TextView biometricActionTxtView;
     private KeyboardView keyboardView;
 
     public PasswordInputView(Context context) {
@@ -39,6 +41,7 @@ public class PasswordInputView extends LinearLayout implements KeyboardActionLis
         passwordEditText = (PasswordEditText) findViewById(com.example.popupwindow.R.id.edit_view);
         titleTxtView = (TextView) findViewById(com.example.popupwindow.R.id.title);
         subTitleTxtView = (TextView) findViewById(com.example.popupwindow.R.id.sub_title);
+        biometricActionTxtView = (TextView) findViewById(com.example.popupwindow.R.id.biometric_action);
         keyboardView = (KeyboardView) findViewById(com.example.popupwindow.R.id.keyboard_view);
 
         Keyboard keyboard = new Keyboard(context, com.example.popupwindow.R.layout.trip_hplus_customizekeyboard_number_card_keyboard_layout);
@@ -75,6 +78,14 @@ public class PasswordInputView extends LinearLayout implements KeyboardActionLis
 
     public void clear() {
         passwordEditText.setText(null);
+    }
+
+    public void setBiometricActionVisible(boolean visible) {
+        biometricActionTxtView.setVisibility(visible ? VISIBLE : GONE);
+    }
+
+    public void setOnBiometricActionClickListener(View.OnClickListener onClickListener) {
+        biometricActionTxtView.setOnClickListener(onClickListener);
     }
 
 }

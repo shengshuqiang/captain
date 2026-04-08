@@ -1,17 +1,12 @@
 package com.shuqiang.captain.qr;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
-
-import androidx.fragment.app.FragmentActivity;
 
 import com.captain.base.BasePermissionActivity;
 import com.captain.base.PermissionUtils;
@@ -24,6 +19,7 @@ import com.shuqiang.captain.qr.mvpmodule.MorseMVPModule;
 import com.shuqiang.captain.qr.mvpmodule.MorseMessageData;
 import com.shuqiang.captain.qr.mvppresenter.MorseMVPPresenter;
 import com.shuqiang.captain.qr.mvppresenter.MorseMessageItemActionData;
+import com.shuqiang.captain.qr.utils.QrBiometricPasswordStore;
 import com.shuqiang.captain.qr.utils.Utils;
 import com.shuqiang.captain.qr.widgets.PasswordPopupWindow;
 import com.google.zxing.client.android.QRScanActivity;
@@ -48,16 +44,18 @@ public class QRActivity extends BasePermissionActivity {
     private String currentPwd;
     // 生成新二维码图片密码
     private String producePwd;
+    private QrBiometricPasswordStore biometricPasswordStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FragmentActivity activity = QRActivity.this;
+        QRActivity activity = QRActivity.this;
         mvpView = (MVPView) findViewById(R.id.mvp_view);
         mvpPresenter = new MorseMVPPresenter(activity);
         firstPasswordPopupWindow = new PasswordPopupWindow(activity);
         secondPasswordPopupWindow = new PasswordPopupWindow(activity);
+        biometricPasswordStore = new QrBiometricPasswordStore(activity);
         MVPHelper.init(mvpView, mvpPresenter, new MorseMVPModule());
 
         findViewById(R.id.scan).setOnClickListener(new View.OnClickListener() {
@@ -209,10 +207,10 @@ public class QRActivity extends BasePermissionActivity {
                 Utils.saveQRMessage(QRActivity.this, encodeStr);
                 Bitmap qrCodeBitmap = Utils.createQRCodeBitmap(context, encodeStr);
                 Utils.saveBitmap(context, mvpView, qrCodeBitmap);
+                biometricPasswordStore.savePassword(password, encodeStr);
             } else {
                 Utils.showMessage(mvpView, "密码为空，无效");
             }
-            // Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + morseMessageDecodeStr + ", encodeStr=" + encodeStr);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -233,42 +231,81 @@ public class QRActivity extends BasePermissionActivity {
         showPasswordPopupWindow(firstPasswordPopupWindow, "请输入密码", null, new PasswordPopupWindow.OnPasswordCompleteListener() {
             @Override
             public void onComplete(String password) {
-                if (password == null) {
-                    return;
-                }
-                String qrMessageDecodeStr = null;
-                if (!TextUtils.isEmpty(password)) {
-                    try {
-                        qrMessageDecodeStr = Utils.decode(password, qrMessage);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Utils.showMessage(mvpView, "密码校验失败");
-                        return;
-                    }
-                    MorseMessageData morseMessageData = MorseMessageData.toDeserialize(qrMessageDecodeStr);
-                    if (morseMessageData != null) {
-                        // 本次持久存储密码二维码
-                        currentPwd = password;
-                        mvpPresenter.handleMorseMessageData(morseMessageData);
-                    } else {
-                        Utils.showMessage(mvpView, "密码无效");
-                    }
-                } else {
-                    Utils.showMessage(mvpView, "密码为空，无效");
-                }
-                Log.e("SSU", "password=" + password + ", morseMessageDecodeStr=" + qrMessageDecodeStr);
+                handleDecodePassword(qrMessage, password, false);
             }
-        });
+        }, true, biometricPasswordStore.canUseBiometricUnlock(qrMessage) ? new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                biometricPasswordStore.authenticate(QRActivity.this, qrMessage, new QrBiometricPasswordStore.Callback() {
+                    @Override
+                    public void onPasswordReady(String password) {
+                        if (handleDecodePassword(qrMessage, password, true)) {
+                            firstPasswordPopupWindow.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Utils.showMessage(mvpView, "指纹识别失败，请重试");
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Utils.showMessage(mvpView, message);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+                });
+            }
+        } : null);
+    }
+
+    private boolean handleDecodePassword(String qrMessage, String password, boolean fromBiometric) {
+        if (password == null) {
+            return false;
+        }
+        if (TextUtils.isEmpty(password)) {
+            Utils.showMessage(mvpView, "密码为空，无效");
+            return false;
+        }
+        final String qrMessageDecodeStr;
+        try {
+            qrMessageDecodeStr = Utils.decode(password, qrMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (fromBiometric) {
+                Utils.showMessage(mvpView, "当前指纹绑定密码无法解锁此二维码，请改用密码输入");
+            } else {
+                Utils.showMessage(mvpView, "密码校验失败");
+            }
+            return false;
+        }
+        MorseMessageData morseMessageData = MorseMessageData.toDeserialize(qrMessageDecodeStr);
+        if (morseMessageData == null) {
+            Utils.showMessage(mvpView, fromBiometric ? "当前指纹绑定密码无法解锁此二维码，请改用密码输入" : "密码无效");
+            return false;
+        }
+        currentPwd = password;
+        biometricPasswordStore.savePassword(password, qrMessage);
+        mvpPresenter.handleMorseMessageData(morseMessageData);
+        return true;
     }
 
     private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener) {
-        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, true);
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, true, null);
     }
     private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss) {
+        showPasswordPopupWindow(passwordPopupWindow, title, subTitle, onPasswordCompleteListener, isPasswordCompleteDismiss, null);
+    }
+    private void showPasswordPopupWindow(final PasswordPopupWindow passwordPopupWindow, String title, String subTitle, PasswordPopupWindow.OnPasswordCompleteListener onPasswordCompleteListener, boolean isPasswordCompleteDismiss, View.OnClickListener onBiometricActionClickListener) {
         passwordPopupWindow.setTitle(title);
         passwordPopupWindow.setSubTitle(subTitle);
         passwordPopupWindow.setPasswordCompleteDismiss(isPasswordCompleteDismiss);
         passwordPopupWindow.setOnPasswordCompleteListener(onPasswordCompleteListener);
+        passwordPopupWindow.setBiometricActionVisible(onBiometricActionClickListener != null);
+        passwordPopupWindow.setOnBiometricActionClickListener(onBiometricActionClickListener);
         passwordPopupWindow.clear();
 
         new Handler().postDelayed(new Runnable() {
