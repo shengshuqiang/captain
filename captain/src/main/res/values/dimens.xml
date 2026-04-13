@@ -30,7 +30,7 @@
     <dimen name="captain_space_card_gap">12dp</dimen>
     <dimen name="captain_space_inline">8dp</dimen>
     <dimen name="captain_space_toolbar_horizontal">12dp</dimen>
-    <dimen name="captain_space_page_bottom">88dp</dimen>
+    <dimen name="captain_space_page_bottom">24dp</dimen>
     <dimen name="captain_space_tab_margin_horizontal">20dp</dimen>
     <dimen name="captain_space_tab_margin_bottom">14dp</dimen>
 

@@ -29,6 +29,7 @@ import captain.R;
 
 // 主页面橱窗（九宫格） Tab
 public class MainShopTabView extends FrameLayout {
+    private GridAdapter gridAdapter;
 
     public MainShopTabView(@NonNull Context context) {
         super(context);
@@ -52,13 +53,21 @@ public class MainShopTabView extends FrameLayout {
 
     public void init(Context context) {
         inflate(context, R.layout.main_shop_tab_layout_new, this);
-        ((GridView) findViewById(R.id.gridview)).setAdapter(new GridAdapter(context));
+        GridView gridView = findViewById(R.id.gridview);
+        gridAdapter = new GridAdapter(context);
+        gridView.setAdapter(gridAdapter);
+    }
+
+    public void refreshVisibleItems() {
+        if (gridAdapter != null) {
+            gridAdapter.refreshItems();
+        }
     }
 
     private static class GridAdapter extends BaseAdapter {
-        private Context context;
-
-        private List<Item> list = new ArrayList<>();
+        private final Context context;
+        private final List<Item> allItems = new ArrayList<>();
+        private final List<Item> visibleItems = new ArrayList<>();
 
         public GridAdapter(Context mContext) {
             super();
@@ -67,21 +76,22 @@ public class MainShopTabView extends FrameLayout {
 //            list.add(new Item("信息二维马测试", R.drawable.zxing, QRTestActivity.class));
             Intent arActivityIntent = new Intent(context, QRActivity.class);
             arActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("信息二维码", R.drawable.zxing, arActivityIntent));
+            allItems.add(new Item("信息二维码", R.drawable.zxing, arActivityIntent, false));
             Intent ldlIntent = new Intent(context, LDLWebViewActivity.class);
             ldlIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
             ldlIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("乐动力", R.drawable.ledongli, ldlIntent));
+            allItems.add(new Item("乐动力", R.drawable.ledongli, ldlIntent, true));
             Intent lldIntent = new Intent(context, LLDWebViewActivity.class);
             lldIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
             lldIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("乐力动", R.drawable.ledongli, lldIntent));
+            allItems.add(new Item("乐力动", R.drawable.ledongli, lldIntent, false));
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("资源嗅探", R.drawable.download, xhsdActivityIntent));
+            allItems.add(new Item("资源监测", R.drawable.download, xhsdActivityIntent, false));
             Intent chessLobbyIntent = new Intent(context, ChessLobbyActivity.class);
             chessLobbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            list.add(new Item("国际象棋", R.drawable.ic_chess_feature, chessLobbyIntent));
+            allItems.add(new Item("国际象棋", R.drawable.ic_chess_feature, chessLobbyIntent, true));
+            refreshItems();
 //            // 一个的话直接跳
 //            if (list.size() == 1) {
 //                Item item = list.get(0);
@@ -92,12 +102,12 @@ public class MainShopTabView extends FrameLayout {
 
         @Override
         public int getCount() {
-            return list.size();
+            return visibleItems.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return position;
+            return visibleItems.get(position);
         }
 
         @Override
@@ -119,7 +129,7 @@ public class MainShopTabView extends FrameLayout {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            final Item item = list.get(position);
+            final Item item = visibleItems.get(position);
             holder.titleTxtView.setText(item.title);
             holder.iconImgView.setImageResource(item.iconRes);
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +141,17 @@ public class MainShopTabView extends FrameLayout {
             return convertView;
         }
 
+        public void refreshItems() {
+            visibleItems.clear();
+            boolean hiddenFeaturesEnabled = HiddenFeaturePrefs.isHiddenFeaturesEnabled(context);
+            for (Item item : allItems) {
+                if (!item.hidden || hiddenFeaturesEnabled) {
+                    visibleItems.add(item);
+                }
+            }
+            notifyDataSetChanged();
+        }
+
         class ViewHolder {
             TextView titleTxtView;
             ImageView iconImgView;
@@ -140,11 +161,13 @@ public class MainShopTabView extends FrameLayout {
             String title;
             int iconRes;
             Intent intent;
+            boolean hidden;
 
-            public Item(String title, int iconRes, Intent intent) {
+            public Item(String title, int iconRes, Intent intent, boolean hidden) {
                 this.title = title;
                 this.iconRes = iconRes;
                 this.intent = intent;
+                this.hidden = hidden;
             }
         }
 

@@ -3,12 +3,14 @@ package com.shuqiang.captain;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +26,10 @@ public class MeTabView extends FrameLayout {
     public static final String PRIVACY_POLICY_ITEM = "隐私政策";
     // 列表项数组
     public static final String[] ITEMS = { PRIVACY_POLICY_ITEM };
+    private static final int HIDDEN_FEATURE_TAP_TARGET = 6;
+    private static final long HIDDEN_FEATURE_TAP_TIMEOUT_MS = 1200L;
+    private int remainingTapCount = HIDDEN_FEATURE_TAP_TARGET;
+    private long lastTapTimestamp;
 
     public MeTabView(@NonNull Context context) {
         super(context);
@@ -48,7 +54,9 @@ public class MeTabView extends FrameLayout {
     public void init(Context context) {
         inflate(context, R.layout.me_tab_layout_new, this);
         // 版本号
-        ((TextView)findViewById(R.id.app_version)).setText("V" + Utils.getAppVersionName(context));
+        TextView versionView = findViewById(R.id.app_version);
+        versionView.setText("V" + Utils.getAppVersionName(context));
+        versionView.setOnClickListener(v -> onVersionClicked(context));
 
         RecyclerView recyclerView = findViewById(R.id.list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -92,6 +100,31 @@ public class MeTabView extends FrameLayout {
                 outRect.bottom = cardGap;
             }
         });
+    }
+
+    private void onVersionClicked(Context context) {
+        if (HiddenFeaturePrefs.isHiddenFeaturesEnabled(context)) {
+            return;
+        }
+        long now = SystemClock.elapsedRealtime();
+        if (now - lastTapTimestamp > HIDDEN_FEATURE_TAP_TIMEOUT_MS) {
+            remainingTapCount = HIDDEN_FEATURE_TAP_TARGET;
+        }
+        lastTapTimestamp = now;
+        remainingTapCount--;
+        if (remainingTapCount <= 0) {
+            if (HiddenFeaturePrefs.enableHiddenFeatures(context)) {
+                Toast.makeText(context, "隐藏功能已开启", Toast.LENGTH_SHORT).show();
+                if (context instanceof MainActivity) {
+                    ((MainActivity) context).refreshHomeTab();
+                }
+            }
+            remainingTapCount = HIDDEN_FEATURE_TAP_TARGET;
+            return;
+        }
+        if (remainingTapCount <= 2) {
+            Toast.makeText(context, "再点击" + remainingTapCount + "次开启隐藏功能", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {

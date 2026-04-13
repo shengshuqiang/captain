@@ -5,10 +5,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -27,6 +30,10 @@ public class MainActivity extends BaseActivity {
     private final String ME_TAB = "MeTab";
     // Tabs
     private final String[] TABS = { MAIN_SHOP_TAB, ME_TAB };
+    private MainShopTabView mainShopTabView;
+    private MeTabView meTabView;
+    private int tabBarBaseBottomMargin = Integer.MIN_VALUE;
+    private int viewPagerBaseBottomMargin = Integer.MIN_VALUE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +68,13 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void destroyItem(final View container, final int position, final Object object) {
-                ((ViewPager) container).removeView((View) object);
+                View view = (View) object;
+                ((ViewPager) container).removeView(view);
+                if (view == mainShopTabView) {
+                    mainShopTabView = null;
+                } else if (view == meTabView) {
+                    meTabView = null;
+                }
             }
 
             @Override
@@ -70,13 +83,19 @@ public class MainActivity extends BaseActivity {
                 switch (TABS[position]) {
                     case MAIN_SHOP_TAB:
                         // 主橱窗 Tab
-                        MainShopTabView mainShopTabView = new MainShopTabView(MainActivity.this);
+                        if (mainShopTabView == null) {
+                            mainShopTabView = new MainShopTabView(MainActivity.this);
+                        }
+                        detachFromParent(mainShopTabView);
                         container.addView(mainShopTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                         view = mainShopTabView;
                         break;
                     case ME_TAB:
                         // 我的 Tab
-                        MeTabView meTabView = new MeTabView(MainActivity.this);
+                        if (meTabView == null) {
+                            meTabView = new MeTabView(MainActivity.this);
+                        }
+                        detachFromParent(meTabView);
                         container.addView(meTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                         view = meTabView;
                         break;
@@ -106,6 +125,7 @@ public class MainActivity extends BaseActivity {
         );
         navigationTabBar.setModels(models);
         navigationTabBar.setViewPager(viewPager, 0);
+        bindBottomInset(viewPager, navigationTabBar);
 
         //IMPORTANT: ENABLE SCROLL BEHAVIOUR IN COORDINATOR LAYOUT
         navigationTabBar.setBehaviorEnabled(true);
@@ -119,6 +139,9 @@ public class MainActivity extends BaseActivity {
             public void onEndTabSelected(final NavigationTabBar.Model model, final int index) {
                 model.hideBadge();
                 updateShellTitle(index);
+                if (index == 0) {
+                    refreshHomeTab();
+                }
             }
         });
         navigationTabBar.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -130,6 +153,9 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onPageSelected(final int position) {
                 updateShellTitle(position);
+                if (position == 0) {
+                    refreshHomeTab();
+                }
             }
 
             @Override
@@ -151,6 +177,70 @@ public class MainActivity extends BaseActivity {
             actionBar.setTitle(R.string.captain_shell_title_profile);
         } else {
             actionBar.setTitle(R.string.captain_shell_title_home);
+        }
+    }
+
+    public void refreshHomeTab() {
+        if (mainShopTabView != null) {
+            mainShopTabView.refreshVisibleItems();
+        }
+    }
+
+    private void detachFromParent(View view) {
+        ViewParent parent = view.getParent();
+        if (parent instanceof ViewGroup) {
+            ((ViewGroup) parent).removeView(view);
+        }
+    }
+
+    // 底部浮层 TabBar 需要和系统导航区一起避让，避免页面末尾被遮挡后无法继续滚动。
+    private void bindBottomInset(ViewPager viewPager, NavigationTabBar navigationTabBar) {
+        View root = (View) viewPager.getParent();
+        if (root == null) {
+            return;
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            updateBottomSpacing(viewPager, navigationTabBar, insets == null ? 0 : insets.getSystemWindowInsetBottom());
+            return insets;
+        });
+        navigationTabBar.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if ((bottom - top) != (oldBottom - oldTop)) {
+                WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(root);
+                updateBottomSpacing(viewPager, navigationTabBar, insets == null ? 0 : insets.getSystemWindowInsetBottom());
+            }
+        });
+        root.post(() -> {
+            WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(root);
+            updateBottomSpacing(viewPager, navigationTabBar, insets == null ? 0 : insets.getSystemWindowInsetBottom());
+            ViewCompat.requestApplyInsets(root);
+        });
+    }
+
+    private void updateBottomSpacing(ViewPager viewPager, NavigationTabBar navigationTabBar, int navigationBarInset) {
+        ViewGroup.MarginLayoutParams tabBarLayoutParams =
+                (ViewGroup.MarginLayoutParams) navigationTabBar.getLayoutParams();
+        if (tabBarBaseBottomMargin == Integer.MIN_VALUE) {
+            tabBarBaseBottomMargin = tabBarLayoutParams.bottomMargin;
+        }
+        int targetTabBarBottomMargin = tabBarBaseBottomMargin + navigationBarInset;
+        if (tabBarLayoutParams.bottomMargin != targetTabBarBottomMargin) {
+            tabBarLayoutParams.bottomMargin = targetTabBarBottomMargin;
+            navigationTabBar.setLayoutParams(tabBarLayoutParams);
+        }
+
+        ViewGroup.MarginLayoutParams viewPagerLayoutParams =
+                (ViewGroup.MarginLayoutParams) viewPager.getLayoutParams();
+        if (viewPagerBaseBottomMargin == Integer.MIN_VALUE) {
+            viewPagerBaseBottomMargin = viewPagerLayoutParams.bottomMargin;
+        }
+        int tabBarHeight = navigationTabBar.getHeight();
+        if (tabBarHeight <= 0) {
+            tabBarHeight = getResources().getDimensionPixelSize(R.dimen.captain_size_tab_height);
+        }
+        int targetViewPagerBottomMargin = viewPagerBaseBottomMargin + tabBarHeight + targetTabBarBottomMargin;
+        if (viewPagerLayoutParams.bottomMargin != targetViewPagerBottomMargin) {
+            viewPagerLayoutParams.bottomMargin = targetViewPagerBottomMargin;
+            viewPager.setLayoutParams(viewPagerLayoutParams);
         }
     }
 }
