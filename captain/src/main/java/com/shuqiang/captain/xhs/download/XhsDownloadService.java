@@ -53,6 +53,7 @@ public class XhsDownloadService extends Service {
             return START_NOT_STICKY;
         }
         running = true;
+        XhsDownloadProgressStore.clear();
         startForeground(NOTIFICATION_ID, buildNotification(
                 getString(R.string.xhs_download_notification_title),
                 "准备开始保存",
@@ -136,6 +137,7 @@ public class XhsDownloadService extends Service {
     }
 
     private void dispatchProgress(XhsSaveSummary saveSummary) {
+        XhsDownloadProgressStore.update(saveSummary);
         sendBroadcast(XhsDownloadContract.buildProgressIntent(this, saveSummary));
     }
 

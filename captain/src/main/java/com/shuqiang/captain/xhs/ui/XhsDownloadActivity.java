@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.captain.base.BasePermissionActivity;
 import com.shuqiang.captain.xhs.download.XhsDownloadContract;
+import com.shuqiang.captain.xhs.download.XhsDownloadProgressStore;
 import com.shuqiang.captain.xhs.model.XhsMediaItem;
 import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
@@ -77,7 +78,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private TextView selectAllButton;
     private TextView clearSelectionButton;
     private TextView secondaryActionView;
-    private TextView clearButton;
     private Button parseButton;
     private Button saveButton;
     private RecyclerView mediaListView;
@@ -135,7 +135,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         selectAllButton = findViewById(R.id.select_all_button);
         clearSelectionButton = findViewById(R.id.clear_selection_button);
         secondaryActionView = findViewById(R.id.secondary_action);
-        clearButton = findViewById(R.id.clear_button);
         parseButton = findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
         mediaListView = findViewById(R.id.media_list);
@@ -158,12 +157,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             @Override
             public void onClick(View view) {
                 pasteFromClipboard();
-            }
-        });
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                clearCurrentContent();
             }
         });
         parseButton.setOnClickListener(new View.OnClickListener() {
@@ -254,6 +247,12 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     protected void onStart() {
         super.onStart();
         registerReceiver(downloadReceiver, new IntentFilter(XhsDownloadContract.ACTION_PROGRESS));
+        if (uiState == UiState.SAVING) {
+            XhsSaveSummary latestSummary = XhsDownloadProgressStore.getLatest();
+            if (latestSummary != null) {
+                applySaveSummary(latestSummary);
+            }
+        }
         if (autoParsePending) {
             autoParsePending = false;
             inputView.post(new Runnable() {
@@ -338,16 +337,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    private void clearCurrentContent() {
-        inputView.setText("");
-        currentParseResult = null;
-        lastSavedUri = null;
-        mediaAdapter.setItems(null);
-        resultContainer.setVisibility(View.GONE);
-        secondaryActionView.setVisibility(View.GONE);
-        setUiState(UiState.IDLE, getString(R.string.xhs_download_idle_status));
-    }
-
     private void startParse(boolean fromAutoTrigger) {
         if (uiState == UiState.SAVING) {
             Toast.makeText(this, "正在保存资源，请稍后再解析", Toast.LENGTH_SHORT).show();
@@ -395,6 +384,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private void applyParseResult(XhsParseResult parseResult) {
         currentParseResult = parseResult;
         lastSavedUri = null;
+        XhsDownloadProgressStore.clear();
         secondaryActionView.setVisibility(View.GONE);
         resultContainer.setVisibility(View.VISIBLE);
         metaTypeView.setText(parseResult.getPrimaryMediaType().getDisplayName() + " · " + parseResult.getMediaCount() + " 项");
@@ -420,6 +410,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private void applyParseError(XhsParserException parserException) {
         currentParseResult = null;
+        XhsDownloadProgressStore.clear();
         mediaAdapter.setItems(null);
         resultContainer.setVisibility(View.GONE);
         secondaryActionView.setVisibility(View.GONE);
@@ -457,7 +448,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         boolean saving = targetState == UiState.SAVING;
         inputView.setEnabled(!saving);
         pasteButton.setEnabled(!saving);
-        clearButton.setEnabled(!saving);
         selectAllButton.setEnabled(!saving);
         clearSelectionButton.setEnabled(!saving);
         switch (targetState) {
@@ -466,20 +456,17 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 statusProgress.setVisibility(View.VISIBLE);
                 parseButton.setEnabled(false);
                 saveButton.setEnabled(false);
-                clearButton.setText(R.string.xhs_download_clear);
                 break;
             case SAVE_SUCCESS:
             case SAVE_PARTIAL_SUCCESS:
                 statusProgress.setVisibility(View.GONE);
                 parseButton.setEnabled(true);
-                clearButton.setText(R.string.xhs_download_continue);
                 refreshSelectionSummary();
                 saveButton.setEnabled(false);
                 break;
             case PARSE_SUCCESS:
                 statusProgress.setVisibility(View.GONE);
                 parseButton.setEnabled(true);
-                clearButton.setText(R.string.xhs_download_clear);
                 refreshSelectionSummary();
                 break;
             case PARSE_FAILED:
@@ -487,7 +474,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             default:
                 statusProgress.setVisibility(View.GONE);
                 parseButton.setEnabled(true);
-                clearButton.setText(R.string.xhs_download_clear);
                 refreshSelectionSummary();
                 break;
         }
@@ -511,6 +497,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private void startSaveService() {
+        XhsDownloadProgressStore.clear();
+        lastSavedUri = null;
+        secondaryActionView.setVisibility(View.GONE);
         setUiState(UiState.SAVING, "正在准备保存资源…");
         Intent serviceIntent = XhsDownloadContract.buildStartIntent(this, currentParseResult);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
