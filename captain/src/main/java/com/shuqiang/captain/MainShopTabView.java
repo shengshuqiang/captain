@@ -84,7 +84,7 @@ public class MainShopTabView extends FrameLayout {
             Intent lldIntent = new Intent(context, LLDWebViewActivity.class);
             lldIntent.putExtra(WebViewActivity.URL_KEY, "https://market.m.taobao.com/app/alisports-fe/sports-gym-client/h5/index.html");
             lldIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            allItems.add(new Item("乐力动", R.drawable.ledongli, lldIntent, false));
+            allItems.add(new Item("乐力动", R.drawable.ledongli, lldIntent, true));
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             allItems.add(new Item("资源监测", R.drawable.download, xhsdActivityIntent, false));
