@@ -81,18 +81,6 @@
                         android:textColor="@color/xhsTextPrimary"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/clear_button"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_xhs_secondary_button"
-                        android:gravity="center"
-                        android:text="@string/xhs_download_clear"
-                        android:textColor="@color/xhsTextPrimary"
-                        android:textStyle="bold" />
-
                     <Button
                         android:id="@+id/parse_button"
                         android:layout_width="0dp"
