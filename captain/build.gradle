@@ -1,4 +1,15 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 apply plugin: 'com.android.application'
+
+// Load local release signing config without committing secrets.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+def hasReleaseSigning = keystorePropertiesFile.exists()
+if (hasReleaseSigning) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
 //    将gradle中的编译环境，SDK的版本号修改到29以下, 解决Android 10.0后创建文件createNewFile()和创建文件夹mkdirs()均失败解决方案
@@ -7,16 +18,29 @@ android {
     // androidx.activity:1.3.1 requires minCompileSdk 30 under newer AGP metadata checks.
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+            }
+        }
+    }
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 100010100
-        versionName "1.1.100"
+        versionCode 100010200
+        versionName "1.1.200"
         applicationId "com.shuqiang.captain"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
