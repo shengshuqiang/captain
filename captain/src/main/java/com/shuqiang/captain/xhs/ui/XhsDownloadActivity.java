@@ -62,7 +62,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private final ExecutorService parseExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private final XhsParseRepository parseRepository = new XhsParseRepository();
+    private XhsParseRepository parseRepository;
 
     private EditText inputView;
     private TextView statusText;
@@ -107,6 +107,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        parseRepository = new XhsParseRepository(this);
         setTitle(R.string.xhs_download_page_title);
         initViews();
         handleIncomingIntent(getIntent(), true);

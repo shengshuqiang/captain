@@ -1,5 +1,6 @@
 package com.shuqiang.captain.xhs.parser;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.shuqiang.captain.xhs.model.XhsParseError;
@@ -16,9 +17,16 @@ import okhttp3.Response;
  */
 public class XhsParseRepository {
     private static final String TAG = "XhsParseRepo";
+    private final Context context;
+
     private enum ParseRoute {
         XHS,
+        WEIXIN,
         GENERIC
+    }
+
+    public XhsParseRepository(Context context) {
+        this.context = context;
     }
 
     public XhsParseResult parse(String rawText, String entrySource) throws XhsParserException {
@@ -45,6 +53,10 @@ public class XhsParseRepository {
                     xhsParseInput.getEntrySource(),
                     pageFetchResult.strategy
             );
+        } else if (parseRoute == ParseRoute.WEIXIN) {
+            finalUrl = parseInput.getExtractedUrl();
+            linkType = "weixin_sph";
+            parseResult = WeixinSphRuntimeParser.parse(context, finalUrl, parseInput.getEntrySource());
         } else {
             finalUrl = parseInput.getExtractedUrl();
             linkType = "generic_url";
@@ -71,6 +83,9 @@ public class XhsParseRepository {
     private ParseRoute resolveRoute(String url) {
         if (XhsInputParser.isDirectLink(url) || XhsInputParser.isShortLink(url)) {
             return ParseRoute.XHS;
+        }
+        if (WeixinSphRuntimeParser.isSupportedUrl(url)) {
+            return ParseRoute.WEIXIN;
         }
         return ParseRoute.GENERIC;
     }
