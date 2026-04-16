@@ -68,7 +68,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private TextView statusText;
     private ProgressBar statusProgress;
     private View resultContainer;
-    private TextView pasteButton;
     private TextView metaTypeView;
     private TextView metaTitleView;
     private TextView metaAuthorView;
@@ -124,7 +123,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         statusText = findViewById(R.id.status_text);
         statusProgress = findViewById(R.id.status_progress);
         resultContainer = findViewById(R.id.result_container);
-        pasteButton = findViewById(R.id.paste_button);
         metaTypeView = findViewById(R.id.meta_type);
         metaTitleView = findViewById(R.id.meta_title);
         metaAuthorView = findViewById(R.id.meta_author);
@@ -150,13 +148,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         });
         mediaListView.setLayoutManager(new GridLayoutManager(this, 1));
         mediaListView.setAdapter(mediaAdapter);
-
-        pasteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                pasteFromClipboard();
-            }
-        });
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -278,26 +269,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     protected void onStop() {
         unregisterReceiver(downloadReceiver);
         super.onStop();
-    }
-
-    private void pasteFromClipboard() {
-        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboardManager == null || !clipboardManager.hasPrimaryClip()) {
-            Toast.makeText(this, "剪贴板暂无内容", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ClipData clipData = clipboardManager.getPrimaryClip();
-        if (clipData == null || clipData.getItemCount() == 0) {
-            Toast.makeText(this, "剪贴板暂无内容", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        CharSequence text = clipData.getItemAt(0).coerceToText(this);
-        if (TextUtils.isEmpty(text)) {
-            Toast.makeText(this, "剪贴板暂无可解析文本", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        inputView.setText(text);
-        inputView.setSelection(text.length());
     }
 
     private String readClipboardText() {
@@ -492,7 +463,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         statusText.setText(message);
         boolean saving = targetState == UiState.SAVING;
         inputView.setEnabled(!saving);
-        pasteButton.setEnabled(!saving);
         selectAllButton.setEnabled(!saving);
         switch (targetState) {
             case PARSING:
