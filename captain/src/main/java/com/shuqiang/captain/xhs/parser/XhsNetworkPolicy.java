@@ -27,9 +27,6 @@ public final class XhsNetworkPolicy {
     }
 
     public static boolean isAllowedMediaUrl(String url) {
-        if (url == null || url.isEmpty()) {
-            return false;
-        }
         try {
             URI uri = new URI(forceHttps(url));
             String scheme = uri.getScheme();
@@ -55,9 +52,6 @@ public final class XhsNetworkPolicy {
     }
 
     private static boolean isAllowedUrl(String url, String[] hostSuffixes) {
-        if (url == null || url.isEmpty()) {
-            return false;
-        }
         try {
             URI uri = new URI(forceHttps(url));
             String scheme = uri.getScheme();
