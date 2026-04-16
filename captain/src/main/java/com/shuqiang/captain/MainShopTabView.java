@@ -87,7 +87,7 @@ public class MainShopTabView extends FrameLayout {
             allItems.add(new Item("乐力动", R.drawable.ledongli, lldIntent, true));
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            allItems.add(new Item("资源监测", R.drawable.download, xhsdActivityIntent, false));
+            allItems.add(new Item("资源检测", R.drawable.download, xhsdActivityIntent, false));
             Intent chessLobbyIntent = new Intent(context, ChessLobbyActivity.class);
             chessLobbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             allItems.add(new Item("国际象棋", R.drawable.ic_chess_feature, chessLobbyIntent, true));
