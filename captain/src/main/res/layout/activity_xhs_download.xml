@@ -214,19 +214,6 @@
                         android:text="@string/xhs_download_select_all"
                         android:textColor="@color/xhsTextPrimary"
                         android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/clear_selection_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:layout_marginLeft="8dp"
-                        android:background="@drawable/bg_xhs_secondary_button"
-                        android:gravity="center"
-                        android:paddingLeft="12dp"
-                        android:paddingRight="12dp"
-                        android:text="@string/xhs_download_clear_selection"
-                        android:textColor="@color/xhsTextPrimary"
-                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView

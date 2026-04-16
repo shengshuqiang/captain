@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -13,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -76,7 +76,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private ImageView coverImageView;
     private TextView selectionSummaryView;
     private TextView selectAllButton;
-    private TextView clearSelectionButton;
     private TextView secondaryActionView;
     private Button parseButton;
     private Button saveButton;
@@ -86,8 +85,8 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private XhsParseResult currentParseResult;
     private XhsMediaAdapter mediaAdapter;
     private String lastSavedUri;
+    private String lastAttemptedInputText;
     private boolean autoParsePending;
-    private boolean clipboardPromptHandled;
 
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
@@ -134,7 +133,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         coverImageView = findViewById(R.id.cover_image);
         selectionSummaryView = findViewById(R.id.selection_summary);
         selectAllButton = findViewById(R.id.select_all_button);
-        clearSelectionButton = findViewById(R.id.clear_selection_button);
         secondaryActionView = findViewById(R.id.secondary_action);
         parseButton = findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
@@ -160,10 +158,26 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 pasteFromClipboard();
             }
         });
+        inputView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // no-op
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // no-op
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                refreshPrimaryParseAction();
+            }
+        });
         parseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startParse(false);
+                handleParseAction();
             }
         });
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -175,13 +189,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         selectAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateAllSelection(true);
-            }
-        });
-        clearSelectionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateAllSelection(false);
+                toggleBulkSelection();
             }
         });
         secondaryActionView.setOnClickListener(new View.OnClickListener() {
@@ -259,11 +267,11 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             inputView.post(new Runnable() {
                 @Override
                 public void run() {
-                    startParse(true);
+                    startParse("auto_parse");
                 }
             });
         } else {
-            maybePromptClipboardParse();
+            refreshPrimaryParseAction();
         }
     }
 
@@ -293,30 +301,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         inputView.setSelection(text.length());
     }
 
-    private void maybePromptClipboardParse() {
-        if (clipboardPromptHandled || !TextUtils.isEmpty(inputView.getText())) {
-            return;
-        }
-        final String clipboardText = readClipboardText();
-        if (TextUtils.isEmpty(clipboardText) || extractUrlFromText(clipboardText) == null) {
-            return;
-        }
-        clipboardPromptHandled = true;
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.xhs_download_clipboard_title)
-                .setMessage(R.string.xhs_download_clipboard_message)
-                .setPositiveButton(R.string.xhs_download_clipboard_parse, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        inputView.setText(clipboardText);
-                        inputView.setSelection(clipboardText.length());
-                        startParse(true);
-                    }
-                })
-                .setNegativeButton(R.string.xhs_download_clipboard_ignore, null)
-                .show();
-    }
-
     private String readClipboardText() {
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager == null || !clipboardManager.hasPrimaryClip()) {
@@ -338,7 +322,52 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    private void startParse(boolean fromAutoTrigger) {
+    private void refreshPrimaryParseAction() {
+        String currentInput = normalizeInput(inputView.getText().toString());
+        if (currentInput.isEmpty() && hasResolvableClipboardContent()) {
+            parseButton.setText(R.string.xhs_download_paste_and_parse);
+            return;
+        }
+        if (!currentInput.isEmpty() && !TextUtils.isEmpty(lastAttemptedInputText)
+                && !TextUtils.equals(currentInput, lastAttemptedInputText)) {
+            parseButton.setText(R.string.xhs_download_reparse);
+            return;
+        }
+        parseButton.setText(R.string.xhs_download_parse);
+    }
+
+    private boolean hasResolvableClipboardContent() {
+        return extractUrlFromText(readClipboardText()) != null;
+    }
+
+    private boolean shouldUseClipboardPrimaryAction() {
+        return normalizeInput(inputView.getText().toString()).isEmpty() && hasResolvableClipboardContent();
+    }
+
+    private String normalizeInput(String rawText) {
+        return rawText == null ? "" : rawText.trim();
+    }
+
+    /**
+     * 主按钮根据输入态在“粘贴并解析 / 解析 / 重新解析”之间切换。
+     */
+    private void handleParseAction() {
+        if (shouldUseClipboardPrimaryAction()) {
+            String clipboardText = readClipboardText();
+            if (TextUtils.isEmpty(clipboardText) || extractUrlFromText(clipboardText) == null) {
+                refreshPrimaryParseAction();
+                Toast.makeText(this, "请先粘贴网页分享文案或链接", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            inputView.setText(clipboardText);
+            inputView.setSelection(clipboardText.length());
+            startParse("clipboard_primary");
+            return;
+        }
+        startParse("manual_input");
+    }
+
+    private void startParse(String rawEntrySource) {
         if (uiState == UiState.SAVING) {
             Toast.makeText(this, "正在保存资源，请稍后再解析", Toast.LENGTH_SHORT).show();
             return;
@@ -348,10 +377,11 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             Toast.makeText(this, "请先粘贴网页分享文案或链接", Toast.LENGTH_SHORT).show();
             return;
         }
+        lastAttemptedInputText = normalizeInput(rawInput);
         setUiState(UiState.PARSING, getString(R.string.xhs_download_parsing_status));
         final String entrySource = Intent.ACTION_SEND.equals(getIntent().getAction())
                 ? "share_intent"
-                : (fromAutoTrigger ? "auto_parse" : "manual_input");
+                : rawEntrySource;
         parseExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -418,6 +448,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         setUiState(UiState.PARSE_FAILED, parserException.getMessage());
     }
 
+    private void toggleBulkSelection() {
+        if (currentParseResult == null || currentParseResult.getMediaCount() <= 1) {
+            return;
+        }
+        updateAllSelection(currentParseResult.getSelectedCount() < currentParseResult.getMediaCount());
+    }
+
     private void updateAllSelection(boolean selected) {
         if (currentParseResult == null || currentParseResult.getMediaItems() == null) {
             return;
@@ -432,6 +469,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private void refreshSelectionSummary() {
         if (currentParseResult == null) {
             selectionSummaryView.setText("已选择 0 / 0 项");
+            selectAllButton.setVisibility(View.GONE);
             saveButton.setText(getString(R.string.xhs_download_save_default));
             saveButton.setEnabled(false);
             return;
@@ -439,6 +477,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         int selectedCount = currentParseResult.getSelectedCount();
         int totalCount = currentParseResult.getMediaCount();
         selectionSummaryView.setText("已选择 " + selectedCount + " / " + totalCount + " 项");
+        boolean showBulkToggle = totalCount > 1;
+        selectAllButton.setVisibility(showBulkToggle ? View.VISIBLE : View.GONE);
+        if (showBulkToggle) {
+            selectAllButton.setText(selectedCount == totalCount
+                    ? R.string.xhs_download_select_none
+                    : R.string.xhs_download_select_all);
+        }
         saveButton.setText("保存 " + selectedCount + " 项");
         saveButton.setEnabled(selectedCount > 0 && uiState != UiState.SAVING);
     }
@@ -450,7 +495,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         inputView.setEnabled(!saving);
         pasteButton.setEnabled(!saving);
         selectAllButton.setEnabled(!saving);
-        clearSelectionButton.setEnabled(!saving);
         switch (targetState) {
             case PARSING:
             case SAVING:
@@ -478,6 +522,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 refreshSelectionSummary();
                 break;
         }
+        refreshPrimaryParseAction();
     }
 
     private void startSave() {
