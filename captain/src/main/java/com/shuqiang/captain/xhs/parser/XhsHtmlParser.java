@@ -72,17 +72,34 @@ public final class XhsHtmlParser {
         String parseStrategy = requestStrategy + " · meta";
         String videoUrl = firstNonEmpty(ogVideo, extractVideoUrl(noteObject));
         if (videoUrl != null && XhsNetworkPolicy.isAllowedMediaUrl(videoUrl)) {
+            String videoCoverUrl = firstNonEmpty(
+                    ogImage,
+                    extractVideoCoverUrl(noteObject, videoUrl)
+            );
             mediaItems.add(new XhsMediaItem(
-                    buildMediaId(noteId, 1),
+                    buildMediaId(noteId, mediaItems.size() + 1),
                     XhsMediaType.VIDEO,
                     videoUrl,
-                    ogImage,
+                    videoCoverUrl,
                     0,
                     0,
                     metaDuration > 0 ? metaDuration : extractVideoDuration(noteObject),
                     guessExtension(videoUrl, XhsMediaType.VIDEO),
                     true
             ));
+            if (videoCoverUrl != null && XhsNetworkPolicy.isAllowedMediaUrl(videoCoverUrl)) {
+                mediaItems.add(new XhsMediaItem(
+                        buildMediaId(noteId, mediaItems.size() + 1),
+                        XhsMediaType.IMAGE,
+                        videoCoverUrl,
+                        videoCoverUrl,
+                        0,
+                        0,
+                        0,
+                        guessExtension(videoCoverUrl, XhsMediaType.IMAGE),
+                        true
+                ));
+            }
             parseStrategy = noteObject != null ? requestStrategy + " · meta + initialState" : requestStrategy + " · meta";
         } else if (noteObject != null) {
             mediaItems.addAll(extractImageItems(noteObject, noteId));
@@ -294,6 +311,79 @@ public final class XhsHtmlParser {
             }
         }
         return 0;
+    }
+
+    private static String extractVideoCoverUrl(JsonObject noteObject, String videoUrl) {
+        if (noteObject == null) {
+            return null;
+        }
+        return findFirstCoverUrl(noteObject.get("video"), videoUrl, "", 0);
+    }
+
+    /**
+     * 只接受字段语义或 URL 形态明显像封面的候选，避免把播放清单误当成图片资源。
+     */
+    private static String findFirstCoverUrl(JsonElement node, String videoUrl, String fieldPath, int depth) {
+        if (node == null || node.isJsonNull() || depth > 12) {
+            return null;
+        }
+        if (node.isJsonObject()) {
+            JsonObject object = node.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+                String childPath = fieldPath.isEmpty() ? entry.getKey() : fieldPath + "." + entry.getKey();
+                String childUrl = findFirstCoverUrl(entry.getValue(), videoUrl, childPath, depth + 1);
+                if (childUrl != null) {
+                    return childUrl;
+                }
+            }
+        } else if (node.isJsonArray()) {
+            JsonArray array = node.getAsJsonArray();
+            for (JsonElement element : array) {
+                String childUrl = findFirstCoverUrl(element, videoUrl, fieldPath, depth + 1);
+                if (childUrl != null) {
+                    return childUrl;
+                }
+            }
+        } else if (node.isJsonPrimitive()) {
+            String candidate = normalizeResourceUrl(node.getAsString());
+            if (isLikelyVideoCoverUrl(candidate, videoUrl, fieldPath)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isLikelyVideoCoverUrl(String candidate, String videoUrl, String fieldPath) {
+        if (candidate == null || !XhsNetworkPolicy.isAllowedMediaUrl(candidate) || candidate.equals(videoUrl)) {
+            return false;
+        }
+        String lowerUrl = candidate.toLowerCase(Locale.US);
+        if (lowerUrl.contains(".mp4") || lowerUrl.contains(".m3u8") || lowerUrl.contains(".mpd")) {
+            return false;
+        }
+        return isLikelyCoverField(fieldPath) || isLikelyImageUrl(lowerUrl);
+    }
+
+    private static boolean isLikelyCoverField(String fieldPath) {
+        if (fieldPath == null || fieldPath.isEmpty()) {
+            return false;
+        }
+        String lowerPath = fieldPath.toLowerCase(Locale.US);
+        return lowerPath.contains("cover")
+                || lowerPath.contains("poster")
+                || lowerPath.contains("image")
+                || lowerPath.contains("thumbnail")
+                || lowerPath.contains("thumb");
+    }
+
+    private static boolean isLikelyImageUrl(String lowerUrl) {
+        return lowerUrl.contains(".jpg")
+                || lowerUrl.contains(".jpeg")
+                || lowerUrl.contains(".png")
+                || lowerUrl.contains(".webp")
+                || lowerUrl.contains(".gif")
+                || lowerUrl.contains(".heic")
+                || lowerUrl.contains(".avif");
     }
 
     private static String findFirstMediaUrl(JsonElement node, boolean preferMp4, int depth) {

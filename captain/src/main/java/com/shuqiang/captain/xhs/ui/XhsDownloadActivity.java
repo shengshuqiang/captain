@@ -16,6 +16,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +43,7 @@ import com.shuqiang.captain.xhs.parser.XhsParserException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Locale;
 
 import captain.R;
 
@@ -49,6 +52,7 @@ import captain.R;
  */
 public class XhsDownloadActivity extends BasePermissionActivity {
     public static final String EXTRA_INPUT_TEXT = "extra_input_text";
+    private static final int CLIPBOARD_HINT_MAX_LENGTH = 80;
 
     private enum UiState {
         IDLE,
@@ -63,6 +67,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private final ExecutorService parseExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final XhsParseRepository parseRepository = new XhsParseRepository();
+    private final ClipboardManager.OnPrimaryClipChangedListener primaryClipChangedListener =
+            new ClipboardManager.OnPrimaryClipChangedListener() {
+                @Override
+                public void onPrimaryClipChanged() {
+                    refreshPrimaryParseAction();
+                }
+            };
 
     private EditText inputView;
     private TextView statusText;
@@ -83,6 +94,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private UiState uiState = UiState.IDLE;
     private XhsParseResult currentParseResult;
     private XhsMediaAdapter mediaAdapter;
+    private ClipboardManager clipboardManager;
     private String lastSavedUri;
     private String lastAttemptedInputText;
     private boolean autoParsePending;
@@ -134,6 +146,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         parseButton = findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
         mediaListView = findViewById(R.id.media_list);
+        clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
             @Override
@@ -246,6 +259,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     protected void onStart() {
         super.onStart();
         registerReceiver(downloadReceiver, new IntentFilter(XhsDownloadContract.ACTION_PROGRESS));
+        if (clipboardManager != null) {
+            clipboardManager.addPrimaryClipChangedListener(primaryClipChangedListener);
+        }
         if (uiState == UiState.SAVING) {
             XhsSaveSummary latestSummary = XhsDownloadProgressStore.getLatest();
             if (latestSummary != null) {
@@ -261,18 +277,36 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 }
             });
         } else {
-            refreshPrimaryParseAction();
+            inputView.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshPrimaryParseAction();
+                    focusInputIfNeeded();
+                }
+            });
         }
     }
 
     @Override
     protected void onStop() {
+        if (clipboardManager != null) {
+            clipboardManager.removePrimaryClipChangedListener(primaryClipChangedListener);
+        }
         unregisterReceiver(downloadReceiver);
         super.onStop();
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus) {
+            return;
+        }
+        refreshPrimaryParseAction();
+        focusInputIfNeeded();
+    }
+
     private String readClipboardText() {
-        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager == null || !clipboardManager.hasPrimaryClip()) {
             return null;
         }
@@ -294,10 +328,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private void refreshPrimaryParseAction() {
         String currentInput = normalizeInput(inputView.getText().toString());
-        if (currentInput.isEmpty() && hasResolvableClipboardContent()) {
+        String clipboardText = readClipboardText();
+        if (currentInput.isEmpty() && extractUrlFromText(clipboardText) != null) {
             parseButton.setText(R.string.xhs_download_paste_and_parse);
+            inputView.setHint(buildClipboardHint(clipboardText));
             return;
         }
+        inputView.setHint(R.string.xhs_download_input_hint);
         if (!currentInput.isEmpty() && !TextUtils.isEmpty(lastAttemptedInputText)
                 && !TextUtils.equals(currentInput, lastAttemptedInputText)) {
             parseButton.setText(R.string.xhs_download_reparse);
@@ -316,6 +353,60 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private String normalizeInput(String rawText) {
         return rawText == null ? "" : rawText.trim();
+    }
+
+    private String buildClipboardHint(String clipboardText) {
+        String normalizedHint = normalizeInput(clipboardText).replaceAll("\\s+", " ");
+        if (normalizedHint.isEmpty()) {
+            return getString(R.string.xhs_download_input_hint);
+        }
+        if (normalizedHint.length() <= CLIPBOARD_HINT_MAX_LENGTH) {
+            return normalizedHint;
+        }
+        return normalizedHint.substring(0, CLIPBOARD_HINT_MAX_LENGTH - 3) + "...";
+    }
+
+    private void focusInputIfNeeded() {
+        if (autoParsePending || currentParseResult != null || !inputView.isEnabled()) {
+            return;
+        }
+        if (!inputView.isFocused()) {
+            inputView.requestFocus();
+        }
+        inputView.setSelection(inputView.getText().length());
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(inputView, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    /**
+     * 优先按实际保存结果的 URI 推断类型，避免混合资源场景被主类型带偏。
+     */
+    private String resolveSavedMimeType(Uri uri) {
+        try {
+            String contentMimeType = getContentResolver().getType(uri);
+            if (!TextUtils.isEmpty(contentMimeType)) {
+                return contentMimeType;
+            }
+        } catch (Exception ignored) {
+            // 降级到扩展名推断。
+        }
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (!TextUtils.isEmpty(extension)) {
+            String mappedMimeType = MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(extension.toLowerCase(Locale.US));
+            if (!TextUtils.isEmpty(mappedMimeType)) {
+                return mappedMimeType;
+            }
+        }
+        if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.VIDEO) {
+            return "video/*";
+        }
+        if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
+            return "application/pdf";
+        }
+        return "image/*";
     }
 
     /**
@@ -549,12 +640,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 Uri uri = Uri.parse(lastSavedUri);
-                String mimeType = "image/*";
-                if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.VIDEO) {
-                    mimeType = "video/*";
-                } else if (currentParseResult != null && currentParseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
-                    mimeType = "application/pdf";
-                }
+                String mimeType = resolveSavedMimeType(uri);
                 intent.setDataAndType(uri, mimeType);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
