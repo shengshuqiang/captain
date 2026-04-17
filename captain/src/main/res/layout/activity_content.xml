@@ -65,7 +65,7 @@
     <devlight.io.library.ntb.NavigationTabBar
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/captain_size_tab_height"
+        android:layout_height="@dimen/captain_size_bottom_bar_height"
         android:layout_gravity="bottom"
         android:layout_marginStart="@dimen/captain_space_tab_margin_horizontal"
         android:layout_marginEnd="@dimen/captain_space_tab_margin_horizontal"

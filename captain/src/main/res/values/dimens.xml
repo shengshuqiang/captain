@@ -37,7 +37,6 @@
     <!-- ============================================ -->
     <!-- 船长App视觉Token - 尺寸底线 -->
     <!-- ============================================ -->
-    <dimen name="captain_size_tab_height">56dp</dimen>
     <dimen name="captain_size_tab_icon">24dp</dimen>
     <dimen name="captain_size_button_height">44dp</dimen>
     <dimen name="captain_size_list_item_height">56dp</dimen>

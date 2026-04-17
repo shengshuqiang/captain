@@ -261,7 +261,7 @@ public class MainActivity extends BaseActivity {
         }
         int tabBarHeight = navigationTabBar.getHeight();
         if (tabBarHeight <= 0) {
-            tabBarHeight = getResources().getDimensionPixelSize(R.dimen.captain_size_tab_height);
+            tabBarHeight = getResources().getDimensionPixelSize(R.dimen.captain_size_bottom_bar_height);
         }
         contentBottomInset = tabBarHeight + targetTabBarBottomMargin;
         if (mainShopTabView != null) {

@@ -1,1 +1,4 @@
-<resources></resources>
+<resources>
+    <!-- 主壳层 TabBar 与隐私弹窗底部操作区共用的 56dp 高度基线。 -->
+    <dimen name="captain_size_bottom_bar_height">56dp</dimen>
+</resources>
