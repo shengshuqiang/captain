@@ -73,4 +73,25 @@ public class GenericWebSniffParserTest {
         Assert.assertEquals("https://cdn.example.com/images/share-cover.jpg",
                 parseResult.getMediaItems().get(0).getMediaUrl());
     }
+
+    @Test
+    public void parseDoesNotTreatHlsPlaylistAsDownloadableVideo() throws Exception {
+        String html = "<html><head>"
+                + "<title>HLS 分享页</title>"
+                + "<meta property=\"og:video\" content=\"https://cdn.example.com/video/demo.m3u8\"/>"
+                + "<meta property=\"og:image\" content=\"https://cdn.example.com/video/demo-cover.jpg\"/>"
+                + "</head><body></body></html>";
+
+        XhsParseResult parseResult = GenericWebSniffParser.parse(
+                html,
+                "https://example.com/post/hls",
+                "manual_input",
+                "desktop"
+        );
+
+        Assert.assertEquals(1, parseResult.getMediaCount());
+        Assert.assertEquals(XhsMediaType.IMAGE, parseResult.getPrimaryMediaType());
+        Assert.assertEquals("https://cdn.example.com/video/demo-cover.jpg",
+                parseResult.getMediaItems().get(0).getMediaUrl());
+    }
 }

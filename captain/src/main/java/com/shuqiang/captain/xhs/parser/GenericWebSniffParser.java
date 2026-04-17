@@ -271,6 +271,9 @@ public final class GenericWebSniffParser {
         if (candidateUrl == null || mediaType == null || !XhsNetworkPolicy.isAllowedMediaUrl(candidateUrl)) {
             return;
         }
+        if (mediaType == XhsMediaType.VIDEO && isHlsPlaylist(candidateUrl, null)) {
+            return;
+        }
         String normalizedUrl = normalizeUrl(candidateUrl);
         if (normalizedUrl == null || mediaMap.containsKey(normalizedUrl)) {
             return;
@@ -306,6 +309,9 @@ public final class GenericWebSniffParser {
     private static XhsMediaType inferMediaType(String url, String hint) {
         String lowerUrl = url == null ? "" : url.toLowerCase(Locale.US);
         String lowerHint = hint == null ? "" : hint.toLowerCase(Locale.US);
+        if (isHlsPlaylist(lowerUrl, lowerHint)) {
+            return null;
+        }
         if (lowerUrl.contains(".pdf") || lowerHint.contains("application/pdf") || lowerHint.contains("pdf")) {
             return XhsMediaType.PDF;
         }
@@ -314,7 +320,7 @@ public final class GenericWebSniffParser {
                 || containsAny(lowerUrl, ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".avif", ".heic")) {
             return XhsMediaType.IMAGE;
         }
-        if (containsAny(lowerUrl, ".mp4", ".m3u8", ".webm", ".mov", ".m4v")
+        if (containsAny(lowerUrl, ".mp4", ".webm", ".mov", ".m4v")
                 || containsAny(lowerHint, "video/", "og:video", "twitter:player", "itemprop=\"video\"", "itemprop=video", "videoobject")) {
             return XhsMediaType.VIDEO;
         }
@@ -328,6 +334,14 @@ public final class GenericWebSniffParser {
             }
         }
         return false;
+    }
+
+    // HLS 只是播放清单，当前保存链路不会拉分片或转封装，不能当成可离线保存的视频。
+    private static boolean isHlsPlaylist(String url, String hint) {
+        String lowerUrl = url == null ? "" : url.toLowerCase(Locale.US);
+        String lowerHint = hint == null ? "" : hint.toLowerCase(Locale.US);
+        return containsAny(lowerUrl, ".m3u8")
+                || containsAny(lowerHint, "mpegurl", "application/vnd.apple.mpegurl", "application/x-mpegurl");
     }
 
     private static String guessExtension(String mediaUrl, XhsMediaType mediaType) {

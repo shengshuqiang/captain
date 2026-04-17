@@ -112,8 +112,7 @@ public class BaseWebViewClient extends WebViewClient {
 
 	@Override
 	public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-//                super.onReceivedSslError(view, handler, error);
-//                避免ssl证书失败空白页
-		handler.proceed();
+		Log.w("TitansOffline", "Blocked page due to SSL error: " + (error == null ? "unknown" : error.getPrimaryError()));
+		handler.cancel();
 	}
 }
