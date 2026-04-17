@@ -32,6 +32,7 @@ public class MainActivity extends BaseActivity {
     private final String[] TABS = { MAIN_SHOP_TAB, ME_TAB };
     private MainShopTabView mainShopTabView;
     private MeTabView meTabView;
+    private NavigationTabBar navigationTabBar;
     private int tabBarBaseBottomMargin = Integer.MIN_VALUE;
     private int viewPagerBaseBottomMargin = Integer.MIN_VALUE;
     private int contentBottomInset;
@@ -109,7 +110,7 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        final NavigationTabBar navigationTabBar = (NavigationTabBar) findViewById(R.id.tab_bar);
+        navigationTabBar = (NavigationTabBar) findViewById(R.id.tab_bar);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
@@ -204,8 +205,19 @@ public class MainActivity extends BaseActivity {
         if (viewPager == null) {
             return;
         }
+        // 直接调 ViewPager#setCurrentItem(false) 会绕过 NavigationTabBar 的索引刷新链路，
+        // 导致首页回调不稳定，所以统一从 TabBar 切换并在下一帧强制刷新首页入口。
+        if (navigationTabBar != null
+                && (navigationTabBar.getModelIndex() != 0 || viewPager.getCurrentItem() != 0)) {
+            navigationTabBar.setModelIndex(0, true);
+            updateShellTitle(0);
+            viewPager.post(this::refreshHomeTab);
+            return;
+        }
         if (viewPager.getCurrentItem() != 0) {
-            viewPager.setCurrentItem(0, false);
+            viewPager.setCurrentItem(0, true);
+            updateShellTitle(0);
+            viewPager.post(this::refreshHomeTab);
             return;
         }
         updateShellTitle(0);
