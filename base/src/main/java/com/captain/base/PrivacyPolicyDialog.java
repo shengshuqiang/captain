@@ -22,22 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
-import android.text.style.URLSpan;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -149,15 +133,12 @@ public class PrivacyPolicyDialog extends DialogFragment {
             }
 
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
-            // 循环遍历并拦截 所有http://开头的链接
+            // 统一交给应用内 WebView，避免弹窗里的本地/远端链接走到系统默认处理。
             for (URLSpan uri : urlSpans) {
                 String url = uri.getURL();
-                // 兼容 https:// 和 http://
-                if (url.startsWith("http")) {
-                    CustomUrlSpan customUrlSpan = new CustomUrlSpan(textview.getContext(), url);
-                    spannableStringBuilder.setSpan(customUrlSpan, spannable.getSpanStart(uri),
-                            spannable.getSpanEnd(uri), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                }
+                CustomUrlSpan customUrlSpan = new CustomUrlSpan(textview.getContext(), url);
+                spannableStringBuilder.setSpan(customUrlSpan, spannable.getSpanStart(uri),
+                        spannable.getSpanEnd(uri), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
             }
             textview.setText(spannableStringBuilder);
         }
