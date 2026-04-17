@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:minHeight="@dimen/captain_size_home_launcher_item_min_height"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/captain_space_inline"
+    android:paddingBottom="@dimen/captain_space_inline">
+
+    <FrameLayout
+        android:id="@+id/icon_tile"
+        android:layout_width="@dimen/captain_size_home_launcher_tile"
+        android:layout_height="@dimen/captain_size_home_launcher_tile"
+        android:background="@drawable/bg_icon_tile"
+        android:foreground="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/captain_size_home_launcher_icon"
+            android:layout_height="@dimen/captain_size_home_launcher_icon"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/grid_item_icon_description"
+            android:scaleType="centerInside" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/CaptainText.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/captain_space_home_launcher_label_top"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:maxWidth="@dimen/captain_size_home_launcher_label_max_width"
+        android:textColor="@color/captain_text_primary" />
+
+</LinearLayout>

@@ -1,76 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<androidx.recyclerview.widget.RecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_recycler_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/captain_surface_page"
-    android:fillViewport="true">
-
-    <LinearLayout
-        android:id="@+id/main_shop_scroll_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/captain_space_page_bottom">
-
-        <!-- ============================================ -->
-        <!-- 欢迎区 (Hero Section) -->
-        <!-- ============================================ -->
-        <LinearLayout
-            android:id="@+id/hero_section"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_hero_gradient"
-            android:orientation="vertical"
-            android:padding="@dimen/captain_space_hero_inner">
-
-            <TextView
-                android:id="@+id/hero_eyebrow"
-                style="@style/CaptainText.Overline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/captain_hero_eyebrow" />
-
-            <!-- 品牌标题 -->
-            <TextView
-                android:id="@+id/hero_title"
-                style="@style/CaptainText.Hero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/captain_space_inline"
-                android:text="@string/captain_hero_title"
-                android:layout_marginBottom="@dimen/captain_space_inline" />
-
-            <!-- 副标题 -->
-            <TextView
-                android:id="@+id/hero_subtitle"
-                style="@style/CaptainText.Body"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/captain_hero_subtitle"
-                android:textColor="@color/captain_text_secondary" />
-
-        </LinearLayout>
-
-        <!-- ============================================ -->
-        <!-- 功能入口区 (GridView 保持兼容) -->
-        <!-- ============================================ -->
-        <GridView
-            android:id="@+id/gridview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/captain_space_block"
-            android:paddingStart="@dimen/captain_space_page_horizontal"
-            android:paddingEnd="@dimen/captain_space_page_horizontal"
-            android:clipToPadding="false"
-            android:numColumns="2"
-            android:listSelector="@android:color/transparent"
-            android:horizontalSpacing="@dimen/captain_space_card_gap"
-            android:verticalSpacing="@dimen/captain_space_card_gap"
-            android:scrollbars="none"
-            android:stretchMode="columnWidth" />
-
-    </LinearLayout>
-
-</androidx.core.widget.NestedScrollView>
+    android:clipToPadding="false"
+    android:overScrollMode="ifContentScrolls"
+    android:paddingStart="@dimen/captain_space_page_horizontal"
+    android:paddingTop="@dimen/captain_space_block"
+    android:paddingEnd="@dimen/captain_space_page_horizontal"
+    android:paddingBottom="@dimen/captain_space_page_bottom"
+    android:scrollbars="none" />

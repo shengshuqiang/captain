@@ -76,6 +76,7 @@ public final class XhsHtmlParser {
                     ogImage,
                     extractVideoCoverUrl(noteObject, videoUrl)
             );
+            // 视频页只保留一条视频媒体，封面挂在 coverUrl 上，避免把封面误算成第二个媒体项。
             mediaItems.add(new XhsMediaItem(
                     buildMediaId(noteId, mediaItems.size() + 1),
                     XhsMediaType.VIDEO,
@@ -87,19 +88,6 @@ public final class XhsHtmlParser {
                     guessExtension(videoUrl, XhsMediaType.VIDEO),
                     true
             ));
-            if (videoCoverUrl != null && XhsNetworkPolicy.isAllowedMediaUrl(videoCoverUrl)) {
-                mediaItems.add(new XhsMediaItem(
-                        buildMediaId(noteId, mediaItems.size() + 1),
-                        XhsMediaType.IMAGE,
-                        videoCoverUrl,
-                        videoCoverUrl,
-                        0,
-                        0,
-                        0,
-                        guessExtension(videoCoverUrl, XhsMediaType.IMAGE),
-                        true
-                ));
-            }
             parseStrategy = noteObject != null ? requestStrategy + " · meta + initialState" : requestStrategy + " · meta";
         } else if (noteObject != null) {
             mediaItems.addAll(extractImageItems(noteObject, noteId));

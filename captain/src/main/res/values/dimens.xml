@@ -50,6 +50,12 @@
     <dimen name="captain_size_feature_card_min_height">156dp</dimen>
     <dimen name="captain_size_feature_title_max_width">120dp</dimen>
     <dimen name="captain_space_feature_title_top">12dp</dimen>
+    <dimen name="captain_size_home_launcher_tile">58dp</dimen>
+    <dimen name="captain_size_home_launcher_icon">30dp</dimen>
+    <dimen name="captain_size_home_launcher_item_min_height">92dp</dimen>
+    <dimen name="captain_size_home_launcher_label_max_width">88dp</dimen>
+    <dimen name="captain_space_home_launcher_label_top">8dp</dimen>
+    <dimen name="captain_space_home_hero_inner">20dp</dimen>
     <dimen name="captain_elevation_tab_shell">10dp</dimen>
 
     <!-- ============================================ -->
