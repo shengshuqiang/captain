@@ -97,6 +97,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private ClipboardManager clipboardManager;
     private String lastSavedUri;
     private String lastAttemptedInputText;
+    private String lastClipboardSnapshotAtParse;
     private boolean autoParsePending;
 
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
@@ -328,10 +329,12 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private void refreshPrimaryParseAction() {
         String currentInput = normalizeInput(inputView.getText().toString());
-        String clipboardText = readClipboardText();
-        if (currentInput.isEmpty() && extractUrlFromText(clipboardText) != null) {
+        String clipboardText = normalizeInput(readClipboardText());
+        if (shouldOfferClipboardPrimaryAction(currentInput, clipboardText)) {
             parseButton.setText(R.string.xhs_download_paste_and_parse);
-            inputView.setHint(buildClipboardHint(clipboardText));
+            inputView.setHint(currentInput.isEmpty()
+                    ? buildClipboardHint(clipboardText)
+                    : getString(R.string.xhs_download_input_hint));
             return;
         }
         inputView.setHint(R.string.xhs_download_input_hint);
@@ -344,11 +347,32 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private boolean hasResolvableClipboardContent() {
-        return extractUrlFromText(readClipboardText()) != null;
+        return hasResolvableClipboardContent(readClipboardText());
     }
 
     private boolean shouldUseClipboardPrimaryAction() {
-        return normalizeInput(inputView.getText().toString()).isEmpty() && hasResolvableClipboardContent();
+        String currentInput = normalizeInput(inputView.getText().toString());
+        String clipboardText = normalizeInput(readClipboardText());
+        return shouldOfferClipboardPrimaryAction(currentInput, clipboardText);
+    }
+
+    /**
+     * 当输入框仍停留在上次解析内容、而剪贴板出现新的可解析链接时，主按钮切回“粘贴&解析”。
+     */
+    private boolean shouldOfferClipboardPrimaryAction(String currentInput, String clipboardText) {
+        if (!hasResolvableClipboardContent(clipboardText)) {
+            return false;
+        }
+        if (currentInput.isEmpty()) {
+            return true;
+        }
+        return !TextUtils.isEmpty(lastAttemptedInputText)
+                && TextUtils.equals(currentInput, lastAttemptedInputText)
+                && !TextUtils.equals(clipboardText, lastClipboardSnapshotAtParse);
+    }
+
+    private boolean hasResolvableClipboardContent(String clipboardText) {
+        return extractUrlFromText(clipboardText) != null;
     }
 
     private String normalizeInput(String rawText) {
@@ -439,6 +463,8 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             return;
         }
         lastAttemptedInputText = normalizeInput(rawInput);
+        // 记录本次解析开始时的剪贴板基线，后续只在出现“新剪贴板内容”时切回粘贴主动作。
+        lastClipboardSnapshotAtParse = normalizeInput(readClipboardText());
         setUiState(UiState.PARSING, getString(R.string.xhs_download_parsing_status));
         final String entrySource = Intent.ACTION_SEND.equals(getIntent().getAction())
                 ? "share_intent"
