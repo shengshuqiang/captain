@@ -42,6 +42,7 @@ public class ChessLobbyActivity extends BaseChessActivity {
     private Button resumeButton;
     private ChessDeviceAdapter deviceAdapter;
     private int pendingAction = ACTION_NONE;
+    private int pendingPermissionMask = ChessBluetoothPermissionManager.PERMISSION_NONE;
     private String pendingDeviceAddress;
     private String launchedGameId;
     private boolean onboardingRedirected;
@@ -64,7 +65,8 @@ public class ChessLobbyActivity extends BaseChessActivity {
         deviceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         deviceAdapter = new ChessDeviceAdapter(device -> {
             pendingDeviceAddress = device.getAddress();
-            ensureBluetoothReady(false, ACTION_CONNECT);
+            ensureBluetoothReady(ChessBluetoothPermissionManager.PERMISSION_CONNECT
+                    | ChessBluetoothPermissionManager.PERMISSION_SCAN, ACTION_CONNECT);
         });
         deviceRecyclerView.setAdapter(deviceAdapter);
         findViewById(R.id.edit_profile_button).setOnClickListener(v -> {
@@ -74,8 +76,10 @@ public class ChessLobbyActivity extends BaseChessActivity {
         });
         findViewById(R.id.history_button).setOnClickListener(v ->
                 startActivity(new Intent(this, ChessHistoryActivity.class)));
-        hostButton.setOnClickListener(v -> ensureBluetoothReady(false, ACTION_HOST));
-        scanButton.setOnClickListener(v -> ensureBluetoothReady(true, ACTION_DISCOVER));
+        hostButton.setOnClickListener(v -> ensureBluetoothReady(ChessBluetoothPermissionManager.PERMISSION_CONNECT
+                | ChessBluetoothPermissionManager.PERMISSION_ADVERTISE, ACTION_HOST));
+        scanButton.setOnClickListener(v -> ensureBluetoothReady(ChessBluetoothPermissionManager.PERMISSION_CONNECT
+                | ChessBluetoothPermissionManager.PERMISSION_SCAN, ACTION_DISCOVER));
         resumeButton.setOnClickListener(v -> startActivity(new Intent(this, ChessGameActivity.class)));
         applySeatSelection(chessManager.getLastSeatPreference());
         bindProfile(chessManager.getLocalProfile());
@@ -162,22 +166,17 @@ public class ChessLobbyActivity extends BaseChessActivity {
         return ChessSeatPreference.RANDOM;
     }
 
-    private void ensureBluetoothReady(boolean includeDiscovery, int action) {
+    private void ensureBluetoothReady(int permissionMask, int action) {
         if (!chessManager.isBluetoothSupported()) {
             onErrorMessage(getString(R.string.chess_bluetooth_unsupported));
             return;
         }
         pendingAction = action;
-        if (ChessBluetoothPermissionManager.requestPermissionsIfNeeded(this, includeDiscovery)) {
+        pendingPermissionMask = permissionMask;
+        if (ChessBluetoothPermissionManager.requestPermissionsIfNeeded(this, permissionMask)) {
             return;
         }
-        BluetoothAdapter adapter = chessManager.getBluetoothAdapter();
-        if (adapter != null && !adapter.isEnabled()) {
-            startActivityForResult(ChessBluetoothPermissionManager.createEnableBluetoothIntent(),
-                    ChessBluetoothPermissionManager.REQUEST_CODE_ENABLE_BLUETOOTH);
-            return;
-        }
-        executePendingAction();
+        continuePendingActionWithBluetoothCheck();
     }
 
     private void continuePendingActionWithBluetoothCheck() {
@@ -187,23 +186,33 @@ public class ChessLobbyActivity extends BaseChessActivity {
                     ChessBluetoothPermissionManager.REQUEST_CODE_ENABLE_BLUETOOTH);
             return;
         }
+        if (pendingAction == ACTION_HOST && ChessBluetoothPermissionManager.requiresPermission(
+                pendingPermissionMask, ChessBluetoothPermissionManager.PERMISSION_ADVERTISE)) {
+            startActivityForResult(ChessBluetoothPermissionManager.createDiscoverableIntent(),
+                    ChessBluetoothPermissionManager.REQUEST_CODE_ENABLE_DISCOVERABLE);
+            return;
+        }
         executePendingAction();
     }
 
     private void executePendingAction() {
         int action = pendingAction;
+        String deviceAddress = pendingDeviceAddress;
         pendingAction = ACTION_NONE;
+        pendingPermissionMask = ChessBluetoothPermissionManager.PERMISSION_NONE;
+        pendingDeviceAddress = null;
         if (action == ACTION_HOST) {
             chessManager.startHosting(getSelectedSeatPreference());
         } else if (action == ACTION_DISCOVER) {
             chessManager.startDiscovery(getSelectedSeatPreference());
-        } else if (action == ACTION_CONNECT && !TextUtils.isEmpty(pendingDeviceAddress)) {
-            chessManager.connectToDevice(pendingDeviceAddress);
+        } else if (action == ACTION_CONNECT && !TextUtils.isEmpty(deviceAddress)) {
+            chessManager.connectToDevice(deviceAddress);
         }
     }
 
     private void clearPendingAction() {
         pendingAction = ACTION_NONE;
+        pendingPermissionMask = ChessBluetoothPermissionManager.PERMISSION_NONE;
         pendingDeviceAddress = null;
     }
 
@@ -213,13 +222,13 @@ public class ChessLobbyActivity extends BaseChessActivity {
         if (requestCode == ChessBluetoothPermissionManager.REQUEST_CODE_BLUETOOTH_PERMISSIONS) {
             if (grantResults.length == 0) {
                 clearPendingAction();
-                onErrorMessage(getString(R.string.chess_enable_bluetooth));
+                onErrorMessage(getString(R.string.chess_enable_bluetooth_permissions));
                 return;
             }
             for (int grantResult : grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     clearPendingAction();
-                    onErrorMessage(getString(R.string.chess_enable_bluetooth));
+                    onErrorMessage(getString(R.string.chess_enable_bluetooth_permissions));
                     return;
                 }
             }
@@ -232,11 +241,20 @@ public class ChessLobbyActivity extends BaseChessActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ChessBluetoothPermissionManager.REQUEST_CODE_ENABLE_BLUETOOTH) {
             if (resultCode == RESULT_OK) {
-                executePendingAction();
+                continuePendingActionWithBluetoothCheck();
             } else {
                 clearPendingAction();
                 onErrorMessage(getString(R.string.chess_enable_bluetooth));
             }
+            return;
+        }
+        if (requestCode == ChessBluetoothPermissionManager.REQUEST_CODE_ENABLE_DISCOVERABLE) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                clearPendingAction();
+                onErrorMessage(getString(R.string.chess_enable_discoverable));
+                return;
+            }
+            executePendingAction();
         }
     }
 }

@@ -124,4 +124,6 @@
     <string name="chess_connection_status">联机状态</string>
     <string name="chess_bluetooth_unsupported">当前设备不支持蓝牙国际象棋对战</string>
     <string name="chess_enable_bluetooth">请先开启蓝牙后再继续</string>
+    <string name="chess_enable_bluetooth_permissions">请先授权附近设备权限后再继续</string>
+    <string name="chess_enable_discoverable">请允许本机被附近设备发现后再创建房间</string>
 </resources>

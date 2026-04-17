@@ -608,7 +608,15 @@ public class ChessManager implements ChessBluetoothService.Listener {
 
     private String getDeviceName() {
         BluetoothAdapter adapter = bluetoothService.getBluetoothAdapter();
-        return adapter == null ? "Captain Device" : adapter.getName();
+        if (adapter == null) {
+            return "Captain Device";
+        }
+        try {
+            String deviceName = adapter.getName();
+            return TextUtils.isEmpty(deviceName) ? "Captain Device" : deviceName;
+        } catch (SecurityException ignore) {
+            return "Captain Device";
+        }
     }
 
     private void emitSnapshot() {

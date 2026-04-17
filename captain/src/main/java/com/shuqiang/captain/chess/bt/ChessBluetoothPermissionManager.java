@@ -16,9 +16,17 @@ import java.util.List;
 public final class ChessBluetoothPermissionManager {
     public static final int REQUEST_CODE_BLUETOOTH_PERMISSIONS = 0xC811;
     public static final int REQUEST_CODE_ENABLE_BLUETOOTH = 0xC812;
+    public static final int REQUEST_CODE_ENABLE_DISCOVERABLE = 0xC813;
+    public static final int PERMISSION_NONE = 0;
+    // Align runtime permission requests with the exact Bluetooth capability each action uses.
+    public static final int PERMISSION_CONNECT = 1;
+    public static final int PERMISSION_SCAN = 1 << 1;
+    public static final int PERMISSION_ADVERTISE = 1 << 2;
+    public static final int HOST_DISCOVERABLE_DURATION_SECONDS = 300;
     private static final int SDK_31 = 31;
     private static final String PERMISSION_BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
     private static final String PERMISSION_BLUETOOTH_CONNECT = "android.permission.BLUETOOTH_CONNECT";
+    private static final String PERMISSION_BLUETOOTH_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE";
     private static final String PERMISSION_ACCESS_FINE_LOCATION = "android.permission.ACCESS_FINE_LOCATION";
 
     private ChessBluetoothPermissionManager() {
@@ -28,12 +36,18 @@ public final class ChessBluetoothPermissionManager {
         return new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
     }
 
-    public static boolean hasRequiredPermissions(Context context, boolean includeDiscovery) {
-        return getMissingPermissions(context, includeDiscovery).isEmpty();
+    public static Intent createDiscoverableIntent() {
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, HOST_DISCOVERABLE_DURATION_SECONDS);
+        return intent;
     }
 
-    public static boolean requestPermissionsIfNeeded(Activity activity, boolean includeDiscovery) {
-        List<String> missingPermissions = getMissingPermissions(activity, includeDiscovery);
+    public static boolean hasRequiredPermissions(Context context, int permissionMask) {
+        return getMissingPermissions(context, permissionMask).isEmpty();
+    }
+
+    public static boolean requestPermissionsIfNeeded(Activity activity, int permissionMask) {
+        List<String> missingPermissions = getMissingPermissions(activity, permissionMask);
         if (missingPermissions.isEmpty()) {
             return false;
         }
@@ -42,20 +56,33 @@ public final class ChessBluetoothPermissionManager {
         return true;
     }
 
-    public static List<String> getMissingPermissions(Context context, boolean includeDiscovery) {
+    public static List<String> getMissingPermissions(Context context, int permissionMask) {
         List<String> permissions = new ArrayList<>();
-        int targetSdk = context.getApplicationInfo().targetSdkVersion;
-        if (Build.VERSION.SDK_INT >= SDK_31 && targetSdk >= SDK_31) {
-            addIfMissing(context, permissions, PERMISSION_BLUETOOTH_CONNECT);
-            if (includeDiscovery) {
-                addIfMissing(context, permissions, PERMISSION_BLUETOOTH_SCAN);
-            }
+        if (permissionMask == PERMISSION_NONE) {
             return permissions;
         }
-        if (includeDiscovery && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        int targetSdk = context.getApplicationInfo().targetSdkVersion;
+        if (Build.VERSION.SDK_INT >= SDK_31) {
+            if (requiresPermission(permissionMask, PERMISSION_CONNECT)) {
+                addIfMissing(context, permissions, PERMISSION_BLUETOOTH_CONNECT);
+            }
+            if (requiresPermission(permissionMask, PERMISSION_SCAN)) {
+                addIfMissing(context, permissions, PERMISSION_BLUETOOTH_SCAN);
+            }
+            if (requiresPermission(permissionMask, PERMISSION_ADVERTISE)) {
+                addIfMissing(context, permissions, PERMISSION_BLUETOOTH_ADVERTISE);
+            }
+        }
+        if (requiresPermission(permissionMask, PERMISSION_SCAN)
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && targetSdk < SDK_31) {
             addIfMissing(context, permissions, PERMISSION_ACCESS_FINE_LOCATION);
         }
         return permissions;
+    }
+
+    public static boolean requiresPermission(int permissionMask, int permission) {
+        return (permissionMask & permission) != 0;
     }
 
     public static boolean isPermissionGranted(Context context, String permission) {

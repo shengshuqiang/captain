@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import captain.R;
+
 public class ChessBluetoothService {
     private static final String SERVICE_NAME = "CaptainChess";
     private static final UUID SERVICE_UUID = UUID.fromString("8f2d48f7-7e1a-4b5b-8e13-6f6c6b5dfab4");
@@ -73,24 +75,29 @@ public class ChessBluetoothService {
             listener.onError("当前设备不支持蓝牙");
             return;
         }
+        if (!ensurePermissions(ChessBluetoothPermissionManager.PERMISSION_CONNECT
+                | ChessBluetoothPermissionManager.PERMISSION_SCAN)) {
+            return;
+        }
         registerReceiverIfNeeded();
         scannedDeviceMap.clear();
-        if (bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.cancelDiscovery();
-        }
-        for (BluetoothDevice bondedDevice : bluetoothAdapter.getBondedDevices()) {
-            addDevice(bondedDevice);
-        }
-        if (!bluetoothAdapter.startDiscovery()) {
-            listener.onError("蓝牙搜索启动失败");
+        cancelDiscoverySafely();
+        try {
+            for (BluetoothDevice bondedDevice : bluetoothAdapter.getBondedDevices()) {
+                addDevice(bondedDevice);
+            }
+            if (!bluetoothAdapter.startDiscovery()) {
+                listener.onError("蓝牙搜索启动失败");
+                dispatchDevices();
+            }
+        } catch (SecurityException exception) {
+            dispatchPermissionError();
             dispatchDevices();
         }
     }
 
     public void stopDiscovery() {
-        if (bluetoothAdapter != null && bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.cancelDiscovery();
-        }
+        cancelDiscoverySafely();
         unregisterReceiverIfNeeded();
     }
 
@@ -101,6 +108,9 @@ public class ChessBluetoothService {
     public void startHosting() {
         if (bluetoothAdapter == null) {
             listener.onError("当前设备不支持蓝牙");
+            return;
+        }
+        if (!ensurePermissions(ChessBluetoothPermissionManager.PERMISSION_CONNECT)) {
             return;
         }
         disconnect();
@@ -117,14 +127,18 @@ public class ChessBluetoothService {
             listener.onError("未选择可连接的设备");
             return;
         }
+        if (!ensurePermissions(ChessBluetoothPermissionManager.PERMISSION_CONNECT
+                | ChessBluetoothPermissionManager.PERMISSION_SCAN)) {
+            return;
+        }
         try {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            if (bluetoothAdapter.isDiscovering()) {
-                bluetoothAdapter.cancelDiscovery();
-            }
+            cancelDiscoverySafely();
             closeConnectThread();
             connectThread = new ConnectThread(device);
             connectThread.start();
+        } catch (SecurityException exception) {
+            dispatchPermissionError();
         } catch (Exception exception) {
             listener.onError("连接设备失败: " + exception.getMessage());
         }
@@ -177,12 +191,16 @@ public class ChessBluetoothService {
         if (device == null || TextUtils.isEmpty(device.getAddress())) {
             return;
         }
-        String name = device.getName();
+        String name = "附近设备";
+        try {
+            name = device.getName();
+        } catch (SecurityException ignore) {
+        }
         if (TextUtils.isEmpty(name)) {
             name = "附近设备";
         }
         scannedDeviceMap.put(device.getAddress(), new ChessScannedDevice(name, device.getAddress(),
-                device.getBondState() == BluetoothDevice.BOND_BONDED));
+                isBondedDevice(device)));
         dispatchDevices();
     }
 
@@ -195,7 +213,7 @@ public class ChessBluetoothService {
         closeConnectThread();
         closeConnectedThread();
         activeSocket = socket;
-        remoteDeviceName = socket.getRemoteDevice() == null ? "" : socket.getRemoteDevice().getName();
+        remoteDeviceName = getRemoteDeviceName(socket);
         suppressConnectionLostCallback = false;
         transportFailureHandled = false;
         connectedThread = new ConnectedThread(socket);
@@ -241,6 +259,52 @@ public class ChessBluetoothService {
         }
     }
 
+    private boolean ensurePermissions(int permissionMask) {
+        if (ChessBluetoothPermissionManager.hasRequiredPermissions(appContext, permissionMask)) {
+            return true;
+        }
+        dispatchPermissionError();
+        return false;
+    }
+
+    private void cancelDiscoverySafely() {
+        if (bluetoothAdapter == null
+                || !ChessBluetoothPermissionManager.hasRequiredPermissions(appContext,
+                ChessBluetoothPermissionManager.PERMISSION_SCAN)) {
+            return;
+        }
+        try {
+            if (bluetoothAdapter.isDiscovering()) {
+                bluetoothAdapter.cancelDiscovery();
+            }
+        } catch (SecurityException ignore) {
+        }
+    }
+
+    private boolean isBondedDevice(BluetoothDevice device) {
+        try {
+            return device.getBondState() == BluetoothDevice.BOND_BONDED;
+        } catch (SecurityException ignore) {
+            return false;
+        }
+    }
+
+    private String getRemoteDeviceName(BluetoothSocket socket) {
+        if (socket == null || socket.getRemoteDevice() == null) {
+            return "";
+        }
+        try {
+            String deviceName = socket.getRemoteDevice().getName();
+            return TextUtils.isEmpty(deviceName) ? "" : deviceName;
+        } catch (SecurityException ignore) {
+            return "";
+        }
+    }
+
+    private void dispatchPermissionError() {
+        listener.onError(appContext.getString(R.string.chess_enable_bluetooth_permissions));
+    }
+
     private void closeSocket(BluetoothSocket socket) {
         if (socket != null) {
             try {
@@ -274,6 +338,8 @@ public class ChessBluetoothService {
         AcceptThread() {
             try {
                 serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord(SERVICE_NAME, SERVICE_UUID);
+            } catch (SecurityException exception) {
+                dispatchPermissionError();
             } catch (IOException exception) {
                 listener.onError("Host 监听创建失败: " + exception.getMessage());
             }
@@ -318,6 +384,8 @@ public class ChessBluetoothService {
             this.device = device;
             try {
                 socket = device.createRfcommSocketToServiceRecord(SERVICE_UUID);
+            } catch (SecurityException exception) {
+                dispatchPermissionError();
             } catch (IOException exception) {
                 listener.onError("创建连接通道失败: " + exception.getMessage());
             }
@@ -331,6 +399,11 @@ public class ChessBluetoothService {
             try {
                 socket.connect();
                 onSocketReady(socket, false);
+            } catch (SecurityException exception) {
+                closeSocket(socket);
+                if (!cancelled) {
+                    dispatchPermissionError();
+                }
             } catch (IOException exception) {
                 closeSocket(socket);
                 if (!cancelled) {
