@@ -116,7 +116,7 @@ public class MeTabView extends FrameLayout {
             if (HiddenFeaturePrefs.enableHiddenFeatures(context)) {
                 Toast.makeText(context, "隐藏功能已开启", Toast.LENGTH_SHORT).show();
                 if (context instanceof MainActivity) {
-                    ((MainActivity) context).refreshHomeTab();
+                    ((MainActivity) context).switchToHomeTab();
                 }
             }
             remainingTapCount = HIDDEN_FEATURE_TAP_TARGET;

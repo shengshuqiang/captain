@@ -34,6 +34,7 @@ public class MainActivity extends BaseActivity {
     private MeTabView meTabView;
     private int tabBarBaseBottomMargin = Integer.MIN_VALUE;
     private int viewPagerBaseBottomMargin = Integer.MIN_VALUE;
+    private int contentBottomInset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,7 @@ public class MainActivity extends BaseActivity {
                         if (mainShopTabView == null) {
                             mainShopTabView = new MainShopTabView(MainActivity.this);
                         }
+                        mainShopTabView.setBottomContentInset(contentBottomInset);
                         detachFromParent(mainShopTabView);
                         container.addView(mainShopTabView, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                         view = mainShopTabView;
@@ -186,6 +188,20 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    // 隐藏功能开启后切回首页，确保新增入口立即可见。
+    public void switchToHomeTab() {
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        if (viewPager == null) {
+            return;
+        }
+        if (viewPager.getCurrentItem() != 0) {
+            viewPager.setCurrentItem(0, false);
+            return;
+        }
+        updateShellTitle(0);
+        refreshHomeTab();
+    }
+
     private void detachFromParent(View view) {
         ViewParent parent = view.getParent();
         if (parent instanceof ViewGroup) {
@@ -237,7 +253,11 @@ public class MainActivity extends BaseActivity {
         if (tabBarHeight <= 0) {
             tabBarHeight = getResources().getDimensionPixelSize(R.dimen.captain_size_tab_height);
         }
-        int targetViewPagerBottomMargin = viewPagerBaseBottomMargin + tabBarHeight + targetTabBarBottomMargin;
+        contentBottomInset = tabBarHeight + targetTabBarBottomMargin;
+        if (mainShopTabView != null) {
+            mainShopTabView.setBottomContentInset(contentBottomInset);
+        }
+        int targetViewPagerBottomMargin = viewPagerBaseBottomMargin + contentBottomInset;
         if (viewPagerLayoutParams.bottomMargin != targetViewPagerBottomMargin) {
             viewPagerLayoutParams.bottomMargin = targetViewPagerBottomMargin;
             viewPager.setLayoutParams(viewPagerLayoutParams);
