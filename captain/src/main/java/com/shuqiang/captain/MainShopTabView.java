@@ -29,7 +29,11 @@ import captain.R;
 
 // 主页面橱窗（九宫格） Tab
 public class MainShopTabView extends FrameLayout {
+    // 算算乐仅支持离线 H5，直接从 APK assets 打开本地页面。
+    private static final String SUAN_SUAN_LE_ASSET_URL = "file:///android_asset/suansuanle/index.html";
     private GridAdapter gridAdapter;
+    private View contentContainer;
+    private int contentBasePaddingBottom = Integer.MIN_VALUE;
 
     public MainShopTabView(@NonNull Context context) {
         super(context);
@@ -53,9 +57,30 @@ public class MainShopTabView extends FrameLayout {
 
     public void init(Context context) {
         inflate(context, R.layout.main_shop_tab_layout_new, this);
+        contentContainer = findViewById(R.id.main_shop_scroll_content);
         GridView gridView = findViewById(R.id.gridview);
         gridAdapter = new GridAdapter(context);
         gridView.setAdapter(gridAdapter);
+    }
+
+    // 首页功能区需要额外留出 TabBar 避让空间，保证最后一行卡片可以完整滚到可视区。
+    public void setBottomContentInset(int bottomInset) {
+        if (contentContainer == null) {
+            return;
+        }
+        if (contentBasePaddingBottom == Integer.MIN_VALUE) {
+            contentBasePaddingBottom = contentContainer.getPaddingBottom();
+        }
+        int targetPaddingBottom = contentBasePaddingBottom + Math.max(bottomInset, 0);
+        if (contentContainer.getPaddingBottom() == targetPaddingBottom) {
+            return;
+        }
+        contentContainer.setPadding(
+                contentContainer.getPaddingLeft(),
+                contentContainer.getPaddingTop(),
+                contentContainer.getPaddingRight(),
+                targetPaddingBottom
+        );
     }
 
     public void refreshVisibleItems() {
@@ -88,6 +113,11 @@ public class MainShopTabView extends FrameLayout {
             Intent xhsdActivityIntent = new Intent(context, XhsDownloadActivity.class);
             xhsdActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             allItems.add(new Item("资源检测", R.drawable.download, xhsdActivityIntent, false));
+            Intent suansuanleIntent = new Intent(context, WebViewActivity.class);
+            suansuanleIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            suansuanleIntent.putExtra(WebViewActivity.URL_KEY, SUAN_SUAN_LE_ASSET_URL);
+            suansuanleIntent.putExtra(WebViewActivity.TITLE_KEY, context.getString(R.string.feature_suansuanle_title));
+            allItems.add(new Item(context.getString(R.string.feature_suansuanle_title), R.drawable.ic_suansuanle_feature, suansuanleIntent, false));
             Intent chessLobbyIntent = new Intent(context, ChessLobbyActivity.class);
             chessLobbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             allItems.add(new Item("国际象棋", R.drawable.ic_chess_feature, chessLobbyIntent, true));
@@ -132,6 +162,9 @@ public class MainShopTabView extends FrameLayout {
             final Item item = visibleItems.get(position);
             holder.titleTxtView.setText(item.title);
             holder.iconImgView.setImageResource(item.iconRes);
+            convertView.setBackgroundResource(item.hidden
+                    ? R.drawable.bg_card_hidden_feature
+                    : R.drawable.bg_card);
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

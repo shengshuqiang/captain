@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      href="./favicon.ico"
+      type="image/x-icon"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>算算乐</title>
+    <style>
+      html {
+        /* 设置rem基准单位，相对于 750px 宽度手机 */
+        font-size: calc(100vw / 7.5);
+        height: 100%;
+        width: 100%;
+      }
+      body {
+        margin: 0;
+      }
+      .swal2-popup {
+        /* swal2 里面通过 em 设置大小，必须重置回去 */
+        font-size: 16px !important;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

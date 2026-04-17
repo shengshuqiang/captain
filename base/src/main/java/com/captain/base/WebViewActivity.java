@@ -10,20 +10,10 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 public class WebViewActivity extends BasePermissionActivity {
     public static final String URL_KEY = "url";
-    // 离线化 url 映射关系
-    private static Map<Integer, String> OFFLINE_URL_MAP = new HashMap<>();
-    static {
-        // 隐私政策 url
-        OFFLINE_URL_MAP.put(R.string.captain_privacy_policy_url, "captain_privacy_policy.html");
-        OFFLINE_URL_MAP.put(R.string.captain_privacy, "captain_privacy.png");
-        OFFLINE_URL_MAP.put(R.string.shengshuqiang_weixin, "shengshuqiang-weixin.jpg");
-        OFFLINE_URL_MAP.put(R.string.captain_v, "captain.v.1.1.100.png");
-    }
+    public static final String TITLE_KEY = "title";
 
     @Override
     protected int getContentLayoutResource() {
@@ -42,12 +32,17 @@ public class WebViewActivity extends BasePermissionActivity {
                 FrameLayout.LayoutParams.MATCH_PARENT
         ));
         String url= getIntent().getStringExtra(URL_KEY);
-        syncToolbarTitle(url);
+        String title = getIntent().getStringExtra(TITLE_KEY);
+        syncToolbarTitle(title, url);
         Log.d("MCPN", "TestWebViewActivity#loadUrl, url=" + url);
         webView.loadUrl(url);
     }
 
-    private void syncToolbarTitle(String url) {
+    private void syncToolbarTitle(@Nullable String title, @Nullable String url) {
+        if (!TextUtils.isEmpty(title)) {
+            setTitle(title);
+            return;
+        }
         if (TextUtils.equals(url, getString(R.string.captain_privacy_policy_url))) {
             setTitle(R.string.privacy_policy_title);
         }
@@ -65,6 +60,7 @@ public class WebViewActivity extends BasePermissionActivity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
 //        打开webview debug模式
         webView.setWebContentsDebuggingEnabled(true);
         webSettings.setAllowFileAccessFromFileURLs(true);

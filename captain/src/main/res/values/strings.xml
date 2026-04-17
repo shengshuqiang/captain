@@ -57,6 +57,7 @@
     <string name="captain_me_intro">船长，帮你把麻烦的小事处理得更轻松。欢迎通过微信「shengshuqiang01」或邮件「shengssu@mail.ustc.edu.cn」和我聊聊。</string>
     <string name="grid_item_icon_description">功能图标</string>
     <string name="feature_icon">功能图标</string>
+    <string name="feature_suansuanle_title">算算乐</string>
 
     <!-- 国际象棋 -->
     <string name="chess_title">国际象棋</string>
