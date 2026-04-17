@@ -188,6 +188,16 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        if (viewPager != null && viewPager.getCurrentItem() != 0) {
+            switchToHomeTab();
+            return;
+        }
+        super.onBackPressed();
+    }
+
     // 隐藏功能开启后切回首页，确保新增入口立即可见。
     public void switchToHomeTab() {
         ViewPager viewPager = findViewById(R.id.view_pager);
