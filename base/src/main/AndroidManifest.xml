@@ -12,11 +12,7 @@
         android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".WebViewActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".LDLWebViewActivity"
             android:label="乐动力">

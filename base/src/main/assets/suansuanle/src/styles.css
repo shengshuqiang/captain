@@ -1,0 +1,351 @@
+.ssl-page {
+  min-height: 100vh;
+  padding: 0.32rem 0.28rem 0.6rem;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top right, rgba(255, 222, 89, 0.22), transparent 32%),
+    linear-gradient(180deg, #fffaf2 0%, #f3f6ff 52%, #eef4f9 100%);
+  color: #241c2d;
+}
+
+.ssl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.24rem;
+}
+
+.ssl-title {
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.02rem;
+}
+
+.ssl-ghost-button,
+.ssl-primary-button,
+.ssl-key,
+.ssl-record-button,
+.ssl-voice-button {
+  border-radius: 0.18rem;
+  border: none;
+  box-shadow: 0 0.08rem 0.18rem rgba(36, 28, 45, 0.08);
+}
+
+.ssl-ghost-button {
+  min-width: 1.42rem;
+  padding: 0.18rem 0.26rem;
+  background: #ffffff;
+  color: #3c3351;
+  font-size: 0.26rem;
+  font-weight: 600;
+}
+
+.ssl-topbar {
+  display: flex;
+  gap: 0.2rem;
+  align-items: stretch;
+}
+
+.ssl-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 0.24rem;
+  box-shadow: 0 0.12rem 0.24rem rgba(36, 28, 45, 0.06);
+}
+
+.ssl-timer-card {
+  width: 3rem;
+  min-height: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.24rem;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 30% 20%, #ffd15f, transparent 32%),
+    linear-gradient(180deg, #2d2438 0%, #110d16 100%);
+  color: #fffdf7;
+}
+
+.ssl-timer-emoji {
+  font-size: 0.64rem;
+  line-height: 1;
+}
+
+.ssl-timer-text {
+  margin-top: 0.14rem;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.02rem;
+}
+
+.ssl-score-card {
+  flex: 1;
+  min-height: 2.2rem;
+  padding: 0.28rem 0.32rem;
+  box-sizing: border-box;
+}
+
+.ssl-score-title {
+  font-size: 0.48rem;
+  font-weight: 700;
+}
+
+.ssl-score-desc {
+  margin-top: 0.12rem;
+  font-size: 0.34rem;
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+.ssl-canvas {
+  width: 100%;
+  height: 3.3rem;
+  margin-top: 0.24rem;
+  padding: 0.16rem;
+  box-sizing: border-box;
+  border-radius: 0.24rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0.12rem 0.24rem rgba(36, 28, 45, 0.06);
+}
+
+.ssl-feedback {
+  min-height: 0.56rem;
+  margin-top: 0.18rem;
+  padding: 0 0.08rem;
+  color: #c23b2d;
+  font-size: 0.28rem;
+  font-weight: 600;
+}
+
+.ssl-keyboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.14rem;
+  margin-top: 0.12rem;
+}
+
+.ssl-key {
+  min-height: 0.98rem;
+  font-size: 0.42rem;
+  font-weight: 700;
+  color: #20192b;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.ssl-key:disabled {
+  color: #9a92a6;
+  background: rgba(236, 232, 241, 0.96);
+  box-shadow: none;
+}
+
+.ssl-key--action {
+  font-size: 0.3rem;
+  font-weight: 700;
+}
+
+.ssl-key--submit {
+  color: #f7fff3;
+  background: linear-gradient(135deg, #4d7f39 0%, #7da642 100%);
+}
+
+.ssl-voice-panel {
+  display: flex;
+  gap: 0.16rem;
+  align-items: center;
+  margin-top: 0.22rem;
+  padding: 0.22rem 0.24rem;
+}
+
+.ssl-voice-button {
+  min-width: 2rem;
+  min-height: 0.9rem;
+  padding: 0 0.28rem;
+  background: linear-gradient(135deg, #f95f4c 0%, #ff9b5d 100%);
+  color: #fffaf7;
+  font-size: 0.3rem;
+  font-weight: 700;
+}
+
+.ssl-voice-button:disabled {
+  background: #c3bccd;
+}
+
+.ssl-voice-status {
+  flex: 1;
+  font-size: 0.26rem;
+  line-height: 1.5;
+  color: #5b5467;
+}
+
+.ssl-finish {
+  margin-top: 0.24rem;
+  padding: 0.28rem;
+  box-sizing: border-box;
+}
+
+.ssl-finish[hidden] {
+  display: none;
+}
+
+.ssl-finish-title {
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #ff5a47;
+}
+
+.ssl-finish-summary,
+.ssl-finish-detail {
+  margin-top: 0.14rem;
+  font-size: 0.3rem;
+  line-height: 1.6;
+}
+
+.ssl-primary-button {
+  width: 100%;
+  min-height: 0.96rem;
+  margin-top: 0.24rem;
+  background: linear-gradient(135deg, #f2b734 0%, #f78f29 100%);
+  color: #1f1712;
+  font-size: 0.32rem;
+  font-weight: 800;
+}
+
+.ssl-record-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.12rem;
+  margin-top: 0.24rem;
+}
+
+.ssl-record-button {
+  min-height: 0.9rem;
+  font-size: 0.32rem;
+  font-weight: 700;
+  color: #1b1723;
+  background: #e8e3ef;
+}
+
+.ssl-record-button--right {
+  background: #8fe0ad;
+}
+
+.ssl-record-button--wrong {
+  background: #ff8a80;
+}
+
+.ssl-record-button--empty {
+  background: #c9c1d4;
+}
+
+.ssl-record-button--selected {
+  outline: 0.06rem solid #5674ff;
+}
+
+.ssl-record-button--modify {
+  color: #f0a300;
+}
+
+.ssl-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.32rem;
+  box-sizing: border-box;
+  background: rgba(17, 13, 22, 0.42);
+  z-index: 20;
+}
+
+.ssl-modal[hidden] {
+  display: none;
+}
+
+.ssl-modal-card {
+  width: min(6.4rem, calc(100vw - 0.64rem));
+  padding: 0.36rem 0.32rem 0.28rem;
+  box-sizing: border-box;
+  border-radius: 0.28rem;
+  background: #fffdf9;
+  box-shadow: 0 0.2rem 0.4rem rgba(36, 28, 45, 0.14);
+}
+
+.ssl-modal-title {
+  font-size: 0.4rem;
+  font-weight: 800;
+}
+
+.ssl-modal-desc {
+  margin-top: 0.12rem;
+  color: #625b6f;
+  font-size: 0.26rem;
+  line-height: 1.5;
+}
+
+.ssl-field {
+  margin-top: 0.24rem;
+}
+
+.ssl-field-label {
+  display: block;
+  margin-bottom: 0.14rem;
+  font-size: 0.26rem;
+  font-weight: 700;
+}
+
+.ssl-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.12rem;
+}
+
+.ssl-radio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  padding: 0.16rem 0.18rem;
+  border-radius: 999px;
+  background: #f3edf8;
+  font-size: 0.24rem;
+}
+
+.ssl-select {
+  width: 100%;
+  min-height: 0.84rem;
+  padding: 0 0.2rem;
+  border: 0.02rem solid #d9d0e7;
+  border-radius: 0.18rem;
+  background: #ffffff;
+  font-size: 0.28rem;
+}
+
+.ssl-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 0.42rem;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 0.6rem);
+  padding: 0.18rem 0.26rem;
+  border-radius: 999px;
+  background: rgba(36, 28, 45, 0.92);
+  color: #fffaf7;
+  font-size: 0.24rem;
+  z-index: 30;
+}
+
+.ssl-toast[hidden] {
+  display: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
