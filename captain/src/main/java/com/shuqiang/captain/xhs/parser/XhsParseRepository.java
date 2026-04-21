@@ -2,6 +2,7 @@ package com.shuqiang.captain.xhs.parser;
 
 import android.util.Log;
 
+import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseInput;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
@@ -48,13 +49,8 @@ public class XhsParseRepository {
         } else {
             finalUrl = parseInput.getExtractedUrl();
             linkType = "generic_url";
-            pageFetchResult = fetchGenericPage(finalUrl);
-            parseResult = GenericWebSniffParser.parse(
-                    pageFetchResult.html,
-                    finalUrl,
-                    parseInput.getEntrySource(),
-                    pageFetchResult.strategy
-            );
+            pageFetchResult = null;
+            parseResult = parseGenericPage(finalUrl, parseInput.getEntrySource());
         }
         Log.d(TAG, "parse finished, entry=" + entrySource
                 + ", linkType=" + linkType
@@ -75,19 +71,97 @@ public class XhsParseRepository {
         return ParseRoute.GENERIC;
     }
 
-    private PageFetchResult fetchGenericPage(String pageUrl) throws XhsParserException {
+    private XhsParseResult parseGenericPage(String pageUrl, String entrySource) throws XhsParserException {
         PageFetchResult desktopResult = executePageRequest(pageUrl, XhsHttpClient.DESKTOP_USER_AGENT, "desktop");
-        if (desktopResult.hasHtml()) {
-            return desktopResult;
+        XhsParseResult desktopParseResult = tryParseGenericResult(desktopResult, pageUrl, entrySource);
+        if (hasDownloadableRichMedia(desktopParseResult)) {
+            return desktopParseResult;
+        }
+        if (!shouldTryGenericMobileFallback(pageUrl, desktopParseResult)) {
+            return desktopParseResult;
         }
         PageFetchResult mobileResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "mobile");
-        if (mobileResult.hasHtml()) {
-            return mobileResult;
+        XhsParseResult mobileParseResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
+        XhsParseResult preferredResult = selectPreferredGenericResult(desktopParseResult, mobileParseResult);
+        if (preferredResult != null) {
+            return preferredResult;
         }
         if (desktopResult.httpCode == 404 || mobileResult.httpCode == 404) {
             throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
         }
         throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
+    }
+
+    private XhsParseResult tryParseGenericResult(PageFetchResult pageFetchResult, String pageUrl, String entrySource)
+            throws XhsParserException {
+        if (pageFetchResult == null || !pageFetchResult.hasHtml()) {
+            return null;
+        }
+        try {
+            return GenericWebSniffParser.parse(
+                    pageFetchResult.html,
+                    pageUrl,
+                    entrySource,
+                    pageFetchResult.strategy
+            );
+        } catch (XhsParserException e) {
+            if (e.getParseError() == XhsParseError.NO_MEDIA_FOUND
+                    || e.getParseError() == XhsParseError.NOTE_UNAVAILABLE) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * generic 页优先选出“可下载信息更多”的结果；若 desktop 只剩封面、mobile 能给出视频，则允许切到 mobile。
+     */
+    static XhsParseResult selectPreferredGenericResult(XhsParseResult primaryResult, XhsParseResult fallbackResult) {
+        if (primaryResult == null) {
+            return fallbackResult;
+        }
+        if (fallbackResult == null) {
+            return primaryResult;
+        }
+        int primaryRichMediaCount = countRichMedia(primaryResult);
+        int fallbackRichMediaCount = countRichMedia(fallbackResult);
+        if (fallbackRichMediaCount > primaryRichMediaCount) {
+            return fallbackResult;
+        }
+        if (fallbackRichMediaCount > 0
+                && fallbackRichMediaCount == primaryRichMediaCount
+                && fallbackResult.getMediaCount() > primaryResult.getMediaCount()) {
+            return fallbackResult;
+        }
+        return primaryResult;
+    }
+
+    private static boolean hasDownloadableRichMedia(XhsParseResult parseResult) {
+        return countRichMedia(parseResult) > 0;
+    }
+
+    /**
+     * 只对“desktop 解析失败”或“B 站这类已知 desktop 信息不完整”的场景补 mobile 回退，避免普通图片页白白多打一跳。
+     */
+    static boolean shouldTryGenericMobileFallback(String pageUrl, XhsParseResult desktopParseResult) {
+        if (desktopParseResult == null) {
+            return true;
+        }
+        return GenericWebSniffParser.isBilibiliHost(pageUrl)
+                || GenericWebSniffParser.isBilibiliHost(desktopParseResult.getCanonicalUrl());
+    }
+
+    private static int countRichMedia(XhsParseResult parseResult) {
+        if (parseResult == null || parseResult.getMediaItems() == null) {
+            return 0;
+        }
+        int richMediaCount = 0;
+        for (int i = 0; i < parseResult.getMediaItems().size(); i++) {
+            if (parseResult.getMediaItems().get(i).getMediaType() != XhsMediaType.IMAGE) {
+                richMediaCount++;
+            }
+        }
+        return richMediaCount;
     }
 
     private PageFetchResult fetchPage(String pageUrl) throws XhsParserException {

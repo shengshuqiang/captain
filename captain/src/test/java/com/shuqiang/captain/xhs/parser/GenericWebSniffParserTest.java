@@ -94,4 +94,35 @@ public class GenericWebSniffParserTest {
         Assert.assertEquals("https://cdn.example.com/video/demo-cover.jpg",
                 parseResult.getMediaItems().get(0).getMediaUrl());
     }
+
+    @Test
+    public void parseExtractsBilibiliMobileVideoAndCoverFromInitialState() throws Exception {
+        String html = "<html><head>"
+                + "<title>叫姐姐_哔哩哔哩_bilibili</title>"
+                + "<link rel=\"canonical\" href=\"https://www.bilibili.com/video/BV1q4dfBNELT/\"/>"
+                + "<meta property=\"og:image\" content=\"https://i1.hdslb.com/bfs/archive/cover.jpg\"/>"
+                + "<meta property=\"og:site_name\" content=\"哔哩哔哩\"/>"
+                + "</head><body><script>"
+                + "window.__INITIAL_STATE__={\"video\":{\"viewInfo\":{\"bvid\":\"BV1q4dfBNELT\",\"pic\":\"http://i1.hdslb.com/bfs/archive/cover.jpg\"},"
+                + "\"upInfo\":{\"name\":\"测试UP主\"},"
+                + "\"playUrlInfo\":[{\"url\":\"https://upos-sz.bilivideo.com/upgcxcode/demo-16.mp4?foo=1\"}],"
+                + "\"related\":{\"result\":[{\"pic\":\"http://i1.hdslb.com/bfs/archive/other.jpg\"}]}}};"
+                + "(function(){})();"
+                + "</script></body></html>";
+
+        XhsParseResult parseResult = GenericWebSniffParser.parse(
+                html,
+                "https://m.bilibili.com/video/BV1q4dfBNELT",
+                "manual_input",
+                "mobile"
+        );
+
+        Assert.assertEquals(2, parseResult.getMediaCount());
+        Assert.assertEquals(XhsMediaType.VIDEO, parseResult.getPrimaryMediaType());
+        Assert.assertEquals("https://upos-sz.bilivideo.com/upgcxcode/demo-16.mp4?foo=1",
+                parseResult.getMediaItems().get(0).getMediaUrl());
+        Assert.assertEquals("https://i1.hdslb.com/bfs/archive/cover.jpg",
+                parseResult.getMediaItems().get(1).getMediaUrl());
+        Assert.assertEquals("测试UP主", parseResult.getAuthorName());
+    }
 }

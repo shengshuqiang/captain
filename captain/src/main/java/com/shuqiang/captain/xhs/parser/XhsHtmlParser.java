@@ -8,7 +8,6 @@ import com.shuqiang.captain.xhs.model.XhsParseResult;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -51,7 +50,7 @@ public final class XhsHtmlParser {
         String ogTitle = cleanMetaTitle(extractMeta(document, "og:title"));
         int metaDuration = parseDuration(extractMeta(document, "og:videotime"));
 
-        JsonObject initialState = extractInitialState(document);
+        JsonObject initialState = XhsStateJsonParser.extractInitialState(document);
         JsonObject noteObject = findNoteObject(initialState, 0);
 
         String noteId = firstNonEmpty(
@@ -136,41 +135,6 @@ public final class XhsHtmlParser {
             }
         }
         return null;
-    }
-
-    private static JsonObject extractInitialState(Document document) {
-        for (Element script : document.getElementsByTag("script")) {
-            String data = firstNonEmpty(script.data(), script.html());
-            if (data == null || !data.contains("window.__INITIAL_STATE__=")) {
-                continue;
-            }
-            String rawState = data.substring(data.indexOf("window.__INITIAL_STATE__=") + "window.__INITIAL_STATE__=".length());
-            rawState = sanitizeStateJson(rawState);
-            if (rawState.isEmpty()) {
-                return null;
-            }
-            try {
-                return new JsonParser().parse(rawState).getAsJsonObject();
-            } catch (Exception ignored) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private static String sanitizeStateJson(String rawState) {
-        if (rawState == null) {
-            return "";
-        }
-        String sanitized = rawState.trim();
-        if (sanitized.endsWith(";")) {
-            sanitized = sanitized.substring(0, sanitized.length() - 1);
-        }
-        sanitized = sanitized.replace(":undefined", ":null")
-                .replace(":void 0", ":null")
-                .replace(":!0", ":true")
-                .replace(":!1", ":false");
-        return sanitized;
     }
 
     private static JsonObject findNoteObject(JsonElement node, int depth) {
@@ -504,43 +468,19 @@ public final class XhsHtmlParser {
     }
 
     private static JsonObject getObject(JsonElement element) {
-        if (element == null || element.isJsonNull() || !element.isJsonObject()) {
-            return null;
-        }
-        return element.getAsJsonObject();
+        return XhsStateJsonParser.getObject(element);
     }
 
     private static JsonObject getObject(JsonObject parent, String memberName) {
-        if (parent == null || !parent.has(memberName)) {
-            return null;
-        }
-        return getObject(parent.get(memberName));
+        return XhsStateJsonParser.getObject(parent, memberName);
     }
 
     private static JsonArray getArray(JsonObject parent, String memberName) {
-        if (parent == null || !parent.has(memberName)) {
-            return null;
-        }
-        JsonElement element = parent.get(memberName);
-        if (element == null || element.isJsonNull() || !element.isJsonArray()) {
-            return null;
-        }
-        return element.getAsJsonArray();
+        return XhsStateJsonParser.getArray(parent, memberName);
     }
 
     private static String getString(JsonObject parent, String memberName) {
-        if (parent == null || !parent.has(memberName)) {
-            return null;
-        }
-        JsonElement element = parent.get(memberName);
-        if (element == null || element.isJsonNull()) {
-            return null;
-        }
-        try {
-            return element.getAsString();
-        } catch (Exception ignored) {
-            return null;
-        }
+        return XhsStateJsonParser.getString(parent, memberName);
     }
 
     private static int getInt(JsonObject parent, String memberName) {

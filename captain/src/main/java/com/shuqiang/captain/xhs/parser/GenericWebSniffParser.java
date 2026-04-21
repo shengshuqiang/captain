@@ -5,6 +5,9 @@ import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -77,6 +80,19 @@ public final class GenericWebSniffParser {
         LinkedHashSet<String> imageCandidates = new LinkedHashSet<>();
         LinkedHashSet<String> headImageCandidates = extractHeadImageCandidates(document, pageUrl);
         String defaultCoverUrl = firstCandidate(headImageCandidates);
+        BilibiliStateMedia bilibiliStateMedia = extractBilibiliStateMedia(document, canonicalUrl, defaultCoverUrl);
+
+        if (bilibiliStateMedia != null) {
+            return buildBilibiliResult(
+                    bilibiliStateMedia,
+                    pageUrl,
+                    canonicalUrl,
+                    firstNonEmpty(bilibiliStateMedia.authorName, authorOrSite),
+                    pageTitle,
+                    entrySource,
+                    requestStrategy
+            );
+        }
 
         collectMetaCandidates(document, pageUrl, mediaMap, imageCandidates, headImageCandidates, defaultCoverUrl);
         collectDomCandidates(document, pageUrl, mediaMap, imageCandidates, defaultCoverUrl);
@@ -117,6 +133,85 @@ public final class GenericWebSniffParser {
                 pageTitle,
                 coverUrl,
                 requestStrategy + " · 通用网页嗅探",
+                entrySource,
+                mediaItems
+        );
+    }
+
+    /**
+     * B 站移动页的 `window.__INITIAL_STATE__` 会给出可直下 mp4；命中后直接走精确提取，避免把相关推荐图片一起误收进来。
+     */
+    private static BilibiliStateMedia extractBilibiliStateMedia(Document document,
+                                                                String canonicalUrl,
+                                                                String fallbackCoverUrl) {
+        if (!isBilibiliHost(canonicalUrl)) {
+            return null;
+        }
+        JsonObject initialState = XhsStateJsonParser.extractInitialState(document);
+        JsonObject videoObject = XhsStateJsonParser.getObject(initialState, "video");
+        if (videoObject == null) {
+            return null;
+        }
+        String videoUrl = extractBilibiliPlayUrl(videoObject);
+        if (videoUrl == null || !XhsNetworkPolicy.isAllowedMediaUrl(videoUrl)) {
+            return null;
+        }
+        String coverUrl = normalizeUrl(firstNonEmpty(
+                fallbackCoverUrl,
+                getNestedString(videoObject, "viewInfo", "pic")
+        ));
+        String noteId = firstNonEmpty(
+                getNestedString(videoObject, "viewInfo", "bvid"),
+                XhsStateJsonParser.getString(videoObject, "bvid")
+        );
+        String authorName = firstNonEmpty(
+                getNestedString(videoObject, "upInfo", "name"),
+                getNestedString(videoObject, "upInfo", "uname")
+        );
+        return new BilibiliStateMedia(noteId, videoUrl, coverUrl, authorName);
+    }
+
+    private static XhsParseResult buildBilibiliResult(BilibiliStateMedia stateMedia,
+                                                      String pageUrl,
+                                                      String canonicalUrl,
+                                                      String authorOrSite,
+                                                      String pageTitle,
+                                                      String entrySource,
+                                                      String requestStrategy) {
+        String noteId = firstNonEmpty(stateMedia.noteId, buildPageId(canonicalUrl));
+        ArrayList<XhsMediaItem> mediaItems = new ArrayList<>();
+        mediaItems.add(new XhsMediaItem(
+                buildMediaId(noteId, 1),
+                XhsMediaType.VIDEO,
+                stateMedia.videoUrl,
+                stateMedia.coverUrl,
+                0,
+                0,
+                0,
+                guessExtension(stateMedia.videoUrl, XhsMediaType.VIDEO),
+                true
+        ));
+        if (stateMedia.coverUrl != null && !stateMedia.coverUrl.equals(stateMedia.videoUrl)) {
+            mediaItems.add(new XhsMediaItem(
+                    buildMediaId(noteId, 2),
+                    XhsMediaType.IMAGE,
+                    stateMedia.coverUrl,
+                    stateMedia.coverUrl,
+                    0,
+                    0,
+                    0,
+                    guessExtension(stateMedia.coverUrl, XhsMediaType.IMAGE),
+                    true
+            ));
+        }
+        return new XhsParseResult(
+                noteId,
+                pageUrl,
+                canonicalUrl,
+                authorOrSite,
+                pageTitle,
+                firstNonEmpty(stateMedia.coverUrl, stateMedia.videoUrl),
+                requestStrategy + " · 通用网页嗅探 + bilibili state",
                 entrySource,
                 mediaItems
         );
@@ -344,6 +439,17 @@ public final class GenericWebSniffParser {
                 || containsAny(lowerHint, "mpegurl", "application/vnd.apple.mpegurl", "application/x-mpegurl");
     }
 
+    static boolean isBilibiliHost(String url) {
+        String host = extractHost(url);
+        if (host == null) {
+            return false;
+        }
+        String lowerHost = host.toLowerCase(Locale.US);
+        return "b23.tv".equals(lowerHost)
+                || "bilibili.com".equals(lowerHost)
+                || lowerHost.endsWith(".bilibili.com");
+    }
+
     private static String guessExtension(String mediaUrl, XhsMediaType mediaType) {
         if (mediaUrl != null) {
             String lowerUrl = mediaUrl.toLowerCase(Locale.US);
@@ -426,6 +532,32 @@ public final class GenericWebSniffParser {
         return cleaned.isEmpty() ? null : cleaned;
     }
 
+    private static String extractBilibiliPlayUrl(JsonObject videoObject) {
+        JsonArray playUrlInfo = XhsStateJsonParser.getArray(videoObject, "playUrlInfo");
+        if (playUrlInfo == null) {
+            return null;
+        }
+        for (JsonElement item : playUrlInfo) {
+            JsonObject playUrlObject = XhsStateJsonParser.getObject(item);
+            if (playUrlObject == null) {
+                continue;
+            }
+            String candidateUrl = normalizeUrl(XhsStateJsonParser.getString(playUrlObject, "url"));
+            if (candidateUrl != null && isPlayableMp4(candidateUrl)) {
+                return candidateUrl;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isPlayableMp4(String url) {
+        return url != null && url.toLowerCase(Locale.US).contains(".mp4");
+    }
+
+    private static String getNestedString(JsonObject parent, String objectKey, String memberName) {
+        return XhsStateJsonParser.getString(XhsStateJsonParser.getObject(parent, objectKey), memberName);
+    }
+
     private static String firstNonEmpty(String... values) {
         for (String value : values) {
             if (value != null && !value.trim().isEmpty()) {
@@ -449,5 +581,19 @@ public final class GenericWebSniffParser {
 
     private static String firstCandidate(LinkedHashSet<String> candidates) {
         return candidates == null || candidates.isEmpty() ? null : candidates.iterator().next();
+    }
+
+    private static final class BilibiliStateMedia {
+        private final String noteId;
+        private final String videoUrl;
+        private final String coverUrl;
+        private final String authorName;
+
+        private BilibiliStateMedia(String noteId, String videoUrl, String coverUrl, String authorName) {
+            this.noteId = noteId;
+            this.videoUrl = videoUrl;
+            this.coverUrl = coverUrl;
+            this.authorName = authorName;
+        }
     }
 }
