@@ -18,6 +18,7 @@ import com.captain.base.LLDWebViewActivity;
 import com.captain.base.WebViewActivity;
 import com.shuqiang.captain.chess.ui.ChessLobbyActivity;
 import com.shuqiang.captain.qr.QRActivity;
+import com.shuqiang.captain.qr.scan.QrScanActivity;
 import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import captain.R;
 // 首页功能区升级为桌面式入口面板，支持拖拽换位和本地持久化。
 public class MainShopTabView extends FrameLayout {
     private static final int HOME_SPAN_COUNT = 3;
+    private static final String QR_SCAN_FEATURE_ID = "qr_scan";
     private static final String SUAN_SUAN_LE_ASSET_URL = "file:///android_asset/suansuanle/index.html";
 
     private final List<HomeFeatureSpec> defaultFeatureSpecs = new ArrayList<>();
@@ -91,6 +93,13 @@ public class MainShopTabView extends FrameLayout {
 
     private void initFeatureSpecs(Context context) {
         defaultFeatureSpecs.clear();
+        defaultFeatureSpecs.add(new HomeFeatureSpec(
+                QR_SCAN_FEATURE_ID,
+                context.getString(R.string.feature_qr_scan_title),
+                R.drawable.scan_icon,
+                false,
+                createIntentFactory(QrScanActivity.class)
+        ));
         defaultFeatureSpecs.add(new HomeFeatureSpec(
                 "info_qr",
                 "信息二维码",
@@ -180,7 +189,7 @@ public class MainShopTabView extends FrameLayout {
 
     public void refreshVisibleItems() {
         orderedFeatureSpecs.clear();
-        orderedFeatureSpecs.addAll(featureOrderStore.loadOrderedSpecs(defaultFeatureSpecs));
+        orderedFeatureSpecs.addAll(featureOrderStore.loadOrderedSpecs(defaultFeatureSpecs, QR_SCAN_FEATURE_ID));
         launcherAdapter.submitFeatures(getVisibleFeatureSpecs());
     }
 

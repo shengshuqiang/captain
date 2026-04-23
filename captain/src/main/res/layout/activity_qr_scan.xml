@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/xhsPageBackground"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/captain_space_page_horizontal"
+        android:paddingTop="@dimen/captain_space_card_inner"
+        android:paddingEnd="@dimen/captain_space_page_horizontal"
+        android:paddingBottom="@dimen/captain_space_page_bottom">
+
+        <TextView
+            android:id="@+id/qr_scan_status"
+            style="@style/CaptainText.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/qr_scan_idle_status" />
+
+        <Button
+            android:id="@+id/qr_scan_start"
+            style="@style/CaptainButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:layout_marginTop="@dimen/captain_space_card_inner"
+            android:background="@drawable/bg_xhs_primary_button"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/qr_scan_start"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/qr_scan_show_generator"
+            style="@style/CaptainButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:layout_marginTop="@dimen/captain_space_inline"
+            android:background="@drawable/bg_xhs_secondary_button"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/qr_scan_show_generator"
+            android:textAllCaps="false"
+            android:textColor="@color/xhsPrimaryDark" />
+
+        <LinearLayout
+            android:id="@+id/qr_scan_result_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_card_gap"
+            android:background="@drawable/bg_xhs_surface"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_card_inner"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CaptainText.CardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/qr_scan_result_title" />
+
+            <TextView
+                android:id="@+id/qr_scan_result_text"
+                style="@style/CaptainText.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:background="@drawable/bg_xhs_input"
+                android:minHeight="120dp"
+                android:padding="14dp"
+                android:textIsSelectable="true" />
+
+            <Button
+                android:id="@+id/qr_scan_copy"
+                style="@style/CaptainButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_marginTop="@dimen/captain_space_card_gap"
+                android:background="@drawable/bg_xhs_secondary_button"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/qr_scan_copy"
+                android:textAllCaps="false"
+                android:textColor="@color/xhsPrimaryDark" />
+
+            <Button
+                android:id="@+id/qr_scan_open_link"
+                style="@style/CaptainButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:background="@drawable/bg_xhs_secondary_button"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/qr_scan_open_link"
+                android:textAllCaps="false"
+                android:textColor="@color/xhsPrimaryDark"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/qr_scan_decrypt"
+                style="@style/CaptainButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:background="@drawable/bg_xhs_secondary_button"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/qr_scan_decrypt"
+                android:textAllCaps="false"
+                android:textColor="@color/xhsPrimaryDark" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/qr_scan_generator_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/captain_space_card_gap"
+            android:background="@drawable/bg_xhs_surface"
+            android:orientation="vertical"
+            android:padding="@dimen/captain_space_card_inner"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CaptainText.CardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/qr_scan_generator_title" />
+
+            <EditText
+                android:id="@+id/qr_scan_generator_input"
+                style="@style/CaptainText.Body"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="@dimen/captain_space_inline"
+                android:background="@drawable/bg_xhs_input"
+                android:gravity="top|start"
+                android:hint="@string/qr_scan_generator_hint"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:padding="14dp" />
+
+            <Button
+                android:id="@+id/qr_scan_generate"
+                style="@style/CaptainButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_marginTop="@dimen/captain_space_card_gap"
+                android:background="@drawable/bg_xhs_primary_button"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/qr_scan_generate"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+            <ImageView
+                android:id="@+id/qr_scan_preview"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="@dimen/captain_space_card_gap"
+                android:background="@drawable/bg_xhs_input"
+                android:contentDescription="@string/qr_scan_preview_description"
+                android:padding="@dimen/captain_space_card_inner"
+                android:scaleType="centerInside"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

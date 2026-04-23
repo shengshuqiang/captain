@@ -41,6 +41,11 @@ package="captain">
     </activity>
 
     <activity
+        android:name="com.shuqiang.captain.qr.scan.QrScanActivity"
+        android:exported="false"
+        android:label="@string/qr_scan_title" />
+
+    <activity
         android:name="com.shuqiang.captain.chess.ui.ChessOnboardingActivity"
         android:exported="false"
         android:label="@string/chess_onboarding_title" />

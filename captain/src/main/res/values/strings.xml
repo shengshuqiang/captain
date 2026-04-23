@@ -57,7 +57,30 @@
     <string name="captain_me_intro">船长，帮你把麻烦的小事处理得更轻松。欢迎通过微信「shengshuqiang01」或邮件「shengssu@mail.ustc.edu.cn」和我聊聊。</string>
     <string name="grid_item_icon_description">功能图标</string>
     <string name="feature_icon">功能图标</string>
+    <string name="feature_qr_scan_title">扫一扫</string>
     <string name="feature_suansuanle_title">算算乐</string>
+
+    <!-- 扫一扫 -->
+    <string name="qr_scan_title">扫一扫</string>
+    <string name="qr_scan_idle_status">打开后优先扫码解析二维码原文。</string>
+    <string name="qr_scan_cancelled_status">未识别到二维码，可重新扫码或生成文本二维码。</string>
+    <string name="qr_scan_result_status">已识别二维码内容。</string>
+    <string name="qr_scan_start">扫码</string>
+    <string name="qr_scan_result_title">二维码原文</string>
+    <string name="qr_scan_copy">复制原文</string>
+    <string name="qr_scan_open_link">打开链接</string>
+    <string name="qr_scan_decrypt">用信息二维码解密</string>
+    <string name="qr_scan_show_generator">文本生成二维码</string>
+    <string name="qr_scan_generator_title">文本二维码预览</string>
+    <string name="qr_scan_generator_hint">输入要生成二维码的文本</string>
+    <string name="qr_scan_generate">生成预览</string>
+    <string name="qr_scan_preview_description">二维码预览</string>
+    <string name="qr_scan_clip_label">二维码内容</string>
+    <string name="qr_scan_copied">已复制</string>
+    <string name="qr_scan_open_link_failed">未找到可打开链接的应用</string>
+    <string name="qr_scan_generate_empty">请输入要生成二维码的文本</string>
+    <string name="qr_scan_generate_failed">二维码生成失败，请缩短文本后重试</string>
+    <string name="qr_scan_privacy_rejected">同意《船长App隐私政策》后将为您提供更丰富的功能</string>
 
     <!-- 国际象棋 -->
     <string name="chess_title">国际象棋</string>

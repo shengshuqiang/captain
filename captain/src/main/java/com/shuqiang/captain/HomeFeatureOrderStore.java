@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +21,8 @@ import java.util.Set;
 public final class HomeFeatureOrderStore {
     private static final String PREFS_NAME = "captain_home_feature_order";
     private static final String KEY_FEATURE_ORDER = "home_feature_order";
+    private static final String KEY_FEATURE_ORDER_MIGRATION_VERSION = "home_feature_order_migration_version";
+    private static final int MIGRATION_VERSION_PIN_FIRST_ENTRY = 1;
 
     private final SharedPreferences preferences;
 
@@ -50,16 +53,43 @@ public final class HomeFeatureOrderStore {
     }
 
     public void saveOrderedIds(@NonNull List<String> orderedIds) {
+        preferences.edit().putString(KEY_FEATURE_ORDER, serializeOrderedIds(orderedIds)).apply();
+    }
+
+    private static String serializeOrderedIds(@NonNull List<String> orderedIds) {
         JSONArray jsonArray = new JSONArray();
         for (String orderedId : new LinkedHashSet<>(orderedIds)) {
             jsonArray.put(orderedId);
         }
-        preferences.edit().putString(KEY_FEATURE_ORDER, jsonArray.toString()).apply();
+        return jsonArray.toString();
     }
 
     @NonNull
     public List<HomeFeatureSpec> loadOrderedSpecs(@NonNull List<HomeFeatureSpec> defaultSpecs) {
         return orderSpecs(defaultSpecs, resolveOrder(HomeFeatureSpec.collectIds(defaultSpecs), loadOrderedIds()));
+    }
+
+    @NonNull
+    public List<HomeFeatureSpec> loadOrderedSpecs(@NonNull List<HomeFeatureSpec> defaultSpecs,
+                                                  @Nullable String pinnedFirstId) {
+        List<String> defaultIds = HomeFeatureSpec.collectIds(defaultSpecs);
+        List<String> orderedIds = resolveOrder(defaultIds, loadOrderedIds());
+        if (shouldApplyPinnedFirstMigration(defaultIds, pinnedFirstId)) {
+            orderedIds = resolveOrderWithPinnedFirst(defaultIds, orderedIds, pinnedFirstId);
+            preferences.edit()
+                    .putString(KEY_FEATURE_ORDER, serializeOrderedIds(orderedIds))
+                    .putInt(KEY_FEATURE_ORDER_MIGRATION_VERSION, MIGRATION_VERSION_PIN_FIRST_ENTRY)
+                    .apply();
+        }
+        return orderSpecs(defaultSpecs, orderedIds);
+    }
+
+    private boolean shouldApplyPinnedFirstMigration(@NonNull List<String> defaultIds,
+                                                   @Nullable String pinnedFirstId) {
+        return !TextUtils.isEmpty(pinnedFirstId)
+                && defaultIds.contains(pinnedFirstId)
+                && preferences.getInt(KEY_FEATURE_ORDER_MIGRATION_VERSION, 0)
+                < MIGRATION_VERSION_PIN_FIRST_ENTRY;
     }
 
     @NonNull
@@ -74,6 +104,21 @@ public final class HomeFeatureOrderStore {
         }
         resolvedIds.addAll(defaultIds);
         return new ArrayList<>(resolvedIds);
+    }
+
+    @NonNull
+    public static List<String> resolveOrderWithPinnedFirst(@NonNull List<String> defaultIds,
+                                                           @NonNull List<String> storedIds,
+                                                           @Nullable String pinnedFirstId) {
+        List<String> resolvedIds = resolveOrder(defaultIds, storedIds);
+        if (pinnedFirstId == null
+                || pinnedFirstId.length() == 0
+                || !defaultIds.contains(pinnedFirstId)) {
+            return resolvedIds;
+        }
+        resolvedIds.remove(pinnedFirstId);
+        resolvedIds.add(0, pinnedFirstId);
+        return resolvedIds;
     }
 
     @NonNull

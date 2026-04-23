@@ -32,6 +32,8 @@ import captain.R;
  */
 public class QRActivity extends BasePermissionActivity {
     public static final int MORSE_MESSAGE_REQUEST_CODE = 0;
+    public static final String EXTRA_QR_MESSAGE_TO_DECODE =
+            "com.shuqiang.captain.qr.EXTRA_QR_MESSAGE_TO_DECODE";
 
     private MVPView mvpView;
     // 首次输入密码弹窗
@@ -109,7 +111,12 @@ public class QRActivity extends BasePermissionActivity {
             }
         });
 
-        handleInitQRMessage();
+        String qrMessageToDecode = getIntent().getStringExtra(EXTRA_QR_MESSAGE_TO_DECODE);
+        if (!TextUtils.isEmpty(qrMessageToDecode)) {
+            decodeQRMessage(qrMessageToDecode);
+        } else {
+            handleInitQRMessage();
+        }
     }
 
     /**
@@ -192,7 +199,6 @@ public class QRActivity extends BasePermissionActivity {
                 } else {
                     Utils.showMessage(mvpView, "密码为空，无效!");
                 }
-//                Log.e("SSU", "password=" + producePwd);
             }
         }, false);
     }

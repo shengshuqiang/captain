@@ -21,6 +21,38 @@ public class HomeFeatureOrderStoreTest {
     }
 
     @Test
+    public void resolveOrderWithPinnedFirstShouldPinNewEntryOnFirstMigration() {
+        assertEquals(
+                Arrays.asList("qr_scan", "info_qr", "resource_detect", "suansuanle"),
+                HomeFeatureOrderStore.resolveOrderWithPinnedFirst(
+                        Arrays.asList("qr_scan", "info_qr", "resource_detect", "suansuanle"),
+                        Arrays.asList("info_qr", "resource_detect"),
+                        "qr_scan")
+        );
+    }
+
+    @Test
+    public void resolveOrderShouldRespectUserOrderAfterMigration() {
+        assertEquals(
+                Arrays.asList("resource_detect", "qr_scan", "info_qr", "suansuanle"),
+                HomeFeatureOrderStore.resolveOrder(
+                        Arrays.asList("qr_scan", "info_qr", "resource_detect", "suansuanle"),
+                        Arrays.asList("resource_detect", "qr_scan", "info_qr", "suansuanle"))
+        );
+    }
+
+    @Test
+    public void resolveOrderWithPinnedFirstShouldCleanUnknownIdsAndAvoidDuplicatePinnedId() {
+        assertEquals(
+                Arrays.asList("qr_scan", "info_qr", "resource_detect"),
+                HomeFeatureOrderStore.resolveOrderWithPinnedFirst(
+                        Arrays.asList("qr_scan", "info_qr", "resource_detect"),
+                        Arrays.asList("ghost", "info_qr", "qr_scan", "qr_scan"),
+                        "qr_scan")
+        );
+    }
+
+    @Test
     public void mergeVisibleOrderShouldKeepHiddenSlotsStable() {
         assertEquals(
                 Arrays.asList("c", "hidden", "a", "b"),
