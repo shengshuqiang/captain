@@ -40,6 +40,7 @@ final class CameraConfigurationManager {
   private static final String TAG = "CameraConfiguration";
 
   private final Context context;
+  private final boolean fastQrScanProfile;
   private int cwNeededRotation;
   private int cwRotationFromDisplayToCamera;
   private Point screenResolution;
@@ -48,7 +49,12 @@ final class CameraConfigurationManager {
   private Point previewSizeOnScreen;
 
   CameraConfigurationManager(Context context) {
+    this(context, false);
+  }
+
+  CameraConfigurationManager(Context context, boolean fastQrScanProfile) {
     this.context = context;
+    this.fastQrScanProfile = fastQrScanProfile;
   }
 
   /**
@@ -122,9 +128,11 @@ final class CameraConfigurationManager {
     display.getSize(theScreenResolution);
     screenResolution = theScreenResolution;
     Log.i(TAG, "Screen resolution in current orientation: " + screenResolution);
-    cameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
+    cameraResolution = fastQrScanProfile
+        ? CameraConfigurationUtils.findFastQrPreviewSizeValue(parameters, screenResolution)
+        : CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
     Log.i(TAG, "Camera resolution: " + cameraResolution);
-    bestPreviewSize = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
+    bestPreviewSize = cameraResolution;
     Log.i(TAG, "Best available preview size: " + bestPreviewSize);
 
     boolean isScreenPortrait = screenResolution.x < screenResolution.y;
@@ -160,8 +168,8 @@ final class CameraConfigurationManager {
 
     CameraConfigurationUtils.setFocus(
         parameters,
-        prefs.getBoolean(PreferencesActivity.KEY_AUTO_FOCUS, true),
-        prefs.getBoolean(PreferencesActivity.KEY_DISABLE_CONTINUOUS_FOCUS, true),
+        fastQrScanProfile || prefs.getBoolean(PreferencesActivity.KEY_AUTO_FOCUS, true),
+        !fastQrScanProfile && prefs.getBoolean(PreferencesActivity.KEY_DISABLE_CONTINUOUS_FOCUS, true),
         safeMode);
 
     if (!safeMode) {
@@ -169,11 +177,11 @@ final class CameraConfigurationManager {
         CameraConfigurationUtils.setInvertColor(parameters);
       }
 
-      if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_BARCODE_SCENE_MODE, true)) {
+      if (fastQrScanProfile || !prefs.getBoolean(PreferencesActivity.KEY_DISABLE_BARCODE_SCENE_MODE, true)) {
         CameraConfigurationUtils.setBarcodeSceneMode(parameters);
       }
 
-      if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_METERING, true)) {
+      if (fastQrScanProfile || !prefs.getBoolean(PreferencesActivity.KEY_DISABLE_METERING, true)) {
         CameraConfigurationUtils.setVideoStabilization(parameters);
         CameraConfigurationUtils.setFocusArea(parameters);
         CameraConfigurationUtils.setMetering(parameters);
@@ -195,6 +203,13 @@ final class CameraConfigurationManager {
       bestPreviewSize.x = afterSize.width;
       bestPreviewSize.y = afterSize.height;
     }
+    Log.i(TAG, "Applied camera params: fastQr=" + fastQrScanProfile
+        + ", preview=" + bestPreviewSize
+        + ", focus=" + afterParameters.getFocusMode()
+        + ", scene=" + afterParameters.getSceneMode()
+        + ", exposure=" + afterParameters.getExposureCompensation()
+        + ", meteringAreas=" + afterParameters.getMeteringAreas()
+        + ", focusAreas=" + afterParameters.getFocusAreas());
   }
 
   Point getBestPreviewSize() {
@@ -244,7 +259,7 @@ final class CameraConfigurationManager {
   private void doSetTorch(Camera.Parameters parameters, boolean newSetting, boolean safeMode) {
     CameraConfigurationUtils.setTorch(parameters, newSetting);
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    if (!safeMode && !prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, true)) {
+    if (!safeMode && (fastQrScanProfile || !prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, true))) {
       CameraConfigurationUtils.setBestExposure(parameters, newSetting);
     }
   }

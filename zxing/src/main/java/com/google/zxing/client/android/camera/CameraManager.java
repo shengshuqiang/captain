@@ -46,9 +46,14 @@ public final class CameraManager {
   private static final int MIN_FRAME_HEIGHT = 240;
   private static final int MAX_FRAME_WIDTH = 1200; // = 5/8 * 1920
   private static final int MAX_FRAME_HEIGHT = 675; // = 5/8 * 1080
+  private static final int FAST_QR_MIN_FRAME_SIZE = 300;
+  private static final int FAST_QR_MAX_FRAME_SIZE = 900;
+  private static final int FAST_QR_FRAME_NUMERATOR = 7;
+  private static final int FAST_QR_FRAME_DENOMINATOR = 10;
 
   private final Context context;
   private final CameraConfigurationManager configManager;
+  private final boolean fastQrScanProfile;
   private OpenCamera camera;
   private AutoFocusManager autoFocusManager;
   private Rect framingRect;
@@ -65,8 +70,13 @@ public final class CameraManager {
   private final PreviewCallback previewCallback;
 
   public CameraManager(Context context) {
+    this(context, false);
+  }
+
+  public CameraManager(Context context, boolean fastQrScanProfile) {
     this.context = context;
-    this.configManager = new CameraConfigurationManager(context);
+    this.fastQrScanProfile = fastQrScanProfile;
+    this.configManager = new CameraConfigurationManager(context, fastQrScanProfile);
     previewCallback = new PreviewCallback(configManager);
   }
   
@@ -224,13 +234,24 @@ public final class CameraManager {
         return null;
       }
 
-      int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
-      int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
+      int width;
+      int height;
+      if (fastQrScanProfile) {
+        int shortSide = Math.min(screenResolution.x, screenResolution.y);
+        int side = shortSide * FAST_QR_FRAME_NUMERATOR / FAST_QR_FRAME_DENOMINATOR;
+        side = Math.max(FAST_QR_MIN_FRAME_SIZE, Math.min(side, FAST_QR_MAX_FRAME_SIZE));
+        side = Math.min(side, shortSide);
+        width = side;
+        height = side;
+      } else {
+        width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
+        height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
+      }
 
       int leftOffset = (screenResolution.x - width) / 2;
       int topOffset = (screenResolution.y - height) / 2;
       framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-      Log.e(TAG, "Calculated framing rect: " + framingRect);
+      Log.i(TAG, "Calculated framing rect: " + framingRect + ", fastQr=" + fastQrScanProfile);
     }
     return framingRect;
   }

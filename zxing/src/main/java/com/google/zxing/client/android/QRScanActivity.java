@@ -239,11 +239,15 @@ public final class QRScanActivity extends BasePermissionActivity implements Surf
         historyManager = new HistoryManager(this);
         historyManager.trimHistory();
 
+        Intent intent = getIntent();
+        boolean fastQrScanProfile = isFastQrScanProfile(intent);
+        Log.i(TAG, "Scan profile: " + (fastQrScanProfile ? Intents.Scan.CAPTAIN_SCAN_PROFILE_FAST_QR : "default"));
+
         // CameraManager must be initialized here, not in onCreate(). This is necessary because we don't
         // want to open the camera driver and measure the screen size if we're going to show the help on
         // first launch. That led to bugs where the scanning rectangle was the wrong size and partially
         // off screen.
-        cameraManager = new CameraManager(getApplication());
+        cameraManager = new CameraManager(getApplication(), fastQrScanProfile);
 
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
         viewfinderView.setCameraManager(cameraManager);
@@ -269,8 +273,6 @@ public final class QRScanActivity extends BasePermissionActivity implements Surf
         ambientLightManager.start(cameraManager);
 
         inactivityTimer.onResume();
-
-        Intent intent = getIntent();
 
         copyToClipboard = prefs.getBoolean(PreferencesActivity.KEY_COPY_TO_CLIPBOARD, true)
                 && (intent == null || intent.getBooleanExtra(Intents.Scan.SAVE_HISTORY, true));
@@ -383,6 +385,12 @@ public final class QRScanActivity extends BasePermissionActivity implements Surf
             }
         }
         return false;
+    }
+
+    private static boolean isFastQrScanProfile(Intent intent) {
+        return intent != null
+                && Intents.Scan.CAPTAIN_SCAN_PROFILE_FAST_QR.equals(
+                intent.getStringExtra(Intents.Scan.CAPTAIN_SCAN_PROFILE));
     }
 
     @Override

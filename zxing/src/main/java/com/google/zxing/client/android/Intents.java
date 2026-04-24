@@ -63,6 +63,13 @@ public final class Intents {
     public static final String QR_CODE_MODE = "QR_CODE_MODE";
 
     /**
+     * Captain internal scan profile. This keeps app-specific camera tuning out of ZXing's
+     * public scan modes while still allowing the host app to request a faster QR path.
+     */
+    public static final String CAPTAIN_SCAN_PROFILE = "CAPTAIN_SCAN_PROFILE";
+    public static final String CAPTAIN_SCAN_PROFILE_FAST_QR = "fast_qr";
+
+    /**
      * Decode only Data Matrix codes.
      */
     public static final String DATA_MATRIX_MODE = "DATA_MATRIX_MODE";

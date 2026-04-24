@@ -42,9 +42,12 @@ public final class CameraConfigurationUtils {
   private static final Pattern SEMICOLON = Pattern.compile(";");
 
   private static final int MIN_PREVIEW_PIXELS = 480 * 320; // normal screen
+  private static final int FAST_QR_MIN_PREVIEW_PIXELS = 1280 * 720;
+  private static final int FAST_QR_MAX_PREVIEW_PIXELS = 1920 * 1080;
   private static final float MAX_EXPOSURE_COMPENSATION = 1.5f;
   private static final float MIN_EXPOSURE_COMPENSATION = 0.0f;
   private static final double MAX_ASPECT_DISTORTION = 0.15;
+  private static final double MAX_FAST_QR_TARGET_ASPECT_RATIO = 16.0 / 9.0;
   private static final int MIN_FPS = 10;
   private static final int MAX_FPS = 20;
   private static final int AREA_PER_1000 = 400;
@@ -342,6 +345,95 @@ public final class CameraConfigurationUtils {
     Point defaultSize = new Point(defaultPreview.width, defaultPreview.height);
     Log.i(TAG, "No suitable preview sizes, using default: " + defaultSize);
     return defaultSize;
+  }
+
+  public static Point findFastQrPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {
+    List<Camera.Size> rawSupportedSizes = parameters.getSupportedPreviewSizes();
+    if (rawSupportedSizes == null) {
+      Log.w(TAG, "Device returned no supported preview sizes; using default");
+      Camera.Size defaultSize = parameters.getPreviewSize();
+      if (defaultSize == null) {
+        throw new IllegalStateException("Parameters contained no preview size!");
+      }
+      return new Point(defaultSize.width, defaultSize.height);
+    }
+
+    int[] selectedSize = findFastQrPreviewSizeValue(
+        toSizeArrays(rawSupportedSizes),
+        screenResolution.x,
+        screenResolution.y,
+        null);
+    if (selectedSize != null) {
+      Point selectedPoint = new Point(selectedSize[0], selectedSize[1]);
+      Log.i(TAG, "Using fast QR preview size: " + selectedPoint);
+      return selectedPoint;
+    }
+    return findBestPreviewSizeValue(parameters, screenResolution);
+  }
+
+  static int[] findFastQrPreviewSizeValue(Iterable<int[]> rawSupportedSizes,
+                                          int screenWidth,
+                                          int screenHeight,
+                                          int[] defaultSize) {
+    double screenAspectRatio = Math.max(screenWidth, screenHeight)
+        / (double) Math.min(screenWidth, screenHeight);
+    // Modern tall phones often have screens wider than the camera preview aspect ratio.
+    // Keep the fast path anchored to common 16:9 camera previews instead of falling back.
+    double targetAspectRatio = Math.min(screenAspectRatio, MAX_FAST_QR_TARGET_ASPECT_RATIO);
+    int[] bestInTargetRange = null;
+    int bestInTargetPixels = 0;
+    int[] smallestAboveTarget = null;
+    int smallestAboveTargetPixels = Integer.MAX_VALUE;
+    int[] largestBelowTarget = null;
+    int largestBelowTargetPixels = 0;
+
+    for (int[] size : rawSupportedSizes) {
+      int width = size[0];
+      int height = size[1];
+      int resolution = width * height;
+      if (resolution < MIN_PREVIEW_PIXELS) {
+        continue;
+      }
+      double aspectRatio = Math.max(width, height) / (double) Math.min(width, height);
+      double distortion = Math.abs(aspectRatio - targetAspectRatio);
+      if (distortion > MAX_ASPECT_DISTORTION) {
+        continue;
+      }
+
+      if (resolution >= FAST_QR_MIN_PREVIEW_PIXELS && resolution <= FAST_QR_MAX_PREVIEW_PIXELS) {
+        if (resolution > bestInTargetPixels) {
+          bestInTargetPixels = resolution;
+          bestInTargetRange = size;
+        }
+      } else if (resolution > FAST_QR_MAX_PREVIEW_PIXELS) {
+        if (resolution < smallestAboveTargetPixels) {
+          smallestAboveTargetPixels = resolution;
+          smallestAboveTarget = size;
+        }
+      } else if (resolution > largestBelowTargetPixels) {
+        largestBelowTargetPixels = resolution;
+        largestBelowTarget = size;
+      }
+    }
+
+    if (bestInTargetRange != null) {
+      return bestInTargetRange;
+    }
+    if (largestBelowTarget != null) {
+      return largestBelowTarget;
+    }
+    if (smallestAboveTarget != null) {
+      return smallestAboveTarget;
+    }
+    return defaultSize;
+  }
+
+  private static List<int[]> toSizeArrays(List<Camera.Size> sizes) {
+    java.util.ArrayList<int[]> points = new java.util.ArrayList<>(sizes.size());
+    for (Camera.Size size : sizes) {
+      points.add(new int[]{size.width, size.height});
+    }
+    return points;
   }
 
   private static String findSettableValue(String name,

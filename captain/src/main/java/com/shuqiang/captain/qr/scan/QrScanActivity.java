@@ -127,6 +127,7 @@ public class QrScanActivity extends BasePermissionActivity {
         Intent intent = new Intent(this, QRScanActivity.class);
         intent.setAction(Intents.Scan.ACTION);
         intent.putExtra(Intents.Scan.MODE, Intents.Scan.QR_CODE_MODE);
+        intent.putExtra(Intents.Scan.CAPTAIN_SCAN_PROFILE, Intents.Scan.CAPTAIN_SCAN_PROFILE_FAST_QR);
         intent.putExtra(Intents.Scan.SAVE_HISTORY, false);
         intent.putExtra(Intents.Scan.RESULT_DISPLAY_DURATION_MS, 0L);
         startActivityForResult(intent, QR_SCAN_REQUEST_CODE);
