@@ -23,6 +23,28 @@ public class TaobaoShareParserTest {
     }
 
     @Test
+    public void extractTaobaoH5UrlFromSchemeKeepsAppHandoffInsideWebView() {
+        String schemeUrl = "tbopen://m.taobao.com/tbopen/index.html?"
+                + "h5Url=https%3A%2F%2Fmain.m.taobao.com%2Fdetail%2Findex.html%3Fid%3D940585894119"
+                + "&short_name=h.RYVkqoGjYnFDBco";
+
+        String h5Url = TaobaoShareParser.extractTaobaoH5UrlFromScheme(schemeUrl);
+
+        Assert.assertEquals("https://main.m.taobao.com/detail/index.html?id=940585894119", h5Url);
+        Assert.assertTrue(TaobaoShareParser.isTaobaoAppScheme(schemeUrl));
+    }
+
+    @Test
+    public void isMtopDetailApiUrlRecognizesTaobaoDetailEndpoint() {
+        Assert.assertTrue(TaobaoShareParser.isMtopDetailApiUrl(
+                "https://h5api.m.taobao.com/h5/mtop.taobao.detail.getdetail/6.0/?jsv=2.7.2"
+        ));
+        Assert.assertFalse(TaobaoShareParser.isMtopDetailApiUrl(
+                "https://h5api.m.taobao.com/h5/mtop.taobao.other/1.0/?jsv=2.7.2"
+        ));
+    }
+
+    @Test
     public void parseDetailResponseExtractsGalleryVideoFromApiStackValue() {
         String apiStackValue = "{"
                 + "\"global\":{\"data\":{"
@@ -82,6 +104,29 @@ public class TaobaoShareParserTest {
         Assert.assertEquals("https://video.alicdn.com/video/940585894119.mov",
                 parseResult.getMediaItems().get(0).getMediaUrl());
         Assert.assertEquals("mov", parseResult.getMediaItems().get(0).getFileExtension());
+    }
+
+    @Test
+    public void parseDetailResponseExtractsJsonpPayloadFromMtopResponse() {
+        String responseJson = "mtopjsonp1({"
+                + "\"data\":{"
+                + "\"item\":{\"itemId\":\"940585894119\",\"title\":\"淘宝商品\"},"
+                + "\"seller\":{\"sellerNick\":\"卖家\"},"
+                + "\"gallery\":{\"videos\":[{\"videoUrl\":\"https://cloud.video.taobao.com/play/u/1/p/1/e/6/t/1/940585894119\"}]}"
+                + "}"
+                + "})";
+
+        XhsParseResult parseResult = TaobaoShareParser.parseDetailResponse(
+                responseJson,
+                PAGE_URL,
+                "manual_input",
+                "webview_mtop_detail"
+        );
+
+        Assert.assertNotNull(parseResult);
+        Assert.assertEquals("940585894119", parseResult.getNoteId());
+        Assert.assertEquals("https://cloud.video.taobao.com/play/u/1/p/1/e/6/t/1/940585894119",
+                parseResult.getMediaItems().get(0).getMediaUrl());
     }
 
     @Test

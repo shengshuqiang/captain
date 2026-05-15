@@ -9,6 +9,8 @@ import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -48,6 +50,67 @@ final class TaobaoShareParser {
                     || lowerHost.equals("m.tb.cn")
                     || lowerHost.endsWith(".taobao.com")
                     || lowerHost.endsWith(".tmall.com");
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    static boolean isMtopDetailApiUrl(String url) {
+        try {
+            URI uri = new URI(XhsNetworkPolicy.forceHttps(url));
+            String host = uri.getHost();
+            String path = uri.getPath();
+            if (host == null || path == null) {
+                return false;
+            }
+            String lowerHost = host.toLowerCase(Locale.US);
+            String lowerPath = path.toLowerCase(Locale.US);
+            return lowerHost.endsWith(".taobao.com")
+                    && lowerPath.contains("/mtop.taobao.detail.getdetail/");
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    static String extractTaobaoH5UrlFromScheme(String rawUrl) {
+        if (rawUrl == null || rawUrl.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            URI uri = new URI(rawUrl.trim());
+            String scheme = uri.getScheme();
+            if (scheme == null) {
+                return null;
+            }
+            String lowerScheme = scheme.toLowerCase(Locale.US);
+            if (!lowerScheme.equals("tbopen") && !lowerScheme.equals("taobao")
+                    && !lowerScheme.equals("tmall")) {
+                return null;
+            }
+            String h5Url = firstNonEmpty(
+                    extractQueryParameter(uri.getRawQuery(), "h5Url"),
+                    extractQueryParameter(uri.getRawQuery(), "url")
+            );
+            h5Url = normalizeUrl(null, h5Url);
+            return isSupportedPage(h5Url) ? h5Url : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    static boolean isTaobaoAppScheme(String rawUrl) {
+        if (rawUrl == null || rawUrl.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            URI uri = new URI(rawUrl.trim());
+            String scheme = uri.getScheme();
+            if (scheme == null) {
+                return false;
+            }
+            String lowerScheme = scheme.toLowerCase(Locale.US);
+            return lowerScheme.equals("tbopen") || lowerScheme.equals("taobao")
+                    || lowerScheme.equals("tmall");
         } catch (Exception ignored) {
             return false;
         }
@@ -525,6 +588,36 @@ final class TaobaoShareParser {
         }
         Matcher matcher = pattern.matcher(input);
         return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private static String extractQueryParameter(String rawQuery, String targetName) {
+        if (rawQuery == null || rawQuery.isEmpty() || targetName == null) {
+            return null;
+        }
+        String[] pairs = rawQuery.split("&");
+        for (String pair : pairs) {
+            int separatorIndex = pair.indexOf('=');
+            if (separatorIndex <= 0) {
+                continue;
+            }
+            String name = decodeQueryComponent(pair.substring(0, separatorIndex));
+            if (!targetName.equals(name)) {
+                continue;
+            }
+            return decodeQueryComponent(pair.substring(separatorIndex + 1));
+        }
+        return null;
+    }
+
+    private static String decodeQueryComponent(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+        } catch (Exception ignored) {
+            return value;
+        }
     }
 
     private static boolean isVideoLikeHost(String mediaUrl) {

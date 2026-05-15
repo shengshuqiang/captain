@@ -21,10 +21,17 @@ import com.shuqiang.captain.xhs.model.XhsParseResult;
 import org.json.JSONArray;
 import org.json.JSONTokener;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * 淘宝动态详情页需要浏览器上下文执行脚本，WebView 仅作为静态解析失败后的可视化兜底。
@@ -201,26 +208,30 @@ public final class TaobaoWebViewSniffer {
     }
 
     private void completeWithMediaUrl(final String mediaUrl, final String source) {
+        XhsParseResult parseResult = TaobaoShareParser.buildSniffedVideoResult(
+                mediaUrl,
+                pageUrl,
+                entrySource,
+                source
+        );
+        completeWithParseResult(parseResult, source);
+    }
+
+    private void completeWithParseResult(final XhsParseResult parseResult, final String source) {
+        if (parseResult == null) {
+            return;
+        }
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (completed) {
                     return;
                 }
-                XhsParseResult parseResult = TaobaoShareParser.buildSniffedVideoResult(
-                        mediaUrl,
-                        pageUrl,
-                        entrySource,
-                        source
-                );
-                if (parseResult == null) {
-                    return;
-                }
                 completed = true;
                 mainHandler.removeCallbacks(timeoutRunnable);
                 Log.d(TAG, "taobao webview sniff found media, source=" + source
                         + ", page=" + TaobaoShareParser.describeUrlForLog(pageUrl)
-                        + ", mediaHost=" + describeHost(mediaUrl));
+                        + ", mediaHost=" + describeHost(parseResult.getMediaItems().get(0).getMediaUrl()));
                 Callback activeCallback = callback;
                 if (activeCallback != null) {
                     activeCallback.onMediaFound(parseResult);
@@ -277,33 +288,120 @@ public final class TaobaoWebViewSniffer {
         }
     }
 
+    private void inspectTaobaoDetailRequest(WebResourceRequest request) {
+        if (request == null || request.getUrl() == null) {
+            return;
+        }
+        inspectTaobaoDetailRequest(request.getUrl().toString(), request.getRequestHeaders());
+    }
+
+    private void inspectTaobaoDetailRequest(String requestUrl, Map<String, String> requestHeaders) {
+        if (completed || !TaobaoShareParser.isMtopDetailApiUrl(requestUrl)) {
+            return;
+        }
+        try {
+            Request request = buildProxyRequest(requestUrl, requestHeaders);
+            try (Response response = XhsHttpClient.getClient().newCall(request).execute()) {
+                ResponseBody responseBody = response.body();
+                byte[] responseBytes = responseBody == null ? new byte[0] : responseBody.bytes();
+                String responseText = new String(responseBytes, resolveCharset(responseBody));
+                Log.d(TAG, "taobao webview mtop response, httpCode=" + response.code()
+                        + ", bodyLength=" + responseBytes.length
+                        + ", hasDetailMediaHint=" + TaobaoShareParser.hasDetailMediaHint(responseText));
+                XhsParseResult parseResult = TaobaoShareParser.parseDetailResponse(
+                        responseText,
+                        pageUrl,
+                        entrySource,
+                        "webview_mtop_detail"
+                );
+                completeWithParseResult(parseResult, "webview_mtop_detail");
+            }
+        } catch (Exception exception) {
+            Log.d(TAG, "ignore taobao mtop sniff response, error="
+                    + exception.getClass().getSimpleName());
+        }
+    }
+
+    private Request buildProxyRequest(String requestUrl, Map<String, String> requestHeaders) {
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(requestUrl)
+                .get()
+                .header("User-Agent", XhsHttpClient.MOBILE_USER_AGENT);
+        if (requestHeaders == null) {
+            return requestBuilder.build();
+        }
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            String name = header.getKey();
+            String value = header.getValue();
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(value) || shouldSkipProxyHeader(name)) {
+                continue;
+            }
+            requestBuilder.header(name, value);
+        }
+        return requestBuilder.build();
+    }
+
+    private boolean shouldSkipProxyHeader(String headerName) {
+        String lowerName = headerName.toLowerCase(Locale.US);
+        return lowerName.equals("accept-encoding")
+                || lowerName.equals("content-length")
+                || lowerName.equals("host")
+                || lowerName.equals("connection");
+    }
+
+    private Charset resolveCharset(ResponseBody responseBody) {
+        if (responseBody == null || responseBody.contentType() == null) {
+            return StandardCharsets.UTF_8;
+        }
+        Charset charset = responseBody.contentType().charset(StandardCharsets.UTF_8);
+        return charset == null ? StandardCharsets.UTF_8 : charset;
+    }
+
+    private boolean handleInternalTaobaoNavigation(WebView view, String rawUrl, String source) {
+        inspectCandidateText(rawUrl, source);
+        String h5Url = TaobaoShareParser.extractTaobaoH5UrlFromScheme(rawUrl);
+        if (!TextUtils.isEmpty(h5Url)) {
+            Log.d(TAG, "taobao webview intercept app scheme, source=" + source
+                    + ", target=" + TaobaoShareParser.describeUrlForLog(h5Url));
+            if (callback != null && !completed) {
+                callback.onStatusChanged("已拦截淘宝 App 跳转，继续在页面内嗅探。");
+            }
+            view.loadUrl(h5Url);
+            return true;
+        }
+        if (TaobaoShareParser.isTaobaoAppScheme(rawUrl)) {
+            Log.d(TAG, "taobao webview block app scheme without h5 target, source=" + source);
+            return true;
+        }
+        return false;
+    }
+
     private final class SniffingWebViewClient extends WebViewClient {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             if (request != null && request.getUrl() != null) {
                 inspectCandidateText(request.getUrl().toString(), "webview_request");
             }
+            inspectTaobaoDetailRequest(request);
             return null;
         }
 
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             inspectCandidateText(url, "webview_request_legacy");
+            inspectTaobaoDetailRequest(url, null);
             return null;
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            if (request != null && request.getUrl() != null) {
-                inspectCandidateText(request.getUrl().toString(), "webview_navigation");
-            }
-            return false;
+            return request != null && request.getUrl() != null
+                    && handleInternalTaobaoNavigation(view, request.getUrl().toString(), "webview_navigation");
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            inspectCandidateText(url, "webview_navigation_legacy");
-            return false;
+            return handleInternalTaobaoNavigation(view, url, "webview_navigation_legacy");
         }
 
         @Override
