@@ -2,6 +2,7 @@ package com.shuqiang.captain.xhs.parser;
 
 import android.util.Log;
 
+import com.google.gson.JsonObject;
 import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseInput;
@@ -9,7 +10,9 @@ import com.shuqiang.captain.xhs.model.XhsParseResult;
 
 import java.io.IOException;
 
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -19,6 +22,7 @@ public class XhsParseRepository {
     private static final String TAG = "XhsParseRepo";
     private enum ParseRoute {
         XHS,
+        LOOPIT,
         GENERIC
     }
 
@@ -48,9 +52,11 @@ public class XhsParseRepository {
             );
         } else {
             finalUrl = parseInput.getExtractedUrl();
-            linkType = "generic_url";
+            linkType = parseRoute == ParseRoute.LOOPIT ? "loopit_game_share" : "generic_url";
             pageFetchResult = null;
-            parseResult = parseGenericPage(finalUrl, parseInput.getEntrySource());
+            parseResult = parseRoute == ParseRoute.LOOPIT
+                    ? LoopitGameShareParser.parse(finalUrl, parseInput.getEntrySource())
+                    : parseGenericPage(finalUrl, parseInput.getEntrySource());
         }
         Log.d(TAG, "parse finished, entry=" + entrySource
                 + ", linkType=" + linkType
@@ -68,11 +74,30 @@ public class XhsParseRepository {
         if (XhsInputParser.isDirectLink(url) || XhsInputParser.isShortLink(url)) {
             return ParseRoute.XHS;
         }
+        if (LoopitGameShareParser.isLoopitGameShareUrl(url)) {
+            return ParseRoute.LOOPIT;
+        }
         return ParseRoute.GENERIC;
     }
 
     private XhsParseResult parseGenericPage(String pageUrl, String entrySource) throws XhsParserException {
+        if (TaobaoShareParser.isSupportedPage(pageUrl)) {
+            XhsParseResult taobaoResult = parseTaobaoSharePage(pageUrl, entrySource);
+            if (taobaoResult != null) {
+                return taobaoResult;
+            }
+            Log.w(TAG, "taobao precise parse produced no media, fallback generic, page="
+                    + TaobaoShareParser.describeUrlForLog(pageUrl));
+        }
+        XhsParseResult alipayResult = tryParseAlipayVideoSharePage(pageUrl, entrySource);
+        if (alipayResult != null) {
+            return alipayResult;
+        }
         PageFetchResult desktopResult = executePageRequest(pageUrl, XhsHttpClient.DESKTOP_USER_AGENT, "desktop");
+        alipayResult = tryParseAlipayVideoSharePage(desktopResult.finalUrl, entrySource);
+        if (alipayResult != null) {
+            return alipayResult;
+        }
         XhsParseResult desktopParseResult = tryParseGenericResult(desktopResult, pageUrl, entrySource);
         if (hasDownloadableRichMedia(desktopParseResult)) {
             return desktopParseResult;
@@ -81,6 +106,10 @@ public class XhsParseRepository {
             return desktopParseResult;
         }
         PageFetchResult mobileResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "mobile");
+        alipayResult = tryParseAlipayVideoSharePage(mobileResult.finalUrl, entrySource);
+        if (alipayResult != null) {
+            return alipayResult;
+        }
         XhsParseResult mobileParseResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
         XhsParseResult preferredResult = selectPreferredGenericResult(desktopParseResult, mobileParseResult);
         if (preferredResult != null) {
@@ -90,6 +119,128 @@ public class XhsParseRepository {
             throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
         }
         throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
+    }
+
+    private XhsParseResult parseTaobaoSharePage(String pageUrl, String entrySource) throws XhsParserException {
+        PageFetchResult landingResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "taobao_mobile");
+        logTaobaoFetch("landing", pageUrl, landingResult, null);
+        XhsParseResult landingApiResult = TaobaoShareParser.parsePageHtml(
+                landingResult.html,
+                pageUrl,
+                entrySource,
+                landingResult.strategy
+        );
+        if (landingApiResult != null) {
+            return landingApiResult;
+        }
+        XhsParseResult directResult = tryParseGenericResult(landingResult, pageUrl, entrySource);
+        if (hasDownloadableRichMedia(directResult)) {
+            return directResult;
+        }
+        String redirectUrl = TaobaoShareParser.extractJsRedirectUrl(landingResult.html);
+        logTaobaoFetch("landing_redirect", pageUrl, landingResult, redirectUrl);
+        if (redirectUrl == null || redirectUrl.equals(pageUrl)) {
+            return directResult;
+        }
+        PageFetchResult detailResult = executePageRequest(redirectUrl, XhsHttpClient.MOBILE_USER_AGENT,
+                "taobao_mobile_redirect");
+        logTaobaoFetch("detail", redirectUrl, detailResult, null);
+        XhsParseResult detailApiResult = TaobaoShareParser.parsePageHtml(
+                detailResult.html,
+                redirectUrl,
+                entrySource,
+                detailResult.strategy
+        );
+        if (detailApiResult != null) {
+            return detailApiResult;
+        }
+        XhsParseResult detailResultFromHtml = tryParseGenericResult(detailResult, redirectUrl, entrySource);
+        if (hasDownloadableRichMedia(detailResultFromHtml)) {
+            return detailResultFromHtml;
+        }
+        if (detailResultFromHtml != null) {
+            return detailResultFromHtml;
+        }
+        return directResult;
+    }
+
+    private void logTaobaoFetch(String step, String pageUrl, PageFetchResult result, String redirectUrl) {
+        String html = result == null ? null : result.html;
+        Log.d(TAG, "taobao step=" + step
+                + ", page=" + TaobaoShareParser.describeUrlForLog(pageUrl)
+                + ", httpCode=" + (result == null ? -1 : result.httpCode)
+                + ", htmlLength=" + (html == null ? 0 : html.length())
+                + ", hasDetailMediaHint=" + TaobaoShareParser.hasDetailMediaHint(html)
+                + ", redirect=" + TaobaoShareParser.describeUrlForLog(redirectUrl));
+    }
+
+    private XhsParseResult tryParseAlipayVideoSharePage(String pageUrl, String entrySource)
+            throws XhsParserException {
+        if (!AlipayVideoShareParser.isSupportedPage(pageUrl)) {
+            return null;
+        }
+        return parseAlipayVideoSharePage(pageUrl, entrySource);
+    }
+
+    private XhsParseResult parseAlipayVideoSharePage(String pageUrl, String entrySource) throws XhsParserException {
+        AlipayVideoShareParser.ShareInfo shareInfo = AlipayVideoShareParser.extractShareInfo(pageUrl);
+        if (shareInfo == null) {
+            return null;
+        }
+        XhsParserException apiException = null;
+        if (shareInfo.contentId != null && !shareInfo.contentId.isEmpty()) {
+            try {
+                String responseJson = executeAlipayVideoDetailRequest(pageUrl, shareInfo.contentId);
+                XhsParseResult apiResult = AlipayVideoShareParser.parseDetailResponse(
+                        responseJson,
+                        pageUrl,
+                        entrySource,
+                        "alipay_webgw",
+                        shareInfo
+                );
+                if (apiResult != null) {
+                    return apiResult;
+                }
+            } catch (XhsParserException exception) {
+                apiException = exception;
+            }
+        }
+        XhsParseResult shareOnlyResult = AlipayVideoShareParser.parseShareInfoOnly(
+                pageUrl,
+                entrySource,
+                "alipay_scheme",
+                shareInfo
+        );
+        if (shareOnlyResult != null) {
+            return shareOnlyResult;
+        }
+        if (apiException != null) {
+            throw apiException;
+        }
+        throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
+    }
+
+    private String executeAlipayVideoDetailRequest(String pageUrl, String contentId) throws XhsParserException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("contentId", contentId);
+        Request request = new Request.Builder()
+                .url(AlipayVideoShareParser.DETAIL_API_URL)
+                .header("User-Agent", XhsHttpClient.MOBILE_USER_AGENT)
+                .header("Accept", "application/json")
+                .header("Origin", "https://render.alipay.com")
+                .header("Referer", pageUrl)
+                .header("x-webgw-appId", AlipayVideoShareParser.APP_ID)
+                .header("x-webgw-version", "2.0")
+                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), payload.toString()))
+                .build();
+        try (Response response = XhsHttpClient.getClient().newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new XhsParserException(XhsParseError.NETWORK_ERROR);
+            }
+            return response.body() == null ? "" : response.body().string();
+        } catch (IOException e) {
+            throw new XhsParserException(XhsParseError.NETWORK_ERROR, e);
+        }
     }
 
     private XhsParseResult tryParseGenericResult(PageFetchResult pageFetchResult, String pageUrl, String entrySource)
@@ -183,14 +334,15 @@ public class XhsParseRepository {
             throws XhsParserException {
         Request request = XhsHttpClient.buildPageRequest(pageUrl, userAgent);
         try (Response response = XhsHttpClient.getClient().newCall(request).execute()) {
+            String finalUrl = response.request().url().toString();
             if (!response.isSuccessful()) {
                 if (response.code() == 404) {
-                    return new PageFetchResult(strategy, response.code(), "");
+                    return new PageFetchResult(strategy, response.code(), "", finalUrl);
                 }
                 throw new XhsParserException(XhsParseError.NETWORK_ERROR);
             }
             String html = response.body() == null ? "" : response.body().string();
-            return new PageFetchResult(strategy, response.code(), html);
+            return new PageFetchResult(strategy, response.code(), html, finalUrl);
         } catch (IOException e) {
             throw new XhsParserException(XhsParseError.NETWORK_ERROR, e);
         }
@@ -203,11 +355,13 @@ public class XhsParseRepository {
         private final String strategy;
         private final int httpCode;
         private final String html;
+        private final String finalUrl;
 
-        private PageFetchResult(String strategy, int httpCode, String html) {
+        private PageFetchResult(String strategy, int httpCode, String html, String finalUrl) {
             this.strategy = strategy;
             this.httpCode = httpCode;
             this.html = html;
+            this.finalUrl = finalUrl;
         }
 
         private boolean hasUsefulContent() {

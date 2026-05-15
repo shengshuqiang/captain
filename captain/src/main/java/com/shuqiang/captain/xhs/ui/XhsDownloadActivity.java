@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
@@ -52,6 +53,7 @@ import captain.R;
  */
 public class XhsDownloadActivity extends BasePermissionActivity {
     public static final String EXTRA_INPUT_TEXT = "extra_input_text";
+    private static final String TAG = "XhsDownloadActivity";
     private static final int CLIPBOARD_HINT_MAX_LENGTH = 80;
 
     private enum UiState {
@@ -527,12 +529,27 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private void applyParseError(XhsParserException parserException) {
+        Log.w(TAG, "parse failed, error=" + parserException.getParseError()
+                + ", inputUrl=" + summarizeUrlForLog(extractUrlFromText(lastAttemptedInputText)));
         currentParseResult = null;
         XhsDownloadProgressStore.clear();
         mediaAdapter.setItems(null);
         resultContainer.setVisibility(View.GONE);
         secondaryActionView.setVisibility(View.GONE);
         setUiState(UiState.PARSE_FAILED, parserException.getMessage());
+    }
+
+    private String summarizeUrlForLog(String rawUrl) {
+        if (TextUtils.isEmpty(rawUrl)) {
+            return "empty";
+        }
+        try {
+            Uri uri = Uri.parse(rawUrl);
+            String id = uri.getQueryParameter("id");
+            return uri.getHost() + uri.getPath() + (TextUtils.isEmpty(id) ? "" : "?id=" + id);
+        } catch (Exception ignored) {
+            return "invalid";
+        }
     }
 
     private void toggleBulkSelection() {
