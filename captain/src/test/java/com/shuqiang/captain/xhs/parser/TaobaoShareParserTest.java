@@ -103,6 +103,40 @@ public class TaobaoShareParserTest {
         Assert.assertNull(parseResult);
     }
 
+    @Test
+    public void sniffedVideoResultAcceptsTaobaoVideoPlayUrlWithoutExtension() {
+        String mediaUrl = "https://cloud.video.taobao.com/play/u/1/p/1/e/6/t/1/940585894119";
+
+        XhsParseResult parseResult = TaobaoShareParser.buildSniffedVideoResult(
+                mediaUrl,
+                PAGE_URL,
+                "manual_input",
+                "webview_request"
+        );
+
+        Assert.assertNotNull(parseResult);
+        Assert.assertEquals("940585894119", parseResult.getNoteId());
+        Assert.assertEquals(XhsMediaType.VIDEO, parseResult.getPrimaryMediaType());
+        Assert.assertEquals(mediaUrl, parseResult.getMediaItems().get(0).getMediaUrl());
+        Assert.assertEquals("mp4", parseResult.getMediaItems().get(0).getFileExtension());
+    }
+
+    @Test
+    public void sniffedVideoResultRejectsHlsAndImageFallback() {
+        Assert.assertNull(TaobaoShareParser.buildSniffedVideoResult(
+                "https://cloud.video.taobao.com/live/index.m3u8",
+                PAGE_URL,
+                "manual_input",
+                "webview_request"
+        ));
+        Assert.assertNull(TaobaoShareParser.buildSniffedVideoResult(
+                "https://img.alicdn.com/imgextra/i1/cover.jpg",
+                PAGE_URL,
+                "manual_input",
+                "webview_request"
+        ));
+    }
+
     private static String quote(String value) {
         return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }

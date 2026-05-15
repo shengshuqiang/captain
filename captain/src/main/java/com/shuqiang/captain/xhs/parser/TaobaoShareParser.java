@@ -70,10 +70,8 @@ final class TaobaoShareParser {
         try {
             URI uri = new URI(normalizedUrl);
             String host = uri.getHost();
-            String path = uri.getPath();
             String itemId = extractItemId(normalizedUrl);
             return (host == null ? "unknown" : host)
-                    + (path == null ? "" : path)
                     + (itemId == null ? "" : "?id=" + itemId);
         } catch (Exception ignored) {
             return "invalid";
@@ -91,6 +89,69 @@ final class TaobaoShareParser {
                 || lowerHtml.contains(".mov")
                 || lowerHtml.contains(".m4v")
                 || lowerHtml.contains(".webm");
+    }
+
+    static boolean isLikelyDownloadableVideoUrl(String mediaUrl) {
+        if (mediaUrl == null || !XhsNetworkPolicy.isAllowedMediaUrl(mediaUrl)) {
+            return false;
+        }
+        String lowerUrl = mediaUrl.toLowerCase(Locale.US);
+        if (lowerUrl.contains(".m3u8") || lowerUrl.startsWith("blob:") || lowerUrl.startsWith("data:")) {
+            return false;
+        }
+        if (lowerUrl.contains(".mp4") || lowerUrl.contains(".mov")
+                || lowerUrl.contains(".m4v") || lowerUrl.contains(".webm")) {
+            return true;
+        }
+        try {
+            URI uri = new URI(mediaUrl);
+            String host = uri.getHost();
+            String path = uri.getPath();
+            String lowerHost = host == null ? "" : host.toLowerCase(Locale.US);
+            String lowerPath = path == null ? "" : path.toLowerCase(Locale.US);
+            return lowerHost.contains("video")
+                    && (lowerPath.contains("/play") || lowerPath.contains("/video"));
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    static String normalizeSniffedUrl(String pageUrl, String rawUrl) {
+        return normalizeUrl(pageUrl, rawUrl);
+    }
+
+    static XhsParseResult buildSniffedVideoResult(String mediaUrl,
+                                                 String pageUrl,
+                                                 String entrySource,
+                                                 String requestStrategy) {
+        String normalizedMediaUrl = normalizeUrl(pageUrl, mediaUrl);
+        if (!isLikelyDownloadableVideoUrl(normalizedMediaUrl)) {
+            return null;
+        }
+        String noteId = firstNonEmpty(extractItemId(pageUrl), extractItemId(normalizedMediaUrl), buildPageId(pageUrl));
+        ArrayList<XhsMediaItem> mediaItems = new ArrayList<>();
+        mediaItems.add(new XhsMediaItem(
+                noteId + "_webview_1",
+                XhsMediaType.VIDEO,
+                normalizedMediaUrl,
+                normalizedMediaUrl,
+                0,
+                0,
+                0,
+                guessVideoExtension(normalizedMediaUrl),
+                true
+        ));
+        return new XhsParseResult(
+                noteId,
+                pageUrl,
+                pageUrl,
+                "淘宝",
+                DEFAULT_TITLE,
+                normalizedMediaUrl,
+                requestStrategy + " · 淘宝 WebView 视频嗅探",
+                entrySource,
+                mediaItems
+        );
     }
 
     static XhsParseResult parseDetailResponse(String responseJson,

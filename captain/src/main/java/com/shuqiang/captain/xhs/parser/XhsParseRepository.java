@@ -86,8 +86,9 @@ public class XhsParseRepository {
             if (taobaoResult != null) {
                 return taobaoResult;
             }
-            Log.w(TAG, "taobao precise parse produced no media, fallback generic, page="
+            Log.w(TAG, "taobao precise parse produced no downloadable video, wait for webview sniff, page="
                     + TaobaoShareParser.describeUrlForLog(pageUrl));
+            throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
         }
         XhsParseResult alipayResult = tryParseAlipayVideoSharePage(pageUrl, entrySource);
         if (alipayResult != null) {
@@ -140,7 +141,7 @@ public class XhsParseRepository {
         String redirectUrl = TaobaoShareParser.extractJsRedirectUrl(landingResult.html);
         logTaobaoFetch("landing_redirect", pageUrl, landingResult, redirectUrl);
         if (redirectUrl == null || redirectUrl.equals(pageUrl)) {
-            return directResult;
+            return null;
         }
         PageFetchResult detailResult = executePageRequest(redirectUrl, XhsHttpClient.MOBILE_USER_AGENT,
                 "taobao_mobile_redirect");
@@ -158,10 +159,7 @@ public class XhsParseRepository {
         if (hasDownloadableRichMedia(detailResultFromHtml)) {
             return detailResultFromHtml;
         }
-        if (detailResultFromHtml != null) {
-            return detailResultFromHtml;
-        }
-        return directResult;
+        return null;
     }
 
     private void logTaobaoFetch(String step, String pageUrl, PageFetchResult result, String redirectUrl) {

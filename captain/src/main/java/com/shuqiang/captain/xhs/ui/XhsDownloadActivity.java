@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,6 +40,7 @@ import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 import com.shuqiang.captain.xhs.model.XhsSaveSummary;
+import com.shuqiang.captain.xhs.parser.TaobaoWebViewSniffer;
 import com.shuqiang.captain.xhs.parser.XhsParseRepository;
 import com.shuqiang.captain.xhs.parser.XhsParserException;
 
@@ -92,6 +94,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private Button parseButton;
     private Button saveButton;
     private RecyclerView mediaListView;
+    private View taobaoWebViewContainer;
+    private TextView taobaoWebViewStatusView;
+    private WebView taobaoWebView;
+    private TaobaoWebViewSniffer taobaoWebViewSniffer;
 
     private UiState uiState = UiState.IDLE;
     private XhsParseResult currentParseResult;
@@ -101,6 +107,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private String lastAttemptedInputText;
     private String lastClipboardSnapshotAtParse;
     private boolean autoParsePending;
+    private int parseRequestVersion;
 
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
@@ -149,6 +156,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         parseButton = findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
         mediaListView = findViewById(R.id.media_list);
+        taobaoWebViewContainer = findViewById(R.id.taobao_webview_container);
+        taobaoWebViewStatusView = findViewById(R.id.taobao_webview_status);
+        taobaoWebView = findViewById(R.id.taobao_sniff_webview);
+        taobaoWebViewSniffer = new TaobaoWebViewSniffer(taobaoWebView);
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
@@ -464,6 +475,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             Toast.makeText(this, "请先粘贴网页分享文案或链接", Toast.LENGTH_SHORT).show();
             return;
         }
+        final int requestVersion = ++parseRequestVersion;
+        stopTaobaoWebViewSniff();
+        hideTaobaoWebView();
         lastAttemptedInputText = normalizeInput(rawInput);
         // 记录本次解析开始时的剪贴板基线，后续只在出现“新剪贴板内容”时切回粘贴主动作。
         lastClipboardSnapshotAtParse = normalizeInput(readClipboardText());
@@ -471,6 +485,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         final String entrySource = Intent.ACTION_SEND.equals(getIntent().getAction())
                 ? "share_intent"
                 : rawEntrySource;
+        final String extractedUrl = extractUrlFromText(rawInput);
         parseExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -479,6 +494,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (requestVersion != parseRequestVersion) {
+                                return;
+                            }
                             applyParseResult(parseResult);
                         }
                     });
@@ -486,6 +504,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (requestVersion != parseRequestVersion) {
+                                return;
+                            }
+                            if (shouldStartTaobaoWebViewSniff(parserException, extractedUrl)) {
+                                startTaobaoWebViewSniff(extractedUrl, entrySource, requestVersion, parserException);
+                                return;
+                            }
                             applyParseError(parserException);
                         }
                     });
@@ -493,12 +518,73 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (requestVersion != parseRequestVersion) {
+                                return;
+                            }
                             applyParseError(new XhsParserException(XhsParseError.NETWORK_ERROR));
                         }
                     });
                 }
             }
         });
+    }
+
+    private boolean shouldStartTaobaoWebViewSniff(XhsParserException parserException, String extractedUrl) {
+        return parserException.getParseError() == XhsParseError.NO_MEDIA_FOUND
+                && TaobaoWebViewSniffer.canSniff(extractedUrl);
+    }
+
+    private void startTaobaoWebViewSniff(String pageUrl,
+                                         String entrySource,
+                                         final int requestVersion,
+                                         final XhsParserException originalException) {
+        taobaoWebViewContainer.setVisibility(View.VISIBLE);
+        taobaoWebViewStatusView.setText(R.string.xhs_download_taobao_webview_loading);
+        setUiState(UiState.PARSING, "静态页面未发现视频，正在打开淘宝页面嗅探资源。");
+        taobaoWebViewSniffer.start(pageUrl, entrySource, new TaobaoWebViewSniffer.Callback() {
+            @Override
+            public void onStatusChanged(String message) {
+                if (requestVersion != parseRequestVersion) {
+                    return;
+                }
+                taobaoWebViewStatusView.setText(message);
+            }
+
+            @Override
+            public void onMediaFound(XhsParseResult parseResult) {
+                if (requestVersion != parseRequestVersion) {
+                    return;
+                }
+                taobaoWebViewStatusView.setText(R.string.xhs_download_taobao_webview_found);
+                applyParseResult(parseResult);
+            }
+
+            @Override
+            public void onSniffFailed(String reason) {
+                if (requestVersion != parseRequestVersion) {
+                    return;
+                }
+                taobaoWebViewStatusView.setText(TextUtils.isEmpty(reason)
+                        ? getString(R.string.xhs_download_taobao_webview_failed)
+                        : reason);
+                applyParseError(originalException);
+            }
+        });
+    }
+
+    private void stopTaobaoWebViewSniff() {
+        if (taobaoWebViewSniffer != null) {
+            taobaoWebViewSniffer.stop();
+        }
+    }
+
+    private void hideTaobaoWebView() {
+        if (taobaoWebViewContainer != null) {
+            taobaoWebViewContainer.setVisibility(View.GONE);
+        }
+        if (taobaoWebViewStatusView != null) {
+            taobaoWebViewStatusView.setText(R.string.xhs_download_taobao_webview_loading);
+        }
     }
 
     private void applyParseResult(XhsParseResult parseResult) {
@@ -546,7 +632,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         try {
             Uri uri = Uri.parse(rawUrl);
             String id = uri.getQueryParameter("id");
-            return uri.getHost() + uri.getPath() + (TextUtils.isEmpty(id) ? "" : "?id=" + id);
+            String host = uri.getHost();
+            return (TextUtils.isEmpty(host) ? "unknown" : host)
+                    + (TextUtils.isEmpty(id) ? "" : "?id=" + id);
         } catch (Exception ignored) {
             return "invalid";
         }
@@ -721,6 +809,9 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     @Override
     protected void onDestroy() {
         parseExecutor.shutdownNow();
+        if (taobaoWebViewSniffer != null) {
+            taobaoWebViewSniffer.destroy();
+        }
         super.onDestroy();
     }
 }
