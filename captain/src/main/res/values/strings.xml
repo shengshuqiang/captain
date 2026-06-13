@@ -63,6 +63,8 @@
     <string name="feature_icon">功能图标</string>
     <string name="feature_qr_scan_title">扫一扫</string>
     <string name="feature_suansuanle_title">算算乐</string>
+    <string name="feature_timer_channel_title">时间水滴</string>
+    <string name="timer_channel_title">时间水滴</string>
 
     <!-- 扫一扫 -->
     <string name="qr_scan_title">扫一扫</string>

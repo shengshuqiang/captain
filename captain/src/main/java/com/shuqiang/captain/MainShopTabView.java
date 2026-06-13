@@ -19,6 +19,7 @@ import com.captain.base.WebViewActivity;
 import com.shuqiang.captain.chess.ui.ChessLobbyActivity;
 import com.shuqiang.captain.qr.QRActivity;
 import com.shuqiang.captain.qr.scan.QrScanActivity;
+import com.shuqiang.captain.timer.TimerChannelActivity;
 import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
 
 import java.util.ArrayList;
@@ -150,6 +151,13 @@ public class MainShopTabView extends FrameLayout {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     return intent;
                 }
+        ));
+        defaultFeatureSpecs.add(new HomeFeatureSpec(
+                "timer_channel",
+                context.getString(R.string.feature_timer_channel_title),
+                R.drawable.ic_timer_water,
+                false,
+                createIntentFactory(TimerChannelActivity.class)
         ));
         defaultFeatureSpecs.add(new HomeFeatureSpec(
                 "chess",

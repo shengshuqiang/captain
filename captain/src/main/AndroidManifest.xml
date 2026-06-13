@@ -3,6 +3,7 @@ xmlns:tools="http://schemas.android.com/tools"
 package="captain">
 
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -88,6 +89,13 @@ package="captain">
         android:name="com.shuqiang.captain.xhs.ui.XhsPreviewActivity"
         android:exported="false"
         android:label="资源预览" />
+
+    <activity
+        android:name="com.shuqiang.captain.timer.TimerChannelActivity"
+        android:exported="false"
+        android:label="@string/timer_channel_title"
+        android:screenOrientation="landscape"
+        android:theme="@style/AppTheme.NoActionBar" />
 
     <activity
         android:name="com.shuqiang.captain.qr.test.QRTestActivity"
