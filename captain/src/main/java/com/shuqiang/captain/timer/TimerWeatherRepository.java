@@ -20,7 +20,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-// 计时器频道天气数据源：优先当前位置，定位不可用时用默认坐标保证页面仍有温度信息。
+// 计时器频道天气数据源：只展示真实当前位置天气，定位或请求失败时交给页面隐藏天气簇。
 public final class TimerWeatherRepository {
     public interface Callback {
         void onWeatherLoaded(@NonNull TimerWeatherInfo weatherInfo);
@@ -28,7 +28,6 @@ public final class TimerWeatherRepository {
         void onWeatherFailed();
     }
 
-    private static final Coordinate DEFAULT_COORDINATE = new Coordinate(31.2304, 121.4737, true);
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
             .connectTimeout(8, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
@@ -40,7 +39,11 @@ public final class TimerWeatherRepository {
         Context appContext = context.getApplicationContext();
         new Thread(() -> {
             try {
-                TimerWeatherInfo weatherInfo = requestWeather(resolveCoordinate(appContext));
+                Coordinate coordinate = resolveCoordinate(appContext);
+                if (coordinate == null) {
+                    throw new IOException("no location for timer weather");
+                }
+                TimerWeatherInfo weatherInfo = requestWeather(coordinate);
                 callback.onWeatherLoaded(weatherInfo);
             } catch (Exception ignored) {
                 callback.onWeatherFailed();
@@ -48,12 +51,13 @@ public final class TimerWeatherRepository {
         }, "timer-weather").start();
     }
 
+    @Nullable
     private Coordinate resolveCoordinate(Context context) {
         Location location = getLastKnownLocation(context);
         if (location == null) {
-            return DEFAULT_COORDINATE;
+            return null;
         }
-        return new Coordinate(location.getLatitude(), location.getLongitude(), false);
+        return new Coordinate(location.getLatitude(), location.getLongitude());
     }
 
     @Nullable
@@ -116,8 +120,7 @@ public final class TimerWeatherRepository {
             Boolean day = current.has("is_day") ? current.optInt("is_day") == 1 : null;
             return new TimerWeatherInfo(TimerWeatherCodeMapper.map(weatherCode),
                     temperature,
-                    day,
-                    coordinate.defaultLocation);
+                    day);
         } catch (Exception exception) {
             if (exception instanceof IOException) {
                 throw (IOException) exception;
@@ -129,12 +132,10 @@ public final class TimerWeatherRepository {
     private static final class Coordinate {
         private final double latitude;
         private final double longitude;
-        private final boolean defaultLocation;
 
-        private Coordinate(double latitude, double longitude, boolean defaultLocation) {
+        private Coordinate(double latitude, double longitude) {
             this.latitude = latitude;
             this.longitude = longitude;
-            this.defaultLocation = defaultLocation;
         }
     }
 }

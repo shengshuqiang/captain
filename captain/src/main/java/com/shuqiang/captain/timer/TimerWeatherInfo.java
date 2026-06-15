@@ -5,18 +5,19 @@ public final class TimerWeatherInfo {
     private final String condition;
     private final int temperatureCelsius;
     private final Boolean day;
-    private final boolean defaultLocation;
 
-    public TimerWeatherInfo(String condition, int temperatureCelsius, Boolean day, boolean defaultLocation) {
+    public TimerWeatherInfo(String condition, int temperatureCelsius, Boolean day) {
         this.condition = condition;
         this.temperatureCelsius = temperatureCelsius;
         this.day = day;
-        this.defaultLocation = defaultLocation;
     }
 
-    public String getDisplayText() {
-        String suffix = defaultLocation ? " · 默认位置" : "";
-        return condition + " " + temperatureCelsius + "°C" + suffix;
+    public String getCondition() {
+        return condition;
+    }
+
+    public int getTemperatureCelsius() {
+        return temperatureCelsius;
     }
 
     public Boolean isDay() {

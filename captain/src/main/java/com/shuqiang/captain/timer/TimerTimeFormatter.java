@@ -11,6 +11,8 @@ import java.util.Locale;
 // 统一生成计时器频道的时间、公历、农历和时令文案。
 public final class TimerTimeFormatter {
     private static final Locale CN = Locale.CHINA;
+    private static final String[] STEMS = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"};
+    private static final String[] BRANCHES = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"};
     private static final String[] LUNAR_MONTHS = {
             "正月", "二月", "三月", "四月", "五月", "六月",
             "七月", "八月", "九月", "十月", "冬月", "腊月"
@@ -33,6 +35,7 @@ public final class TimerTimeFormatter {
         return new TimeInfo(
                 timeFormat.format(calendar.getTime()),
                 solarFormat.format(calendar.getTime()),
+                formatGanzhiYear(timeMillis, calendar),
                 formatLunar(timeMillis),
                 seasonInfo.name,
                 seasonInfo.season,
@@ -40,6 +43,65 @@ public final class TimerTimeFormatter {
                 calendar.get(Calendar.MINUTE),
                 calendar.get(Calendar.SECOND)
         );
+    }
+
+    public String formatClockTime(long timeMillis) {
+        Calendar calendar = Calendar.getInstance(CN);
+        calendar.setTimeInMillis(timeMillis);
+        return timeFormat.format(calendar.getTime());
+    }
+
+    public String formatElapsed(long elapsedMs) {
+        long totalSeconds = Math.max(0L, elapsedMs / 1000L);
+        long hours = totalSeconds / 3600L;
+        long minutes = (totalSeconds / 60L) % 60L;
+        long seconds = totalSeconds % 60L;
+        return String.format(CN, "%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    public String formatCompactElapsed(long elapsedMs) {
+        long totalSeconds = Math.max(0L, elapsedMs / 1000L);
+        long hours = totalSeconds / 3600L;
+        long minutes = (totalSeconds / 60L) % 60L;
+        long seconds = totalSeconds % 60L;
+        if (hours > 0L) {
+            return String.format(CN, "%d:%02d'%02d\"", hours, minutes, seconds);
+        }
+        long totalMinutes = totalSeconds / 60L;
+        return String.format(CN, "%d'%02d\"", totalMinutes, seconds);
+    }
+
+    private String formatGanzhiYear(long timeMillis, Calendar solarCalendar) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                return formatGanzhiYearWithIcu(timeMillis);
+            } catch (RuntimeException ignored) {
+                // ICU 个别机型异常时回退到公历年近似值，保证顶部信息不中断。
+            }
+        }
+        return formatGanzhiYearByGregorian(solarCalendar.get(Calendar.YEAR));
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private String formatGanzhiYearWithIcu(long timeMillis) {
+        ChineseCalendar lunarCalendar = new ChineseCalendar(CN);
+        lunarCalendar.setTimeInMillis(timeMillis);
+        int cycleYear = lunarCalendar.get(ChineseCalendar.YEAR);
+        if (cycleYear < 1) {
+            throw new IllegalStateException("invalid lunar cycle year");
+        }
+        int index = (cycleYear - 1) % 60;
+        return STEMS[index % 10] + BRANCHES[index % 12] + "年";
+    }
+
+    private String formatGanzhiYearByGregorian(int year) {
+        int index = positiveModulo(year - 4, 60);
+        return STEMS[index % 10] + BRANCHES[index % 12] + "年";
+    }
+
+    private int positiveModulo(int value, int divisor) {
+        int result = value % divisor;
+        return result < 0 ? result + divisor : result;
     }
 
     private String formatLunar(long timeMillis) {
@@ -70,6 +132,7 @@ public final class TimerTimeFormatter {
     public static final class TimeInfo {
         public final String timeText;
         public final String solarText;
+        public final String ganzhiYearText;
         public final String lunarText;
         public final String solarTerm;
         public final int season;
@@ -77,10 +140,11 @@ public final class TimerTimeFormatter {
         public final int minute;
         public final int second;
 
-        private TimeInfo(String timeText, String solarText, String lunarText, String solarTerm,
-                         int season, int hour, int minute, int second) {
+        private TimeInfo(String timeText, String solarText, String ganzhiYearText, String lunarText,
+                         String solarTerm, int season, int hour, int minute, int second) {
             this.timeText = timeText;
             this.solarText = solarText;
+            this.ganzhiYearText = ganzhiYearText;
             this.lunarText = lunarText;
             this.solarTerm = solarTerm;
             this.season = season;

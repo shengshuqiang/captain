@@ -90,7 +90,11 @@ public final class TimerChannelActivity extends Activity {
 
             @Override
             public void onWeatherFailed() {
-                // 保留上一次成功天气；首次失败时 View 会自然展示本地时间兜底。
+                mainHandler.post(() -> {
+                    if (!destroyed && timerChannelView != null) {
+                        timerChannelView.setWeatherInfo(null);
+                    }
+                });
             }
         });
     }
