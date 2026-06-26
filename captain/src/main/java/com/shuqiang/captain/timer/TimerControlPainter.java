@@ -1,11 +1,16 @@
 package com.shuqiang.captain.timer;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
+
+import androidx.core.content.ContextCompat;
+
+import captain.R;
 
 // 计时器左右控制按钮绘制，保持自绘图标避免依赖 emoji 字体差异。
 final class TimerControlPainter {
@@ -14,17 +19,23 @@ final class TimerControlPainter {
     static final int ICON_PLAY = 3;
     static final int ICON_REFRESH = 4;
 
+    private final Context context;
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path = new Path();
     private final RectF arcRect = new RectF();
     private final float density;
 
-    TimerControlPainter(float density) {
+    TimerControlPainter(Context context, float density) {
+        this.context = context.getApplicationContext();
         this.density = density;
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setStrokeCap(Paint.Cap.ROUND);
         strokePaint.setStrokeJoin(Paint.Join.ROUND);
+    }
+
+    private int color(int resId) {
+        return ContextCompat.getColor(context, resId);
     }
 
     void drawGlassButton(Canvas canvas, RectF bounds, boolean day, int icon) {
@@ -33,24 +44,24 @@ final class TimerControlPainter {
         paint.setShader(new RadialGradient(bounds.centerX() - radius * 0.35f,
                 bounds.centerY() - radius * 0.45f,
                 radius * 1.35f,
-                day ? 0xF4FFFFFF : 0xD83D4A62,
-                day ? 0x96D9E9F2 : 0x88243043,
+                color(day ? R.color.captain_timer_button_glass_core_day : R.color.captain_timer_button_glass_core_night),
+                color(day ? R.color.captain_timer_button_glass_edge_day : R.color.captain_timer_button_glass_edge_night),
                 Shader.TileMode.CLAMP));
         canvas.drawOval(bounds, paint);
         paint.setShader(null);
         strokePaint.setStrokeWidth(dp(1.2f));
-        strokePaint.setColor(day ? 0xB8FFFFFF : 0x66DDEBFF);
+        strokePaint.setColor(color(day ? R.color.captain_timer_button_stroke_day : R.color.captain_timer_button_stroke_night));
         canvas.drawOval(bounds, strokePaint);
-        paint.setColor(day ? 0x33241C2D : 0x33000000);
+        paint.setColor(color(day ? R.color.captain_timer_button_inner_shadow_day : R.color.captain_timer_button_inner_shadow_night));
         canvas.drawCircle(bounds.centerX(), bounds.centerY() + dp(1.5f), radius * 0.72f, paint);
         drawIcon(canvas, bounds, day, icon);
     }
 
     private void drawIcon(Canvas canvas, RectF bounds, boolean day, int icon) {
-        int color = day ? 0xDD241C2D : 0xEEF8FBFF;
-        strokePaint.setColor(color);
+        int iconColor = color(day ? R.color.captain_timer_button_icon_day : R.color.captain_timer_button_icon_night);
+        strokePaint.setColor(iconColor);
         strokePaint.setStrokeWidth(dp(2.6f));
-        paint.setColor(color);
+        paint.setColor(iconColor);
         float cx = bounds.centerX();
         float cy = bounds.centerY();
         if (icon == ICON_STOPWATCH) {

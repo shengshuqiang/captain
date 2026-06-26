@@ -11,6 +11,9 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import captain.R;
 
 import java.util.List;
 import java.util.Locale;
@@ -55,10 +58,11 @@ public final class TimerChannelView extends View {
 
     private void init() {
         density = getResources().getDisplayMetrics().density;
-        backgroundPainter = new TimerBackgroundPainter(density);
-        topInfoPainter = new TimerTopInfoPainter(density);
-        waterPainter = new TimerWaterPainter(density);
-        controlPainter = new TimerControlPainter(density);
+        Context context = getContext();
+        backgroundPainter = new TimerBackgroundPainter(context, density);
+        topInfoPainter = new TimerTopInfoPainter(context, density);
+        waterPainter = new TimerWaterPainter(context, density);
+        controlPainter = new TimerControlPainter(context, density);
         setKeepScreenOn(true);
         setClickable(true);
         textPaint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
@@ -189,8 +193,10 @@ public final class TimerChannelView extends View {
         textPaint.setTextSize(textSize);
         textPaint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
         textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setColor(day ? 0xEE241C2D : 0xF2F8FBFF);
-        textPaint.setShadowLayer(dp(4), 0, dp(2), day ? 0x22FFFFFF : 0x55000000);
+        textPaint.setColor(ContextCompat.getColor(getContext(),
+                day ? R.color.captain_timer_center_text_day : R.color.captain_timer_center_text_night));
+        textPaint.setShadowLayer(dp(4), 0, dp(2), ContextCompat.getColor(getContext(),
+                day ? R.color.captain_timer_center_shadow_day : R.color.captain_timer_center_shadow_night));
         textPaint.getFontMetrics(timeMetrics);
         timeBaseline = getHeight() * 0.45f - (timeMetrics.ascent + timeMetrics.descent) / 2f;
         canvas.drawText(elapsedText, getWidth() / 2f, timeBaseline, textPaint);
@@ -205,7 +211,8 @@ public final class TimerChannelView extends View {
         secondaryTextPaint.setTypeface(Typeface.MONOSPACE);
         secondaryTextPaint.setTextAlign(Paint.Align.CENTER);
         secondaryTextPaint.setTextSize(dp(14));
-        secondaryTextPaint.setColor(day ? 0xB05E5568 : 0xB0DFE8F2);
+        secondaryTextPaint.setColor(ContextCompat.getColor(getContext(),
+                day ? R.color.captain_timer_record_text_day : R.color.captain_timer_record_text_night));
         float y = timeBaseline + dp(50);
         for (TimerLapRecord record : records) {
             String line = String.format(Locale.US, "%02d  %s  %s",

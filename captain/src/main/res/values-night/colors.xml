@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- P1-8 双主题对称:暗色映射层 -->
+    <!-- 只覆盖 leaf token;别名(text_primary→gray_1000 等)按 config 自动跟随。 -->
+    <!-- 注意:启用需把 AppTheme 切到 Theme.AppCompat.DayNight 且各表面已全部 token 化, -->
+    <!-- 当前 AppTheme 仍为 Light,本文件为「就绪未启用」的对称层。 -->
+    <!-- ============================================ -->
+
+    <!-- 中性 gray:暗色下明度方向反转(100最暗背景 → 1000最亮文字) -->
+    <color name="captain_gray_100">#15121A</color>
+    <color name="captain_gray_200">#211C2A</color>
+    <color name="captain_gray_300">#2C2636</color>
+    <color name="captain_gray_400">#3A3346</color>
+    <color name="captain_gray_500">#6E6678</color>
+    <color name="captain_gray_600">#8E8799</color>
+    <color name="captain_gray_700">#ABA4B5</color>
+    <color name="captain_gray_800">#C9C3D1</color>
+    <color name="captain_gray_900">#E2DEE8</color>
+    <color name="captain_gray_1000">#F3EFF5</color>
+
+    <!-- 容器:暗色表面逐档提亮表达层级 -->
+    <color name="captain_surface_page">#15121A</color>
+    <color name="captain_surface_hero">#241B2E</color>
+    <color name="captain_surface_card">#1E1A26</color>
+    <color name="captain_surface_card_soft">#242030</color>
+    <color name="captain_surface_icon_tile">#2A2433</color>
+    <color name="captain_surface_toolbar">#1A1622</color>
+
+    <!-- 品牌:背景档转暗色品牌底,填充档保持/略提亮,文字档转亮 -->
+    <color name="captain_brand_100">#2E1A20</color>
+    <color name="captain_brand_200">#3A2028</color>
+    <color name="captain_brand_300">#47262F</color>
+    <color name="captain_brand_400">#6E3A44</color>
+    <color name="captain_brand_500">#97505B</color>
+    <color name="captain_brand_600">#F5868C</color>
+    <color name="captain_brand_700">#FF8A8F</color>
+    <color name="captain_brand_800">#FF9EA3</color>
+    <color name="captain_brand_900">#FFB6BB</color>
+    <color name="captain_brand_1000">#FFD2D6</color>
+
+    <!-- 文字补充 -->
+    <color name="captain_text_on_soft">#E7B9C3</color>
+
+    <!-- 反馈:浅底档转暗,文字档转亮,实填档(700)保持 -->
+    <color name="captain_feedback_error_100">#3A1E1E</color>
+    <color name="captain_feedback_error_900">#F2A9A9</color>
+    <color name="captain_feedback_warning_100">#352712</color>
+    <color name="captain_feedback_warning_900">#F2CC8E</color>
+    <color name="captain_feedback_success_100">#16291E</color>
+    <color name="captain_feedback_success_900">#9BD9B2</color>
+    <color name="captain_feedback_info_100">#16213A</color>
+    <color name="captain_feedback_info_900">#A8C4F4</color>
+
+    <!-- 小红书暗色表面 -->
+    <color name="captain_xhs_page_background">#14171F</color>
+    <color name="captain_xhs_surface">#1E222B</color>
+</resources>

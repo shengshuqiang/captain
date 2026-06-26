@@ -2,13 +2,13 @@
     <item android:state_enabled="false">
         <shape>
             <solid android:color="#FFCCD3E0" />
-            <corners android:radius="22dp" />
+            <corners android:radius="@dimen/captain_radius_card" />
         </shape>
     </item>
     <item>
         <shape>
-            <solid android:color="@color/xhsPrimary" />
-            <corners android:radius="22dp" />
+            <solid android:color="@color/captain_xhs_brand_primary" />
+            <corners android:radius="@dimen/captain_radius_card" />
         </shape>
     </item>
 </selector>

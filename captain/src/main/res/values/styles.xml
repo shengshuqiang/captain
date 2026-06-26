@@ -15,7 +15,8 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <!-- ============================================ -->
-    <!-- 按钮样式 -->
+    <!-- 按钮样式(button 类) -->
+    <!-- P2-12: 背景走 selector(见 bg_button_*),文字态由 color selector 承载 -->
     <!-- ============================================ -->
     <style name="CaptainButton">
         <item name="android:textSize">@dimen/captain_text_card_title</item>
@@ -23,16 +24,18 @@
         <item name="android:paddingStart">@dimen/captain_space_card_inner</item>
         <item name="android:paddingEnd">@dimen/captain_space_card_inner</item>
         <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0</item>
     </style>
 
     <style name="CaptainButton.Primary" parent="CaptainButton">
         <item name="android:background">@drawable/bg_button_primary</item>
-        <item name="android:textColor">@color/captain_text_on_brand</item>
+        <item name="android:textColor">@color/captain_button_primary_text</item>
     </style>
 
     <style name="CaptainButton.Secondary" parent="CaptainButton">
         <item name="android:background">@drawable/bg_button_secondary</item>
-        <item name="android:textColor">@color/captain_brand_primary</item>
+        <item name="android:textColor">@color/captain_button_secondary_text</item>
     </style>
 
     <!-- ============================================ -->
@@ -48,46 +51,57 @@
     </style>
 
     <!-- ============================================ -->
-    <!-- 文字样式 -->
+    <!-- 文字样式 - P2-9 按 heading/label/copy 四类成阶 -->
+    <!-- 标题 600(API28+ textFontWeight,<28 回退 sans-serif-medium) -->
     <!-- ============================================ -->
     <style name="CaptainText">
         <item name="android:textColor">@color/captain_text_primary</item>
     </style>
 
+    <!-- heading 类:600 字重 + 字距收紧 + 行高 -->
     <style name="CaptainText.Hero">
         <item name="android:textSize">@dimen/captain_text_hero</item>
         <item name="android:textColor">@color/captain_text_primary</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
     </style>
 
     <style name="CaptainText.PageTitle">
         <item name="android:textSize">@dimen/captain_text_page_title</item>
         <item name="android:textColor">@color/captain_text_primary</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-
-    <style name="CaptainText.Overline">
-        <item name="android:textSize">@dimen/captain_text_caption</item>
-        <item name="android:textColor">@color/captain_text_on_soft</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
     </style>
 
     <style name="CaptainText.CardTitle">
         <item name="android:textSize">@dimen/captain_text_card_title</item>
         <item name="android:textColor">@color/captain_text_primary</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textFontWeight">600</item>
     </style>
 
+    <!-- label 类:500 字重 + 小字号微扩字距 -->
+    <style name="CaptainText.Overline">
+        <item name="android:textSize">@dimen/captain_text_caption</item>
+        <item name="android:textColor">@color/captain_text_on_soft</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <!-- copy 类:400 字重 + 中文正文行高 -->
     <style name="CaptainText.Body">
         <item name="android:textSize">@dimen/captain_text_body</item>
         <item name="android:textColor">@color/captain_text_secondary</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
     </style>
 
     <style name="CaptainText.Caption">
         <item name="android:textSize">@dimen/captain_text_caption</item>
         <item name="android:textColor">@color/captain_text_secondary</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
     </style>
 
 </resources>

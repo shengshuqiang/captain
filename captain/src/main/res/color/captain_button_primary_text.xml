@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 主按钮文字色:默认白字,禁用中性灰 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="@color/captain_gray_500" />
+    <item android:color="@color/captain_text_on_brand" />
+</selector>

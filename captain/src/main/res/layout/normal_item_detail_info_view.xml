@@ -12,7 +12,7 @@
         android:paddingRight="15dp"
         android:gravity="right|center_vertical"
         android:orientation="horizontal"
-        android:background="@color/colorPrimary">
+        android:background="@color/captain_brand_primary">
 
         <ImageView
             android:id="@+id/cancel"

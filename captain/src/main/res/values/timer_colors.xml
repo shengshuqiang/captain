@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 计时器频道颜色 token：昼夜按时段/天气 isDay() 运行时切换，故成对维护 day/night，
+     运行时由 ContextCompat.getColor 根据 day 分支读取，请勿放入 values-night。 -->
+<resources>
+    <!-- 背景：季节渐变（春夏秋冬四端点，顶/底各一套）-->
+    <color name="captain_timer_bg_top_spring_day">#FFEAF8F1</color>
+    <color name="captain_timer_bg_top_summer_day">#FFE9F6FF</color>
+    <color name="captain_timer_bg_top_autumn_day">#FFFFF3DD</color>
+    <color name="captain_timer_bg_top_winter_day">#FFEAF2FF</color>
+    <color name="captain_timer_bg_top_spring_night">#FF102433</color>
+    <color name="captain_timer_bg_top_summer_night">#FF0E2438</color>
+    <color name="captain_timer_bg_top_autumn_night">#FF231C2D</color>
+    <color name="captain_timer_bg_top_winter_night">#FF111827</color>
+    <color name="captain_timer_bg_bottom_spring_day">#FFFFFBF4</color>
+    <color name="captain_timer_bg_bottom_summer_day">#FFFFF8E8</color>
+    <color name="captain_timer_bg_bottom_autumn_day">#FFFFF2EB</color>
+    <color name="captain_timer_bg_bottom_winter_day">#FFF8FBFF</color>
+    <color name="captain_timer_bg_bottom_spring_night">#FF182B2B</color>
+    <color name="captain_timer_bg_bottom_summer_night">#FF102033</color>
+    <color name="captain_timer_bg_bottom_autumn_night">#FF2A2027</color>
+    <color name="captain_timer_bg_bottom_winter_night">#FF172033</color>
+
+    <!-- 顶部地平线与日月 -->
+    <color name="captain_timer_horizon_line_day">#997A5D35</color>
+    <color name="captain_timer_horizon_line_night">#99D8E3FF</color>
+    <color name="captain_timer_sun_core_day">#FFFFF4A8</color>
+    <color name="captain_timer_sun_edge_day">#FFFF8A25</color>
+    <color name="captain_timer_sun_highlight_day">#66FFFFFF</color>
+    <color name="captain_timer_moon_core_night">#FFF8FBFF</color>
+    <color name="captain_timer_moon_edge_night">#FF94A4D8</color>
+    <color name="captain_timer_moon_shadow_night">#CC29305A</color>
+
+    <!-- 时间辉光 -->
+    <color name="captain_timer_glow_day">#26FFD36D</color>
+    <color name="captain_timer_glow_night">#223B6FCF</color>
+    <color name="captain_timer_glow_transparent">#00000000</color>
+
+    <!-- 晴天氛围光晕 -->
+    <color name="captain_timer_sunny_atmosphere_day">#2BFFE29D</color>
+    <color name="captain_timer_sunny_atmosphere_night">#1A9FCBFF</color>
+
+    <!-- 季节波浪 -->
+    <color name="captain_timer_wave_day">#35FFFFFF</color>
+    <color name="captain_timer_wave_night">#18FFFFFF</color>
+
+    <!-- 天气小图标：太阳 -->
+    <color name="captain_timer_icon_sun_ray_day">#CCF59B22</color>
+    <color name="captain_timer_icon_sun_ray_night">#CCD5ECFF</color>
+    <color name="captain_timer_icon_sun_body_day">#FFFFB442</color>
+    <color name="captain_timer_icon_sun_body_night">#FFEAF6FF</color>
+
+    <!-- 天气小图标：云 -->
+    <color name="captain_timer_icon_cloud_body_day">#D8FFFFFF</color>
+    <color name="captain_timer_icon_cloud_body_night">#CCDCEBFF</color>
+    <color name="captain_timer_icon_cloud_line_day">#556C7D88</color>
+    <color name="captain_timer_icon_cloud_line_night">#668EA8C5</color>
+
+    <!-- 天气小图标：雾 -->
+    <color name="captain_timer_icon_fog_day">#AA8596A2</color>
+    <color name="captain_timer_icon_fog_night">#AACEDEF6</color>
+
+    <!-- 天气小图标：雨 -->
+    <color name="captain_timer_icon_rain_day">#AA4CA7D8</color>
+    <color name="captain_timer_icon_rain_night">#CC8CD8FF</color>
+
+    <!-- 天气小图标：雪 -->
+    <color name="captain_timer_icon_snow_day">#CCDFF7FF</color>
+    <color name="captain_timer_icon_snow_night">#EEF8FBFF</color>
+
+    <!-- 天气小图标：闪电 -->
+    <color name="captain_timer_icon_lightning_day">#FFE2A330</color>
+    <color name="captain_timer_icon_lightning_night">#FFFFE589</color>
+
+    <!-- 天气氛围：云层 -->
+    <color name="captain_timer_cloud_layer_fog_day">#42FFFFFF</color>
+    <color name="captain_timer_cloud_layer_plain_day">#2EFFFFFF</color>
+    <color name="captain_timer_cloud_layer_fog_night">#2A9FB5D0</color>
+    <color name="captain_timer_cloud_layer_plain_night">#1E9FB5D0</color>
+
+    <!-- 天气氛围：雷雨遮罩 -->
+    <color name="captain_timer_thunder_mask_day">#14EAD7A0</color>
+    <color name="captain_timer_thunder_mask_night">#183F69FF</color>
+
+    <!-- 天气氛围：雨线 -->
+    <color name="captain_timer_rain_streak_day">#334CA7D8</color>
+    <color name="captain_timer_rain_streak_night">#448CD8FF</color>
+
+    <!-- 天气氛围：雪花 -->
+    <color name="captain_timer_snow_flake_day">#55FFFFFF</color>
+    <color name="captain_timer_snow_flake_night">#66EAF6FF</color>
+
+    <!-- 水滴石穿：石面渐变 -->
+    <color name="captain_timer_stone_core_day">#FFE9E0D8</color>
+    <color name="captain_timer_stone_edge_day">#FFC2B2A5</color>
+    <color name="captain_timer_stone_core_night">#FF58606B</color>
+    <color name="captain_timer_stone_edge_night">#FF303742</color>
+
+    <!-- 水滴石穿：石面刻痕（alpha 运行时按 traceStrength 计算，仅取 RGB）-->
+    <color name="captain_timer_stone_trace_day">#FF67574C</color>
+    <color name="captain_timer_stone_trace_night">#FFB9C6D2</color>
+
+    <!-- 水滴：波纹（alpha 运行时按 ripple 计算，仅取 RGB）-->
+    <color name="captain_timer_ripple_day">#FF4AA7D8</color>
+    <color name="captain_timer_ripple_night">#FF8CD8FF</color>
+
+    <!-- 水滴石穿：石面凹坑 -->
+    <color name="captain_timer_stone_hole_day">#665F5048</color>
+    <color name="captain_timer_stone_hole_night">#8845505A</color>
+
+    <!-- 水滴：拖尾 -->
+    <color name="captain_timer_drop_trail_day">#334CA7D8</color>
+    <color name="captain_timer_drop_trail_night">#338CD8FF</color>
+
+    <!-- 水滴：滴体渐变 -->
+    <color name="captain_timer_drop_core_day">#F08FE5FF</color>
+    <color name="captain_timer_drop_edge_day">#884CA7D8</color>
+    <color name="captain_timer_drop_core_night">#F4D7F4FF</color>
+    <color name="captain_timer_drop_edge_night">#AA73C8F4</color>
+
+    <!-- 水滴：高光（昼夜同色）-->
+    <color name="captain_timer_drop_highlight">#CCFFFFFF</color>
+
+    <!-- 控制按钮：玻璃质感渐变 -->
+    <color name="captain_timer_button_glass_core_day">#F4FFFFFF</color>
+    <color name="captain_timer_button_glass_edge_day">#96D9E9F2</color>
+    <color name="captain_timer_button_glass_core_night">#D83D4A62</color>
+    <color name="captain_timer_button_glass_edge_night">#88243043</color>
+
+    <!-- 控制按钮：描边 -->
+    <color name="captain_timer_button_stroke_day">#B8FFFFFF</color>
+    <color name="captain_timer_button_stroke_night">#66DDEBFF</color>
+
+    <!-- 控制按钮：内阴影 -->
+    <color name="captain_timer_button_inner_shadow_day">#33241C2D</color>
+    <color name="captain_timer_button_inner_shadow_night">#33000000</color>
+
+    <!-- 控制按钮：图标 -->
+    <color name="captain_timer_button_icon_day">#DD241C2D</color>
+    <color name="captain_timer_button_icon_night">#EEF8FBFF</color>
+
+    <!-- 顶部标签文字：时令/天气主文字 -->
+    <color name="captain_timer_top_label_primary_day">#CC5E5568</color>
+    <color name="captain_timer_top_label_primary_night">#CCDFE8F2</color>
+
+    <!-- 顶部标签文字：公历日期次要文字 -->
+    <color name="captain_timer_top_label_secondary_day">#AA5E5568</color>
+    <color name="captain_timer_top_label_secondary_night">#AADFE8F2</color>
+
+    <!-- 中央计时文字 -->
+    <color name="captain_timer_center_text_day">#EE241C2D</color>
+    <color name="captain_timer_center_text_night">#F2F8FBFF</color>
+
+    <!-- 中央计时文字阴影 -->
+    <color name="captain_timer_center_shadow_day">#22FFFFFF</color>
+    <color name="captain_timer_center_shadow_night">#55000000</color>
+
+    <!-- 圈次记录文字 -->
+    <color name="captain_timer_record_text_day">#B05E5568</color>
+    <color name="captain_timer_record_text_night">#B0DFE8F2</color>
+</resources>

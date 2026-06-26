@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/xhsPageBackground"
+    android:background="@color/captain_xhs_page_background"
     android:orientation="vertical">
 
     <ScrollView
@@ -34,7 +34,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/xhs_download_page_title"
-                    android:textColor="@color/xhsTextPrimary"
+                    android:textColor="@color/captain_xhs_text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
@@ -44,7 +44,7 @@
                     android:layout_marginTop="8dp"
                     android:lineSpacingExtra="2dp"
                     android:text="@string/xhs_download_intro"
-                    android:textColor="@color/xhsTextSecondary"
+                    android:textColor="@color/captain_xhs_text_secondary"
                     android:textSize="14sp" />
 
                 <EditText
@@ -57,8 +57,8 @@
                     android:hint="@string/xhs_download_input_hint"
                     android:inputType="textMultiLine|textCapSentences"
                     android:padding="14dp"
-                    android:textColor="@color/xhsTextPrimary"
-                    android:textColorHint="@color/xhsTextSecondary"
+                    android:textColor="@color/captain_xhs_text_primary"
+                    android:textColorHint="@color/captain_xhs_text_secondary"
                     android:textSize="15sp"
                     tools:text="sunshine☀️ 发个之前的视频hhhh 一直很喜欢的skims+... https://www.xiaohongshu.com/explore/xxxx" />
 
@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/xhs_download_idle_status"
-                    android:textColor="@color/xhsTextSecondary"
+                    android:textColor="@color/captain_xhs_text_secondary"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -126,7 +126,7 @@
                     android:paddingRight="10dp"
                     android:paddingBottom="4dp"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/captain_text_caption"
                     tools:text="视频 · 1 项" />
 
                 <TextView
@@ -134,7 +134,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:textColor="@color/xhsTextPrimary"
+                    android:textColor="@color/captain_xhs_text_primary"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     tools:text="一直很喜欢的 skims look" />
@@ -144,7 +144,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@color/xhsTextSecondary"
+                    android:textColor="@color/captain_xhs_text_secondary"
                     android:textSize="14sp"
                     tools:text="作者：sunshine☀️" />
 
@@ -153,8 +153,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:textColor="@color/xhsTextSecondary"
-                    android:textSize="13sp"
+                    android:textColor="@color/captain_xhs_text_secondary"
+                    android:textSize="@dimen/captain_text_caption"
                     tools:text="来源：网页 SSR · 预计保存 1 项" />
 
                 <ImageView
@@ -178,7 +178,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/xhsTextPrimary"
+                        android:textColor="@color/captain_xhs_text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="已选择 1 / 1 项" />
@@ -192,8 +192,8 @@
                         android:paddingLeft="12dp"
                         android:paddingRight="12dp"
                         android:text="@string/xhs_download_select_all"
-                        android:textColor="@color/xhsTextPrimary"
-                        android:textSize="13sp" />
+                        android:textColor="@color/captain_xhs_text_primary"
+                        android:textSize="@dimen/captain_text_caption" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -219,7 +219,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/xhs_download_taobao_webview_title"
-                    android:textColor="@color/xhsTextPrimary"
+                    android:textColor="@color/captain_xhs_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -229,8 +229,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="@string/xhs_download_taobao_webview_loading"
-                    android:textColor="@color/xhsTextSecondary"
-                    android:textSize="13sp" />
+                    android:textColor="@color/captain_xhs_text_secondary"
+                    android:textSize="@dimen/captain_text_caption" />
 
                 <WebView
                     android:id="@+id/taobao_sniff_webview"
@@ -264,7 +264,7 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:text="@string/xhs_download_open_album"
-            android:textColor="@color/xhsTextPrimary"
+            android:textColor="@color/captain_xhs_text_primary"
             android:textStyle="bold"
             android:visibility="gone" />
 

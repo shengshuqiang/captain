@@ -1,19 +1,29 @@
 package com.shuqiang.captain.timer;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import captain.R;
 
 // 顶部状态栏绘制：左侧时令和天气按可用宽度降级，右侧公历日期保持稳定。
 final class TimerTopInfoPainter {
+    private final Context context;
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final float density;
 
-    TimerTopInfoPainter(float density) {
+    TimerTopInfoPainter(Context context, float density) {
+        this.context = context.getApplicationContext();
         this.density = density;
         textPaint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+    }
+
+    private int color(int resId) {
+        return ContextCompat.getColor(context, resId);
     }
 
     void drawTopLabels(Canvas canvas, int width, TimerTimeFormatter.TimeInfo timeInfo,
@@ -22,7 +32,7 @@ final class TimerTopInfoPainter {
         textPaint.setTextSize(dp(15));
         textPaint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         textPaint.setTextAlign(Paint.Align.LEFT);
-        textPaint.setColor(day ? 0xCC5E5568 : 0xCCDFE8F2);
+        textPaint.setColor(color(day ? R.color.captain_timer_top_label_primary_day : R.color.captain_timer_top_label_primary_night));
 
         float leftPadding = dp(28);
         float rightPadding = dp(28);
@@ -48,7 +58,7 @@ final class TimerTopInfoPainter {
 
         textPaint.setTextAlign(Paint.Align.RIGHT);
         textPaint.setTextSize(dp(14));
-        textPaint.setColor(day ? 0xAA5E5568 : 0xAADFE8F2);
+        textPaint.setColor(color(day ? R.color.captain_timer_top_label_secondary_day : R.color.captain_timer_top_label_secondary_night));
         canvas.drawText(solarText, width - rightPadding, baseline, textPaint);
         textPaint.setTextAlign(Paint.Align.LEFT);
     }

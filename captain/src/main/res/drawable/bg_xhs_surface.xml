@@ -1,4 +1,4 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/xhsSurface" />
-    <corners android:radius="24dp" />
+    <solid android:color="@color/captain_xhs_surface" />
+    <corners android:radius="@dimen/captain_radius_card" />
 </shape>

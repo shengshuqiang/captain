@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- 船长App视觉Token - 动效时长(P1-7) -->
+    <!-- 默认即时(0);状态150 / 弹层200 / 遮罩300。单位 ms。 -->
+    <!-- 缓动统一用 FastOutSlowInInterpolator;reduced-motion 时归零。 -->
+    <!-- ============================================ -->
+    <integer name="captain_motion_instant">0</integer>
+    <integer name="captain_motion_state">150</integer>
+    <integer name="captain_motion_popover">200</integer>
+    <integer name="captain_motion_overlay">300</integer>
+</resources>
