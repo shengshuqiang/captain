@@ -87,6 +87,40 @@ public class XhsParseRepositoryTest {
         Assert.assertTrue(shouldFallback);
     }
 
+    @Test
+    public void shouldTryGenericMobileFallbackForDouyinShortLinkWhenDesktopOnlyHasCover() {
+        XhsParseResult desktopResult = buildParseResult(
+                "https://www.douyin.com/video/7657490923185873481",
+                new XhsMediaItem("desktop_cover", XhsMediaType.IMAGE,
+                        "https://p3-pc-sign.douyinpic.com/cover.jpeg",
+                        "https://p3-pc-sign.douyinpic.com/cover.jpeg", 0, 0, 0, "jpg", true)
+        );
+
+        boolean shouldFallback = XhsParseRepository.shouldTryGenericMobileFallback(
+                "https://v.douyin.com/edv2J8qaQEM/",
+                desktopResult
+        );
+
+        Assert.assertTrue(shouldFallback);
+    }
+
+    @Test
+    public void shouldTryGenericMobileFallbackForDouyinCanonicalUrl() {
+        XhsParseResult desktopResult = buildParseResult(
+                "https://www.douyin.com/video/7657490923185873481",
+                new XhsMediaItem("desktop_cover", XhsMediaType.IMAGE,
+                        "https://p3-pc-sign.douyinpic.com/cover.jpeg",
+                        "https://p3-pc-sign.douyinpic.com/cover.jpeg", 0, 0, 0, "jpg", true)
+        );
+
+        boolean shouldFallback = XhsParseRepository.shouldTryGenericMobileFallback(
+                "https://example.com/redirect",
+                desktopResult
+        );
+
+        Assert.assertTrue(shouldFallback);
+    }
+
     private static XhsParseResult buildParseResult(XhsMediaItem... mediaItems) {
         return buildParseResult("https://example.com/post/1", mediaItems);
     }

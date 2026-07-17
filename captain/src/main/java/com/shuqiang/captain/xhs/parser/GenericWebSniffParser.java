@@ -94,6 +94,20 @@ public final class GenericWebSniffParser {
             );
         }
 
+        StructuredVideoStateParser.Result structuredVideo = StructuredVideoStateParser.extract(document);
+        if (structuredVideo != null) {
+            return buildStructuredVideoResult(
+                    structuredVideo,
+                    pageUrl,
+                    canonicalUrl,
+                    authorOrSite,
+                    pageTitle,
+                    firstNonEmpty(structuredVideo.coverUrl, defaultCoverUrl),
+                    entrySource,
+                    requestStrategy
+            );
+        }
+
         collectMetaCandidates(document, pageUrl, mediaMap, imageCandidates, headImageCandidates, defaultCoverUrl);
         collectDomCandidates(document, pageUrl, mediaMap, imageCandidates, defaultCoverUrl);
         collectRawHtmlCandidates(html, pageUrl, mediaMap, imageCandidates);
@@ -133,6 +147,56 @@ public final class GenericWebSniffParser {
                 pageTitle,
                 coverUrl,
                 requestStrategy + " · 通用网页嗅探",
+                entrySource,
+                mediaItems
+        );
+    }
+
+    /**
+     * 结构化状态命中后只保留主视频和对应封面，避免把站点 Logo、推荐图一并返回。
+     */
+    private static XhsParseResult buildStructuredVideoResult(StructuredVideoStateParser.Result stateMedia,
+                                                             String pageUrl,
+                                                             String canonicalUrl,
+                                                             String authorOrSite,
+                                                             String pageTitle,
+                                                             String coverUrl,
+                                                             String entrySource,
+                                                             String requestStrategy) {
+        String noteId = buildPageId(canonicalUrl);
+        ArrayList<XhsMediaItem> mediaItems = new ArrayList<>();
+        mediaItems.add(new XhsMediaItem(
+                buildMediaId(noteId, 1),
+                XhsMediaType.VIDEO,
+                stateMedia.videoUrl,
+                coverUrl,
+                0,
+                0,
+                0,
+                guessExtension(stateMedia.videoUrl, XhsMediaType.VIDEO),
+                true
+        ));
+        if (coverUrl != null && !coverUrl.equals(stateMedia.videoUrl)) {
+            mediaItems.add(new XhsMediaItem(
+                    buildMediaId(noteId, 2),
+                    XhsMediaType.IMAGE,
+                    coverUrl,
+                    coverUrl,
+                    0,
+                    0,
+                    0,
+                    guessExtension(coverUrl, XhsMediaType.IMAGE),
+                    true
+            ));
+        }
+        return new XhsParseResult(
+                noteId,
+                pageUrl,
+                canonicalUrl,
+                authorOrSite,
+                pageTitle,
+                firstNonEmpty(coverUrl, stateMedia.videoUrl),
+                requestStrategy + " · 结构化视频状态(" + stateMedia.sourceKey + ")",
                 entrySource,
                 mediaItems
         );
@@ -448,6 +512,21 @@ public final class GenericWebSniffParser {
         return "b23.tv".equals(lowerHost)
                 || "bilibili.com".equals(lowerHost)
                 || lowerHost.endsWith(".bilibili.com");
+    }
+
+    /**
+     * 抖音桌面页常只暴露封面，移动页才下发作品视频状态，因此需要显式补一次移动端抓取。
+     */
+    static boolean isDouyinHost(String url) {
+        String host = extractHost(url);
+        if (host == null) {
+            return false;
+        }
+        String lowerHost = host.toLowerCase(Locale.US);
+        return "douyin.com".equals(lowerHost)
+                || lowerHost.endsWith(".douyin.com")
+                || "iesdouyin.com".equals(lowerHost)
+                || lowerHost.endsWith(".iesdouyin.com");
     }
 
     private static String guessExtension(String mediaUrl, XhsMediaType mediaType) {

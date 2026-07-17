@@ -9,6 +9,7 @@ import com.shuqiang.captain.xhs.model.XhsParseInput;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 
 import java.io.IOException;
+import java.net.URI;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -100,6 +101,7 @@ public class XhsParseRepository {
             return alipayResult;
         }
         XhsParseResult desktopParseResult = tryParseGenericResult(desktopResult, pageUrl, entrySource);
+        logGenericCandidate(desktopResult, desktopParseResult);
         if (hasDownloadableRichMedia(desktopParseResult)) {
             return desktopParseResult;
         }
@@ -112,6 +114,7 @@ public class XhsParseRepository {
             return alipayResult;
         }
         XhsParseResult mobileParseResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
+        logGenericCandidate(mobileResult, mobileParseResult);
         XhsParseResult preferredResult = selectPreferredGenericResult(desktopParseResult, mobileParseResult);
         if (preferredResult != null) {
             return preferredResult;
@@ -249,7 +252,9 @@ public class XhsParseRepository {
         try {
             return GenericWebSniffParser.parse(
                     pageFetchResult.html,
-                    pageUrl,
+                    pageFetchResult.finalUrl == null || pageFetchResult.finalUrl.trim().isEmpty()
+                            ? pageUrl
+                            : pageFetchResult.finalUrl,
                     entrySource,
                     pageFetchResult.strategy
             );
@@ -259,6 +264,28 @@ public class XhsParseRepository {
                 return null;
             }
             throw e;
+        }
+    }
+
+    /**
+     * 只记录解析决策所需的主机、数量和策略，不输出可能带身份参数的完整 URL。
+     */
+    private void logGenericCandidate(PageFetchResult fetchResult, XhsParseResult parseResult) {
+        Log.d(TAG, "generic candidate, strategy=" + (fetchResult == null ? "unknown" : fetchResult.strategy)
+                + ", host=" + extractHost(fetchResult == null ? null : fetchResult.finalUrl)
+                + ", httpCode=" + (fetchResult == null ? -1 : fetchResult.httpCode)
+                + ", htmlLength=" + (fetchResult == null || fetchResult.html == null ? 0 : fetchResult.html.length())
+                + ", mediaCount=" + (parseResult == null ? 0 : parseResult.getMediaCount())
+                + ", richMediaCount=" + countRichMedia(parseResult)
+                + ", resultStrategy=" + (parseResult == null ? "none" : parseResult.getParseStrategy()));
+    }
+
+    private String extractHost(String rawUrl) {
+        try {
+            String host = rawUrl == null ? null : new URI(rawUrl).getHost();
+            return host == null || host.trim().isEmpty() ? "unknown" : host;
+        } catch (Exception ignored) {
+            return "unknown";
         }
     }
 
@@ -290,14 +317,16 @@ public class XhsParseRepository {
     }
 
     /**
-     * 只对“desktop 解析失败”或“B 站这类已知 desktop 信息不完整”的场景补 mobile 回退，避免普通图片页白白多打一跳。
+     * 只对 desktop 解析失败或已知桌面页信息不完整的平台补 mobile 回退，避免普通图片页白白多打一跳。
      */
     static boolean shouldTryGenericMobileFallback(String pageUrl, XhsParseResult desktopParseResult) {
         if (desktopParseResult == null) {
             return true;
         }
         return GenericWebSniffParser.isBilibiliHost(pageUrl)
-                || GenericWebSniffParser.isBilibiliHost(desktopParseResult.getCanonicalUrl());
+                || GenericWebSniffParser.isBilibiliHost(desktopParseResult.getCanonicalUrl())
+                || GenericWebSniffParser.isDouyinHost(pageUrl)
+                || GenericWebSniffParser.isDouyinHost(desktopParseResult.getCanonicalUrl());
     }
 
     private static int countRichMedia(XhsParseResult parseResult) {
