@@ -205,7 +205,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/taobao_webview_container"
+                android:id="@+id/resource_webview_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -218,22 +218,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/xhs_download_taobao_webview_title"
+                    android:text="@string/xhs_download_webview_title"
                     android:textColor="@color/captain_xhs_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/taobao_webview_status"
+                    android:id="@+id/resource_webview_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="@string/xhs_download_taobao_webview_loading"
+                    android:text="@string/xhs_download_webview_loading"
                     android:textColor="@color/captain_xhs_text_secondary"
                     android:textSize="@dimen/captain_text_caption" />
 
                 <WebView
-                    android:id="@+id/taobao_sniff_webview"
+                    android:id="@+id/resource_sniff_webview"
                     android:layout_width="match_parent"
                     android:layout_height="320dp"
                     android:layout_marginTop="12dp"

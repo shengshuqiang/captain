@@ -31,10 +31,10 @@
     <string name="xhs_download_open">打开</string>
     <string name="xhs_download_select">选择</string>
     <string name="xhs_download_selected">已选</string>
-    <string name="xhs_download_taobao_webview_title">淘宝页面预览</string>
-    <string name="xhs_download_taobao_webview_loading">静态解析未发现视频，正在打开淘宝页面嗅探资源。</string>
-    <string name="xhs_download_taobao_webview_found">已嗅探到视频资源，可在上方预览并保存。</string>
-    <string name="xhs_download_taobao_webview_failed">页面已打开，但未嗅探到可保存的视频资源。</string>
+    <string name="xhs_download_webview_title">动态页面资源监测</string>
+    <string name="xhs_download_webview_loading">静态解析未发现媒体，正在打开页面监测动态资源。</string>
+    <string name="xhs_download_webview_found">已提取页面资源；仅可预览的内容大图默认选中。</string>
+    <string name="xhs_download_webview_failed">页面已打开，但未监测到可保存的图片、视频或 PDF。</string>
     <string name="xhs_download_notification_channel">资源检测</string>
     <string name="xhs_download_notification_title">正在保存网页资源</string>
     <string name="xhs_download_notification_done">保存已完成</string>

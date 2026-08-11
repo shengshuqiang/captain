@@ -121,6 +121,28 @@ public class XhsParseRepositoryTest {
         Assert.assertTrue(shouldFallback);
     }
 
+    @Test
+    public void requiresRuntimeMediaInspectionForImageOnlyStaticResult() {
+        XhsParseResult imageOnlyResult = buildParseResult(
+                new XhsMediaItem("site_icon", XhsMediaType.IMAGE,
+                        "https://example.com/apple-touch-icon.png",
+                        "https://example.com/apple-touch-icon.png", 0, 0, 0, "png", true)
+        );
+
+        Assert.assertTrue(XhsParseRepository.requiresRuntimeMediaInspection(imageOnlyResult));
+    }
+
+    @Test
+    public void doesNotRequireRuntimeMediaInspectionWhenStaticResultHasVideo() {
+        XhsParseResult videoResult = buildParseResult(
+                new XhsMediaItem("video", XhsMediaType.VIDEO,
+                        "https://cdn.example.com/video.mp4",
+                        "https://cdn.example.com/cover.jpg", 0, 0, 0, "mp4", true)
+        );
+
+        Assert.assertFalse(XhsParseRepository.requiresRuntimeMediaInspection(videoResult));
+    }
+
     private static XhsParseResult buildParseResult(XhsMediaItem... mediaItems) {
         return buildParseResult("https://example.com/post/1", mediaItems);
     }

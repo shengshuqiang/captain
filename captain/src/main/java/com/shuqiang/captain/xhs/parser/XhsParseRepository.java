@@ -102,11 +102,14 @@ public class XhsParseRepository {
         }
         XhsParseResult desktopParseResult = tryParseGenericResult(desktopResult, pageUrl, entrySource);
         logGenericCandidate(desktopResult, desktopParseResult);
-        if (hasDownloadableRichMedia(desktopParseResult)) {
+        if (!requiresRuntimeMediaInspection(desktopParseResult)) {
             return desktopParseResult;
         }
         if (!shouldTryGenericMobileFallback(pageUrl, desktopParseResult)) {
-            return desktopParseResult;
+            Log.d(TAG, "generic image-only candidate requires final DOM inspection, host="
+                    + extractHost(desktopResult.finalUrl)
+                    + ", mediaCount=" + (desktopParseResult == null ? 0 : desktopParseResult.getMediaCount()));
+            throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
         }
         PageFetchResult mobileResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "mobile");
         alipayResult = tryParseAlipayVideoSharePage(mobileResult.finalUrl, entrySource);
@@ -116,7 +119,7 @@ public class XhsParseRepository {
         XhsParseResult mobileParseResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
         logGenericCandidate(mobileResult, mobileParseResult);
         XhsParseResult preferredResult = selectPreferredGenericResult(desktopParseResult, mobileParseResult);
-        if (preferredResult != null) {
+        if (!requiresRuntimeMediaInspection(preferredResult)) {
             return preferredResult;
         }
         if (desktopResult.httpCode == 404 || mobileResult.httpCode == 404) {
@@ -314,6 +317,13 @@ public class XhsParseRepository {
 
     private static boolean hasDownloadableRichMedia(XhsParseResult parseResult) {
         return countRichMedia(parseResult) > 0;
+    }
+
+    /**
+     * 静态 HTML 无法判断图片是否属于最终正文以及是否可预览，图片-only 结果交给 WebView 最终 DOM 复核。
+     */
+    static boolean requiresRuntimeMediaInspection(XhsParseResult parseResult) {
+        return !hasDownloadableRichMedia(parseResult);
     }
 
     /**
