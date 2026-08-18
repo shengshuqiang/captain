@@ -7,6 +7,7 @@ import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseInput;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
+import com.shuqiang.captain.xhs.model.XhsRequestMode;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +29,11 @@ public class XhsParseRepository {
     }
 
     public XhsParseResult parse(String rawText, String entrySource) throws XhsParserException {
+        return parse(rawText, entrySource, XhsRequestMode.AUTO);
+    }
+
+    public XhsParseResult parse(String rawText, String entrySource, XhsRequestMode requestMode)
+            throws XhsParserException {
         long startTime = System.currentTimeMillis();
         XhsParseInput parseInput = GenericWebInputParser.parse(rawText, entrySource);
         ParseRoute parseRoute = resolveRoute(parseInput.getExtractedUrl());
@@ -57,7 +63,7 @@ public class XhsParseRepository {
             pageFetchResult = null;
             parseResult = parseRoute == ParseRoute.LOOPIT
                     ? LoopitGameShareParser.parse(finalUrl, parseInput.getEntrySource())
-                    : parseGenericPage(finalUrl, parseInput.getEntrySource());
+                    : parseGenericPage(finalUrl, parseInput.getEntrySource(), requestMode);
         }
         Log.d(TAG, "parse finished, entry=" + entrySource
                 + ", linkType=" + linkType
@@ -81,7 +87,8 @@ public class XhsParseRepository {
         return ParseRoute.GENERIC;
     }
 
-    private XhsParseResult parseGenericPage(String pageUrl, String entrySource) throws XhsParserException {
+    private XhsParseResult parseGenericPage(String pageUrl, String entrySource, XhsRequestMode requestMode)
+            throws XhsParserException {
         if (TaobaoShareParser.isSupportedPage(pageUrl)) {
             XhsParseResult taobaoResult = parseTaobaoSharePage(pageUrl, entrySource);
             if (taobaoResult != null) {
@@ -95,15 +102,28 @@ public class XhsParseRepository {
         if (alipayResult != null) {
             return alipayResult;
         }
+        if (requestMode == XhsRequestMode.MOBILE_RETRY) {
+            return parseGenericMobileOnly(pageUrl, entrySource);
+        }
         PageFetchResult desktopResult = executePageRequest(pageUrl, XhsHttpClient.DESKTOP_USER_AGENT, "desktop");
         alipayResult = tryParseAlipayVideoSharePage(desktopResult.finalUrl, entrySource);
         if (alipayResult != null) {
             return alipayResult;
         }
+        XhsParseResult preciseMediaResult = tryParsePreciseStreamingResult(desktopResult, pageUrl, entrySource);
+        if (preciseMediaResult != null) {
+            return preciseMediaResult;
+        }
         XhsParseResult desktopParseResult = tryParseGenericResult(desktopResult, pageUrl, entrySource);
         logGenericCandidate(desktopResult, desktopParseResult);
         if (!requiresRuntimeMediaInspection(desktopParseResult)) {
             return desktopParseResult;
+        }
+        if (requestMode == XhsRequestMode.DESKTOP) {
+            if (desktopResult.httpCode == 404) {
+                throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
+            }
+            throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
         }
         if (!shouldTryGenericMobileFallback(pageUrl, desktopParseResult)) {
             Log.d(TAG, "generic image-only candidate requires final DOM inspection, host="
@@ -116,6 +136,10 @@ public class XhsParseRepository {
         if (alipayResult != null) {
             return alipayResult;
         }
+        preciseMediaResult = tryParsePreciseStreamingResult(mobileResult, pageUrl, entrySource);
+        if (preciseMediaResult != null) {
+            return preciseMediaResult;
+        }
         XhsParseResult mobileParseResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
         logGenericCandidate(mobileResult, mobileParseResult);
         XhsParseResult preferredResult = selectPreferredGenericResult(desktopParseResult, mobileParseResult);
@@ -126,6 +150,41 @@ public class XhsParseRepository {
             throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
         }
         throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
+    }
+
+    private XhsParseResult parseGenericMobileOnly(String pageUrl, String entrySource) throws XhsParserException {
+        PageFetchResult mobileResult = executePageRequest(pageUrl, XhsHttpClient.MOBILE_USER_AGENT, "mobile_retry");
+        XhsParseResult alipayResult = tryParseAlipayVideoSharePage(mobileResult.finalUrl, entrySource);
+        if (alipayResult != null) {
+            return alipayResult;
+        }
+        XhsParseResult preciseResult = tryParsePreciseStreamingResult(mobileResult, pageUrl, entrySource);
+        if (preciseResult != null) {
+            return preciseResult;
+        }
+        XhsParseResult genericResult = tryParseGenericResult(mobileResult, pageUrl, entrySource);
+        logGenericCandidate(mobileResult, genericResult);
+        if (!requiresRuntimeMediaInspection(genericResult)) {
+            return genericResult;
+        }
+        if (mobileResult.httpCode == 404) {
+            throw new XhsParserException(XhsParseError.NOTE_UNAVAILABLE);
+        }
+        throw new XhsParserException(XhsParseError.NO_MEDIA_FOUND);
+    }
+
+    private XhsParseResult tryParsePreciseStreamingResult(PageFetchResult fetchResult,
+                                                           String pageUrl,
+                                                           String entrySource) {
+        if (fetchResult == null || !fetchResult.hasHtml()) {
+            return null;
+        }
+        String finalUrl = fetchResult.finalUrl == null || fetchResult.finalUrl.trim().isEmpty()
+                ? pageUrl : fetchResult.finalUrl;
+        XhsParseResult siteResult = PornhubMediaParser.parse(
+                fetchResult.html, finalUrl, entrySource, fetchResult.strategy);
+        return siteResult != null ? siteResult : HlsMediaCandidateParser.parse(
+                fetchResult.html, finalUrl, entrySource, fetchResult.strategy);
     }
 
     private XhsParseResult parseTaobaoSharePage(String pageUrl, String entrySource) throws XhsParserException {

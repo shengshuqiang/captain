@@ -17,6 +17,8 @@
     <string name="xhs_download_parse">解析</string>
     <string name="xhs_download_paste_and_parse">粘贴&amp;解析</string>
     <string name="xhs_download_reparse">重新解析</string>
+    <string name="xhs_download_mobile_retry">手机模式重试</string>
+    <string name="xhs_download_manual_webview">浏览器验证并手动提取</string>
     <string name="xhs_download_idle_status">粘贴网页分享文案后开始解析，支持识别图片、视频和 PDF。</string>
     <string name="xhs_download_parsing_status">正在解析网页内容，请稍候…</string>
     <string name="xhs_download_save_default">保存 0 项</string>
@@ -31,10 +33,10 @@
     <string name="xhs_download_open">打开</string>
     <string name="xhs_download_select">选择</string>
     <string name="xhs_download_selected">已选</string>
-    <string name="xhs_download_webview_title">动态页面资源监测</string>
-    <string name="xhs_download_webview_loading">静态解析未发现媒体，正在打开页面监测动态资源。</string>
-    <string name="xhs_download_webview_found">已提取页面资源；仅可预览的内容大图默认选中。</string>
-    <string name="xhs_download_webview_failed">页面已打开，但未监测到可保存的图片、视频或 PDF。</string>
+    <string name="xhs_download_webview_manual_hint">完成页面确认、关闭弹窗或播放视频后提取</string>
+    <string name="xhs_download_webview_close">关闭</string>
+    <string name="xhs_download_webview_refresh">刷新</string>
+    <string name="xhs_download_webview_extract">提取当前页面媒体</string>
     <string name="xhs_download_notification_channel">资源检测</string>
     <string name="xhs_download_notification_title">正在保存网页资源</string>
     <string name="xhs_download_notification_done">保存已完成</string>

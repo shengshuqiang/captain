@@ -35,12 +35,13 @@ import com.bumptech.glide.Glide;
 import com.captain.base.BasePermissionActivity;
 import com.shuqiang.captain.xhs.download.XhsDownloadContract;
 import com.shuqiang.captain.xhs.download.XhsDownloadProgressStore;
+import com.shuqiang.captain.xhs.download.RuntimeMediaSessionStore;
 import com.shuqiang.captain.xhs.model.XhsMediaItem;
 import com.shuqiang.captain.xhs.model.XhsMediaType;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 import com.shuqiang.captain.xhs.model.XhsSaveSummary;
-import com.shuqiang.captain.xhs.parser.WebViewResourceSniffer;
+import com.shuqiang.captain.xhs.model.XhsRequestMode;
 import com.shuqiang.captain.xhs.parser.XhsParseRepository;
 import com.shuqiang.captain.xhs.parser.XhsParserException;
 
@@ -61,6 +62,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private enum UiState {
         IDLE,
         PARSING,
+        MANUAL_BROWSING,
         PARSE_SUCCESS,
         PARSE_FAILED,
         SAVING,
@@ -93,11 +95,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private TextView secondaryActionView;
     private Button parseButton;
     private Button saveButton;
+    private Button mobileRetryButton;
+    private Button manualWebViewButton;
     private RecyclerView mediaListView;
     private View resourceWebViewContainer;
     private TextView resourceWebViewStatusView;
     private WebView resourceWebView;
-    private WebViewResourceSniffer webViewResourceSniffer;
+    private ManualWebExtractionController manualWebExtractionController;
 
     private UiState uiState = UiState.IDLE;
     private XhsParseResult currentParseResult;
@@ -108,6 +112,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private String lastClipboardSnapshotAtParse;
     private boolean autoParsePending;
     private int parseRequestVersion;
+    private boolean runtimeSessionHandedOff;
 
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
@@ -137,7 +142,19 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        if (manualWebExtractionController != null && manualWebExtractionController.isActive()) {
+            manualWebExtractionController.close();
+        }
         handleIncomingIntent(intent, true);
+        if (autoParsePending) {
+            autoParsePending = false;
+            inputView.post(new Runnable() {
+                @Override
+                public void run() {
+                    startParse("auto_parse_new_intent");
+                }
+            });
+        }
     }
 
     private void initViews() {
@@ -155,11 +172,32 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         secondaryActionView = findViewById(R.id.secondary_action);
         parseButton = findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
+        mobileRetryButton = findViewById(R.id.mobile_retry_button);
+        manualWebViewButton = findViewById(R.id.manual_webview_button);
         mediaListView = findViewById(R.id.media_list);
         resourceWebViewContainer = findViewById(R.id.resource_webview_container);
         resourceWebViewStatusView = findViewById(R.id.resource_webview_status);
         resourceWebView = findViewById(R.id.resource_sniff_webview);
-        webViewResourceSniffer = new WebViewResourceSniffer(resourceWebView);
+        manualWebExtractionController = new ManualWebExtractionController(
+                this,
+                resourceWebViewContainer,
+                resourceWebViewStatusView,
+                (Button) findViewById(R.id.resource_webview_close),
+                (Button) findViewById(R.id.resource_webview_refresh),
+                (Button) findViewById(R.id.resource_webview_extract),
+                resourceWebView,
+                new ManualWebExtractionController.Listener() {
+                    @Override
+                    public void onExtractionReady(XhsParseResult result) {
+                        applyParseResult(result);
+                    }
+
+                    @Override
+                    public void onClosed() {
+                        restoreUiAfterManualBrowsing();
+                    }
+                }
+        );
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
@@ -195,6 +233,18 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             @Override
             public void onClick(View view) {
                 handleParseAction();
+            }
+        });
+        mobileRetryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startParse("mobile_retry", XhsRequestMode.MOBILE_RETRY);
+            }
+        });
+        manualWebViewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startManualWebExtraction();
             }
         });
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -313,7 +363,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus) {
+        if (!hasFocus || isManualBrowsing()) {
             return;
         }
         refreshPrimaryParseAction();
@@ -404,7 +454,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private void focusInputIfNeeded() {
-        if (autoParsePending || currentParseResult != null || !inputView.isEnabled()) {
+        if (autoParsePending || isManualBrowsing() || currentParseResult != null || !inputView.isEnabled()) {
             return;
         }
         if (!inputView.isFocused()) {
@@ -466,6 +516,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private void startParse(String rawEntrySource) {
+        startParse(rawEntrySource, XhsRequestMode.AUTO);
+    }
+
+    private void startParse(String rawEntrySource, final XhsRequestMode requestMode) {
         if (uiState == UiState.SAVING) {
             Toast.makeText(this, "正在保存资源，请稍后再解析", Toast.LENGTH_SHORT).show();
             return;
@@ -476,8 +530,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             return;
         }
         final int requestVersion = ++parseRequestVersion;
-        stopWebViewResourceSniff();
-        hideResourceWebView();
+        discardCurrentRuntimeSession();
+        currentParseResult = null;
+        mediaAdapter.setItems(null);
+        resultContainer.setVisibility(View.GONE);
+        if (manualWebExtractionController != null && manualWebExtractionController.isActive()) {
+            manualWebExtractionController.close();
+        }
         lastAttemptedInputText = normalizeInput(rawInput);
         // 记录本次解析开始时的剪贴板基线，后续只在出现“新剪贴板内容”时切回粘贴主动作。
         lastClipboardSnapshotAtParse = normalizeInput(readClipboardText());
@@ -490,7 +549,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             @Override
             public void run() {
                 try {
-                    final XhsParseResult parseResult = parseRepository.parse(rawInput, entrySource);
+                    final XhsParseResult parseResult = parseRepository.parse(rawInput, entrySource, requestMode);
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -507,8 +566,8 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                             if (requestVersion != parseRequestVersion) {
                                 return;
                             }
-                            if (shouldStartWebViewResourceSniff(parserException, extractedUrl)) {
-                                startWebViewResourceSniff(extractedUrl, entrySource, requestVersion, parserException);
+                            if (shouldOfferManualWebExtraction(parserException, extractedUrl)) {
+                                startManualWebExtraction(extractedUrl, entrySource);
                                 return;
                             }
                             applyParseError(parserException);
@@ -529,66 +588,46 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         });
     }
 
-    private boolean shouldStartWebViewResourceSniff(XhsParserException parserException, String extractedUrl) {
+    private boolean shouldOfferManualWebExtraction(XhsParserException parserException, String extractedUrl) {
         return parserException.getParseError() == XhsParseError.NO_MEDIA_FOUND
-                && WebViewResourceSniffer.canSniff(extractedUrl);
+                && com.shuqiang.captain.xhs.parser.WebViewResourceSniffer.canSniff(extractedUrl);
     }
 
-    private void startWebViewResourceSniff(String pageUrl,
-                                           String entrySource,
-                                           final int requestVersion,
-                                           final XhsParserException originalException) {
-        resourceWebViewContainer.setVisibility(View.VISIBLE);
-        resourceWebViewStatusView.setText(R.string.xhs_download_webview_loading);
-        setUiState(UiState.PARSING, "静态页面未发现媒体，正在监测动态页面资源。");
-        webViewResourceSniffer.start(pageUrl, entrySource, new WebViewResourceSniffer.Callback() {
-            @Override
-            public void onStatusChanged(String message) {
-                if (requestVersion != parseRequestVersion) {
-                    return;
-                }
-                resourceWebViewStatusView.setText(message);
-            }
-
-            @Override
-            public void onMediaFound(XhsParseResult parseResult) {
-                if (requestVersion != parseRequestVersion) {
-                    return;
-                }
-                resourceWebViewStatusView.setText(R.string.xhs_download_webview_found);
-                applyParseResult(parseResult);
-            }
-
-            @Override
-            public void onSniffFailed(String reason) {
-                if (requestVersion != parseRequestVersion) {
-                    return;
-                }
-                resourceWebViewStatusView.setText(TextUtils.isEmpty(reason)
-                        ? getString(R.string.xhs_download_webview_failed)
-                        : reason);
-                applyParseError(originalException);
-            }
-        });
-    }
-
-    private void stopWebViewResourceSniff() {
-        if (webViewResourceSniffer != null) {
-            webViewResourceSniffer.stop();
+    private void startManualWebExtraction() {
+        String pageUrl = extractUrlFromText(inputView.getText().toString());
+        if (TextUtils.isEmpty(pageUrl)) {
+            Toast.makeText(this, "请先粘贴网页链接", Toast.LENGTH_SHORT).show();
+            return;
         }
+        startManualWebExtraction(pageUrl, "manual_webview");
     }
 
-    private void hideResourceWebView() {
-        if (resourceWebViewContainer != null) {
-            resourceWebViewContainer.setVisibility(View.GONE);
+    private void startManualWebExtraction(String pageUrl, String entrySource) {
+        if (uiState == UiState.SAVING) {
+            Toast.makeText(this, "正在保存资源，请稍后再打开网页", Toast.LENGTH_SHORT).show();
+            return;
         }
-        if (resourceWebViewStatusView != null) {
-            resourceWebViewStatusView.setText(R.string.xhs_download_webview_loading);
+        inputView.clearFocus();
+        setUiState(UiState.MANUAL_BROWSING, "请在网页中完成验证，再手动提取当前页面媒体。");
+        manualWebExtractionController.open(pageUrl, entrySource);
+    }
+
+    private boolean isManualBrowsing() {
+        return manualWebExtractionController != null && manualWebExtractionController.isActive();
+    }
+
+    private void restoreUiAfterManualBrowsing() {
+        if (currentParseResult != null) {
+            setUiState(UiState.PARSE_SUCCESS, "已关闭网页，保留上一次解析结果。");
+        } else {
+            setUiState(UiState.IDLE, "已关闭网页，可重新解析或再次手动浏览。");
         }
     }
 
     private void applyParseResult(XhsParseResult parseResult) {
+        discardCurrentRuntimeSession();
         currentParseResult = parseResult;
+        runtimeSessionHandedOff = false;
         lastSavedUri = null;
         XhsDownloadProgressStore.clear();
         secondaryActionView.setVisibility(View.GONE);
@@ -617,6 +656,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private void applyParseError(XhsParserException parserException) {
         Log.w(TAG, "parse failed, error=" + parserException.getParseError()
                 + ", inputUrl=" + summarizeUrlForLog(extractUrlFromText(lastAttemptedInputText)));
+        discardCurrentRuntimeSession();
         currentParseResult = null;
         XhsDownloadProgressStore.clear();
         mediaAdapter.setItems(null);
@@ -684,12 +724,21 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         this.uiState = targetState;
         statusText.setText(message);
         boolean saving = targetState == UiState.SAVING;
-        inputView.setEnabled(!saving);
-        selectAllButton.setEnabled(!saving);
+        boolean browsing = targetState == UiState.MANUAL_BROWSING;
+        boolean controlsLocked = saving || browsing;
+        inputView.setEnabled(!controlsLocked);
+        selectAllButton.setEnabled(!controlsLocked);
+        mobileRetryButton.setEnabled(!controlsLocked && targetState != UiState.PARSING);
+        manualWebViewButton.setEnabled(!controlsLocked && targetState != UiState.PARSING);
         switch (targetState) {
             case PARSING:
             case SAVING:
                 statusProgress.setVisibility(View.VISIBLE);
+                parseButton.setEnabled(false);
+                saveButton.setEnabled(false);
+                break;
+            case MANUAL_BROWSING:
+                statusProgress.setVisibility(View.GONE);
                 parseButton.setEnabled(false);
                 saveButton.setEnabled(false);
                 break;
@@ -738,11 +787,17 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         lastSavedUri = null;
         secondaryActionView.setVisibility(View.GONE);
         setUiState(UiState.SAVING, "正在准备保存资源…");
-        Intent serviceIntent = XhsDownloadContract.buildStartIntent(this, currentParseResult);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
+        try {
+            Intent serviceIntent = XhsDownloadContract.buildStartIntent(this, currentParseResult);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+            runtimeSessionHandedOff = true;
+        } catch (RuntimeException exception) {
+            setUiState(UiState.PARSE_SUCCESS, "启动保存任务失败，请稍后重试。");
+            Toast.makeText(this, "启动保存任务失败", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -753,6 +808,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 + "，重复 " + saveSummary.getDuplicateCount()
                 + "，失败 " + saveSummary.getFailedCount();
         if (saveSummary.isComplete()) {
+            // 运行态会话只允许 Service 领取一次，完成后禁用旧句柄，避免无效重复保存。
+            if (hasRuntimeMediaItems()) {
+                updateAllSelection(false);
+            }
             if (saveSummary.getFailedCount() == 0 && saveSummary.hasAnySuccess()) {
                 setUiState(UiState.SAVE_SUCCESS, summaryMessage);
             } else if (saveSummary.isPartialSuccess()) {
@@ -764,6 +823,18 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         } else {
             setUiState(UiState.SAVING, summaryMessage);
         }
+    }
+
+    private boolean hasRuntimeMediaItems() {
+        if (currentParseResult == null || currentParseResult.getMediaItems() == null) {
+            return false;
+        }
+        for (XhsMediaItem item : currentParseResult.getMediaItems()) {
+            if (item != null && item.requiresRuntimeSession()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void openSavedMedia() {
@@ -803,15 +874,65 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         if (position < 0 || position >= currentParseResult.getMediaItems().size()) {
             position = 0;
         }
+        XhsMediaItem previewItem = currentParseResult.getMediaItems().get(position);
+        if (previewItem.requiresSourceResolution()) {
+            String message = previewItem.getMediaType() == XhsMediaType.VIDEO
+                    ? "短效视频会在保存时取源；保存为 MP4 后可播放"
+                    : "该资源依赖当前浏览会话，请保存后查看";
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            return;
+        }
         startActivity(XhsPreviewActivity.buildIntent(this, currentParseResult, position));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (manualWebExtractionController != null
+                && manualWebExtractionController.handleBackPressed()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (manualWebExtractionController != null) {
+            manualWebExtractionController.onResume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (manualWebExtractionController != null) {
+            manualWebExtractionController.onPause();
+        }
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         parseExecutor.shutdownNow();
-        if (webViewResourceSniffer != null) {
-            webViewResourceSniffer.destroy();
+        if (!runtimeSessionHandedOff) {
+            discardCurrentRuntimeSession();
+        }
+        if (manualWebExtractionController != null) {
+            manualWebExtractionController.destroy();
         }
         super.onDestroy();
+    }
+
+    private void discardCurrentRuntimeSession() {
+        if (runtimeSessionHandedOff || currentParseResult == null
+                || currentParseResult.getMediaItems() == null) {
+            return;
+        }
+        for (XhsMediaItem item : currentParseResult.getMediaItems()) {
+            if (item != null && item.requiresRuntimeSession()) {
+                RuntimeMediaSessionStore.getInstance().discard(item.getRuntimeSessionId());
+                break;
+            }
+        }
+        runtimeSessionHandedOff = false;
     }
 }

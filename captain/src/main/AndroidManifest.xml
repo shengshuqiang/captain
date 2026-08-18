@@ -75,7 +75,9 @@ package="captain">
         android:name="com.shuqiang.captain.xhs.ui.XhsDownloadActivity"
         android:exported="true"
         android:label="@string/xhs_download_page_title"
-        android:launchMode="singleTop">
+        android:launchMode="singleTop"
+        android:configChanges="orientation|screenSize|keyboardHidden"
+        android:windowSoftInputMode="adjustResize">
         <intent-filter>
             <action android:name="android.intent.action.SEND" />
             <action android:name="android.intent.action.SEND_MULTIPLE" />

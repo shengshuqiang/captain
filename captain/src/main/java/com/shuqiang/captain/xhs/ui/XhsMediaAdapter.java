@@ -132,7 +132,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
                         .into(mediaCover);
             }
 
-            mediaType.setText(item.getMediaType().getDisplayName());
+            mediaType.setText(buildTypeLabel(item));
             mediaIndex.setText((position + 1) + " / " + totalCount);
             mediaDuration.setText(item.getDisplayDuration());
             mediaDuration.setVisibility(item.getMediaType() == XhsMediaType.VIDEO
@@ -187,7 +187,8 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
      * 首次预览失败只撤销系统给出的默认勾选，后续仍允许用户手动选择该资源。
      */
     private void handlePreviewFailure(final XhsMediaItem item, GlideException exception) {
-        if (item.getMediaType() != XhsMediaType.IMAGE || !previewFailuresHandled.add(item.getId())) {
+        if (item.getMediaType() != XhsMediaType.IMAGE || item.requiresRuntimeSession()
+                || !previewFailuresHandled.add(item.getId())) {
             return;
         }
         Log.w(TAG, "image preview failed, host=" + describeHost(item.getMediaUrl())
@@ -220,5 +221,13 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             return exception == null ? "unknown" : exception.getClass().getSimpleName();
         }
         return exception.getRootCauses().get(0).getClass().getSimpleName();
+    }
+
+    private String buildTypeLabel(XhsMediaItem item) {
+        if (item.getMediaType() != XhsMediaType.VIDEO) {
+            return item.getMediaType().getDisplayName();
+        }
+        String format = item.getTransport().getDisplayName();
+        return item.getQualityHeight() > 0 ? format + " · " + item.getQualityHeight() + "P" : format;
     }
 }
