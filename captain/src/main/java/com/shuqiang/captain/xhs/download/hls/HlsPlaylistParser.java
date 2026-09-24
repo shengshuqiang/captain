@@ -25,6 +25,8 @@ public final class HlsPlaylistParser {
         long mediaSequence = 0;
         boolean endList = false;
         boolean hasMap = false;
+        String initSegmentUrl = null;
+        boolean hasMultipleMaps = false;
         boolean hasDiscontinuity = false;
         boolean hasByteRange = false;
         boolean hasAlternateAudio = false;
@@ -49,6 +51,15 @@ public final class HlsPlaylistParser {
                 currentKey = parseKey(playlistUrl, parseAttributes(afterColon(line)));
             } else if (line.startsWith("#EXT-X-MAP:")) {
                 hasMap = true;
+                Map<String, String> attributes = parseAttributes(afterColon(line));
+                String mapUri = attributes.get("URI");
+                if (mapUri == null || mapUri.isEmpty()) {
+                    throw new IOException("HLS 初始化片段地址缺失");
+                }
+                String resolvedMap = resolveUrl(playlistUrl, mapUri);
+                hasMultipleMaps |= initSegmentUrl != null && !initSegmentUrl.equals(resolvedMap);
+                initSegmentUrl = resolvedMap;
+                hasByteRange |= attributes.containsKey("BYTERANGE");
             } else if (line.startsWith("#EXT-X-BYTERANGE:")) {
                 hasByteRange = true;
             } else if (line.startsWith("#EXT-X-DISCONTINUITY")) {
@@ -68,7 +79,8 @@ public final class HlsPlaylistParser {
             }
         }
         HlsPlaylist.Type type = variants.isEmpty() ? HlsPlaylist.Type.MEDIA : HlsPlaylist.Type.MASTER;
-        return new HlsPlaylist(type, variants, segments, endList, hasMap, hasDiscontinuity,
+        return new HlsPlaylist(type, variants, segments, endList, hasMap,
+                initSegmentUrl, hasMultipleMaps, hasDiscontinuity,
                 hasByteRange, hasAlternateAudio);
     }
 

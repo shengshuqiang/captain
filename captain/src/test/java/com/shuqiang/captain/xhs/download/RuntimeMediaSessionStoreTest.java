@@ -66,6 +66,22 @@ public class RuntimeMediaSessionStoreTest {
                         "age=confirmed; media=old", "media=new; fresh=yes"));
     }
 
+    @Test
+    public void previewUsesCapturedContextWithoutConsumingDownloadSession() {
+        RuntimeMediaSessionStore store = new RuntimeMediaSessionStore(60_000L);
+        XhsParseResult raw = buildResult();
+        raw.getMediaItems().get(0).setDiscoveryInfo(1234L, true);
+        XhsMediaItem item = store.capture(raw, "captured-agent", raw.getPageUrl(),
+                url -> url.contains("cdn.example.com") ? "media=allowed" : "page=only")
+                .getMediaItems().get(0);
+        Assert.assertEquals("media=allowed", store.previewHeaders(item).get("Cookie"));
+        Assert.assertEquals("captured-agent", store.previewHeaders(item).get("User-Agent"));
+        Assert.assertEquals(1234L, item.getDiscoveredAtMs());
+        Assert.assertTrue(item.isCurrentPlayback());
+        Assert.assertNotNull(store.claim(item.getRuntimeSessionId()));
+        Assert.assertThrows(IllegalStateException.class, () -> store.previewHeaders(item));
+    }
+
     private XhsParseResult buildResult() {
         ArrayList<XhsMediaItem> items = new ArrayList<>();
         items.add(new XhsMediaItem("video", XhsMediaType.VIDEO,

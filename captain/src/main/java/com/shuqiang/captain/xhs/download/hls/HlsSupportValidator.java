@@ -47,8 +47,8 @@ public final class HlsSupportValidator {
         if (!playlist.hasEndList()) {
             throw new IOException("暂不支持直播或未结束的 HLS");
         }
-        if (playlist.hasMap()) {
-            throw new IOException("暂不支持 fMP4 HLS");
+        if (playlist.hasMultipleMaps()) {
+            throw new IOException("暂不支持切换初始化片段的 HLS");
         }
         if (playlist.hasByteRange()) {
             throw new IOException("暂不支持 HLS Byte Range 分片");
@@ -60,6 +60,9 @@ public final class HlsSupportValidator {
             HlsPlaylist.Key key = segment.getKey();
             if (key == null) {
                 continue;
+            }
+            if (playlist.hasMap()) {
+                throw new IOException("暂不支持加密的 fMP4 HLS");
             }
             if (!"AES-128".equalsIgnoreCase(key.getMethod())) {
                 throw new IOException("暂不支持 HLS 加密方式 " + key.getMethod());
@@ -76,8 +79,19 @@ public final class HlsSupportValidator {
             return;
         }
         String lower = codecs.toLowerCase(Locale.US);
-        if (!lower.contains("avc1") || !lower.contains("mp4a")) {
-            throw new IOException("暂只支持 H.264 + AAC HLS");
+        String[] tracks = lower.split(",");
+        boolean hasVideo = false;
+        for (String track : tracks) {
+            String codec = track.trim();
+            if (codec.startsWith("avc1") || codec.startsWith("avc3")
+                    || codec.startsWith("hvc1") || codec.startsWith("hev1")) {
+                hasVideo = true;
+            } else if (!codec.startsWith("mp4a")) {
+                throw new IOException("暂不支持该 HLS 编码组合");
+            }
+        }
+        if (!hasVideo) {
+            throw new IOException("HLS 清单缺少可转封装的视频编码");
         }
     }
 }

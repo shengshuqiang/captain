@@ -3,15 +3,18 @@ package com.shuqiang.captain.xhs.parser;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -43,7 +46,7 @@ public final class WebViewResourceSniffer {
     private static final int SNIFF_TIMEOUT_MS = 18000;
     private static final int GENERIC_PRIME_SCAN_MS = 3500;
     private static final int GENERIC_FINAL_SCAN_MS = 7000;
-    private static final int INTERACTIVE_FINAL_SCAN_MS = 1000;
+    private static final int INTERACTIVE_SNAPSHOT_TIMEOUT_MS = 1500;
     private static final long ANY_PAGE_GENERATION = -1L;
     private static final Pattern HTTP_URL_PATTERN = Pattern.compile("(?:https?:)?//[^\\s\"'<>\\\\]+");
     private static final String COLLECT_MEDIA_JS = "(function(){"
@@ -71,60 +74,7 @@ public final class WebViewResourceSniffer {
             + "}"
             + "return urls.slice(0,120);"
             + "})()";
-    private static final String COLLECT_DOM_MEDIA_JS = "(function(){"
-            + "var out=[];var seen={};"
-            + "var preview=window.__captainMediaPreview;"
-            + "if(!preview){preview={states:{},dimensions:{},images:{},count:0};window.__captainMediaPreview=preview;}"
-            + "if(!preview.dimensions){preview.dimensions={};}"
-            + "function absolute(u){if(!u||typeof u!=='string'){return '';}"
-            + "u=u.replace(/&amp;/g,'&');try{return new URL(u,document.baseURI).href;}catch(e){return '';}}"
-            + "function largeBox(b){if(!b||b.width<=0||b.height<=0){return false;}"
-            + "var max=Math.max(b.width,b.height);var min=Math.min(b.width,b.height);"
-            + "return max>=240&&(b.width*b.height)>=40000&&(max/min)<=4;}"
-            + "function rememberSize(u,w,h){if(u&&w>0&&h>0){preview.dimensions[u]={width:Math.round(w),height:Math.round(h)};}}"
-            + "function sourceSize(u){return preview.dimensions[u]||{width:0,height:0};}"
-            + "function ensureProbe(u,b){u=absolute(u);if(!largeBox(b)||!/^https?:\\/\\//i.test(u)"
-            + "||preview.states[u]||preview.count>=60){return;}preview.states[u]='loading';preview.count++;"
-            + "var p=new Image();preview.images[u]=p;"
-            + "p.onload=function(){preview.states[u]='ready';rememberSize(u,p.naturalWidth,p.naturalHeight);delete preview.images[u];};"
-            + "p.onerror=function(){preview.states[u]='failed';delete preview.images[u];};p.src=u;}"
-            + "function add(u,k,mime,w,h,sw,sh,v,ready,hint){u=absolute(u);"
-            + "if(!/^https?:\\/\\//i.test(u)||seen[u]){return;}seen[u]=1;"
-            + "out.push({url:u,kind:k,mime:mime||'',width:w||0,height:h||0,sourceWidth:sw||0,sourceHeight:sh||0,"
-            + "visible:!!v,ready:!!ready,hints:hint||''});"
-            + "}"
-            + "function box(e){var r=e.getBoundingClientRect?e.getBoundingClientRect():null;"
-            + "return {width:Math.round(r?r.width:(e.width||0)),height:Math.round(r?r.height:(e.height||0))};}"
-            + "function state(e,b){var s=window.getComputedStyle?getComputedStyle(e):null;"
-            + "return (!s||(s.display!=='none'&&s.visibility!=='hidden'&&s.opacity!=='0'))&&b.width>0&&b.height>0;}"
-            + "function loaded(e){return !!e.complete&&(e.naturalWidth||0)>0&&(e.naturalHeight||0)>0;}"
-            + "var imgs=document.querySelectorAll('img');"
-            + "for(var i=0;i<imgs.length&&i<240;i++){var e=imgs[i];try{if(e.loading==='lazy'){e.loading='eager';}}catch(q){}"
-            + "var b=box(e);var ok=loaded(e);var s=window.getComputedStyle?getComputedStyle(e):null;"
-            + "var parent=e.parentElement;var link=e.closest?e.closest('a'):null;"
-            + "var hint=(e.className||'')+' '+(e.alt||'')+' '+(e.getAttribute('role')||'')+' '+(e.getAttribute('loading')||'')"
-            + "+' '+(s?s.filter:'')+' '+(parent&&typeof parent.className==='string'?parent.className:'')+' '+(link?link.href:'');"
-            + "var loadedUrl=ok?absolute(e.currentSrc||e.src):'';"
-            + "if(loadedUrl){preview.states[loadedUrl]='ready';rememberSize(loadedUrl,e.naturalWidth,e.naturalHeight);}"
-            + "var urls=[e.currentSrc,e.src,e.getAttribute('data-src'),e.getAttribute('data-original'),e.getAttribute('data-lazy-src')];"
-            + "for(var j=0;j<urls.length;j++){var resolved=absolute(urls[j]);"
-            + "ensureProbe(resolved,b);var d=sourceSize(resolved);add(resolved,'image','',b.width,b.height,d.width,d.height,state(e,b),"
-            + "(ok&&resolved===loadedUrl)||preview.states[resolved]==='ready',hint);}"
-            + "var sets=[e.getAttribute('srcset'),e.getAttribute('data-srcset')];"
-            + "for(var z=0;z<sets.length;z++){if(!sets[z]){continue;}var parts=sets[z].split(',');"
-            + "for(var n=0;n<parts.length;n++){var srcPart=parts[n].trim().split(/\\s+/)[0];var setUrl=absolute(srcPart);"
-            + "ensureProbe(setUrl,b);var sd=sourceSize(setUrl);add(setUrl,'image','',b.width,b.height,sd.width,sd.height,state(e,b),"
-            + "(ok&&setUrl===loadedUrl)||preview.states[setUrl]==='ready',hint);}}}"
-            + "var videos=document.querySelectorAll('video,video source');"
-            + "for(var x=0;x<videos.length&&x<80;x++){var m=videos[x];var host=m.tagName&&m.tagName.toLowerCase()==='source'?m.parentElement:m;"
-            + "var vb=box(host||m);var mime=m.getAttribute('type')||(host&&host.getAttribute?host.getAttribute('type'):'')||'';"
-            + "var mediaUrls=[m.currentSrc,m.src,m.getAttribute('src'),m.getAttribute('data-src')];"
-            + "for(var q=0;q<mediaUrls.length;q++){add(mediaUrls[q],'video',mime,vb.width,vb.height,(host&&host.videoWidth)||0,(host&&host.videoHeight)||0,state(host||m,vb),!!mediaUrls[q],m.className||'');}}"
-            + "var links=document.querySelectorAll('a[href$=\".pdf\"],embed[type=\"application/pdf\"],object[type=\"application/pdf\"]');"
-            + "for(var y=0;y<links.length&&y<40;y++){var p=links[y];var pb=box(p);"
-            + "add(p.href||p.src||p.data,'pdf','application/pdf',pb.width,pb.height,0,0,state(p,pb),true,p.className||'');}"
-            + "return JSON.stringify({title:document.title||'',items:out});"
-            + "})()";
+    private static final String COLLECT_DOM_MEDIA_JS = WebResourceDomSnapshot.SCRIPT;
 
     private final WebView webView;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -165,6 +115,15 @@ public final class WebViewResourceSniffer {
             evaluatePageCandidates("webview_page_delayed");
         }
     };
+    /** 页面脚本繁忙时仍可返回已观察到的地址，避免按钮无限等待 JS 回调。 */
+    private final Runnable interactiveSnapshotTimeout = new Runnable() {
+        @Override
+        public void run() {
+            if (!completed && interactiveSnapshotPending) {
+                completeInteractiveResult("webview_manual_timeout", sessionGeneration, pageGeneration);
+            }
+        }
+    };
 
     private Callback callback;
     private String pageUrl;
@@ -178,6 +137,18 @@ public final class WebViewResourceSniffer {
     private long startedAtMs;
     private volatile long sessionGeneration;
     private long pageGeneration;
+    private int pageErrorLogCount;
+    private String lastDiscoverySignature;
+    /** 仅轮询少量播放器元数据，同时节流网络候选的 UI 通知；不加载任何媒体。 */
+    private final Runnable interactiveDiscoveryPoll = new Runnable() {
+        @Override
+        public void run() {
+            if (completed || !interactiveMode) return;
+            publishInteractiveResources();
+            evaluateDomMedia("webview_player_poll", sessionGeneration, pageGeneration);
+            mainHandler.postDelayed(this, 1500);
+        }
+    };
 
     public interface Callback {
         void onStatusChanged(String message);
@@ -188,6 +159,10 @@ public final class WebViewResourceSniffer {
 
         default void onCaptureStateChanged(boolean capturing) {
             // 自动嗅探调用方无需处理手动快照状态。
+        }
+
+        default void onResourcesChanged(XhsParseResult result) {
+            // 自动解析不消费持续发现；null 表示新页面尚未发现候选。
         }
     }
 
@@ -223,6 +198,7 @@ public final class WebViewResourceSniffer {
         this.taobaoMode = !interactiveMode && TaobaoShareParser.isSupportedPage(this.pageUrl);
         this.genericCollector = taobaoMode ? null : new WebResourceMediaCollector(this.pageUrl, entrySource);
         this.completed = false;
+        this.lastDiscoverySignature = null;
         if (!canSniff(this.pageUrl)) {
             completed = true;
             if (callback != null) {
@@ -243,7 +219,7 @@ public final class WebViewResourceSniffer {
         webView.loadUrl(this.pageUrl);
     }
 
-    /** 用户完成页面交互后主动触发两阶段 DOM 快照，空结果不会关闭浏览会话。 */
+    /** 用户主动查看资源时读取一次元数据；不为验证候选加载额外媒体。 */
     public boolean captureCurrentPageMedia() {
         if (completed || !interactiveMode || interactiveSnapshotPending || genericCollector == null) {
             return false;
@@ -258,25 +234,11 @@ public final class WebViewResourceSniffer {
         interactiveSnapshotPending = true;
         genericCollector.setPageUrl(currentUrl);
         if (callback != null) {
-            callback.onStatusChanged("正在读取当前页面媒体，请保持页面不动。");
+            callback.onStatusChanged("正在整理资源来源，不下载媒体文件。");
             callback.onCaptureStateChanged(true);
         }
-        evaluatePageCandidates("webview_manual_prime");
-        final long expectedSession = sessionGeneration;
-        final long expectedPage = pageGeneration;
-        mainHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isActiveScan(expectedSession, expectedPage)) {
-                    interactiveSnapshotPending = false;
-                    if (callback != null) {
-                        callback.onCaptureStateChanged(false);
-                    }
-                    return;
-                }
-                evaluatePageCandidates("webview_manual_final");
-            }
-        }, INTERACTIVE_FINAL_SCAN_MS);
+        mainHandler.postDelayed(interactiveSnapshotTimeout, INTERACTIVE_SNAPSHOT_TIMEOUT_MS);
+        evaluatePageCandidates("webview_manual_final");
         return true;
     }
 
@@ -285,6 +247,7 @@ public final class WebViewResourceSniffer {
         pageGeneration = 0L;
         completed = true;
         mainHandler.removeCallbacks(timeoutRunnable);
+        mainHandler.removeCallbacks(interactiveDiscoveryPoll);
         removePageScanCallbacks();
         callback = null;
         pageUrl = null;
@@ -309,6 +272,14 @@ public final class WebViewResourceSniffer {
             webView.destroy();
         } catch (Exception ignored) {
             // ignore
+        }
+    }
+
+    /** Activity 进入后台时停止轮询；清单覆盖层切换不调用此方法。 */
+    public void setObservationPaused(boolean paused) {
+        mainHandler.removeCallbacks(interactiveDiscoveryPoll);
+        if (!paused && interactiveMode && !completed) {
+            mainHandler.postDelayed(interactiveDiscoveryPoll, 1500);
         }
     }
 
@@ -450,7 +421,8 @@ public final class WebViewResourceSniffer {
                                   final long expectedSession,
                                   final long expectedPage) {
         try {
-            webView.evaluateJavascript(COLLECT_DOM_MEDIA_JS, new ValueCallback<String>() {
+            webView.evaluateJavascript("webview_player_poll".equals(source)
+                    ? WebResourceDomSnapshot.VIDEO_SCRIPT : COLLECT_DOM_MEDIA_JS, new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String value) {
                     inspectDomMediaResult(value, source, expectedSession, expectedPage);
@@ -464,6 +436,7 @@ public final class WebViewResourceSniffer {
     private void inspectDomMediaResult(String value, String source,
                                        long expectedSession, long expectedPage) {
         if (!isActiveScan(expectedSession, expectedPage)
+                || ("webview_manual_final".equals(source) && !interactiveSnapshotPending)
                 || genericCollector == null
                 || TextUtils.isEmpty(value)
                 || "null".equals(value)) {
@@ -474,6 +447,12 @@ public final class WebViewResourceSniffer {
             String jsonText = parsedValue instanceof String ? (String) parsedValue : value;
             JSONObject payload = new JSONObject(jsonText);
             genericCollector.setPageTitle(payload.optString("title"));
+            java.util.Set<String> playingUrls = new java.util.HashSet<>();
+            JSONArray playing = payload.optJSONArray("playingUrls");
+            if (playing != null) {
+                for (int i = 0; i < playing.length(); i++) playingUrls.add(playing.optString(i));
+            }
+            genericCollector.setCurrentPlaybackUrls(playingUrls);
             JSONArray items = payload.optJSONArray("items");
             if (items != null) {
                 for (int i = 0; i < items.length(); i++) {
@@ -518,6 +497,7 @@ public final class WebViewResourceSniffer {
             return;
         }
         interactiveSnapshotPending = false;
+        mainHandler.removeCallbacks(interactiveSnapshotTimeout);
         Callback activeCallback = callback;
         if (activeCallback != null) {
             activeCallback.onCaptureStateChanged(false);
@@ -539,10 +519,12 @@ public final class WebViewResourceSniffer {
     }
 
     private void completeInteractiveResult(String source, long expectedSession, long expectedPage) {
-        if (!isActiveScan(expectedSession, expectedPage) || genericCollector == null) {
+        if (!isActiveScan(expectedSession, expectedPage) || genericCollector == null
+                || !interactiveSnapshotPending) {
             return;
         }
         interactiveSnapshotPending = false;
+        mainHandler.removeCallbacks(interactiveSnapshotTimeout);
         if (callback != null) {
             callback.onCaptureStateChanged(false);
         }
@@ -553,7 +535,28 @@ public final class WebViewResourceSniffer {
             }
             return;
         }
-        completeWithParseResult(parseResult, source, expectedSession, expectedPage);
+        // 查看清单只是一次快照，保留页面与监听以覆盖广告结束后的后续资源。
+        if (callback != null) callback.onMediaFound(parseResult);
+    }
+
+    private void publishInteractiveResources() {
+        if (genericCollector == null || callback == null) return;
+        XhsParseResult result = genericCollector.buildResult();
+        StringBuilder signature = new StringBuilder();
+        signature.append(pageGeneration);
+        if (result != null) {
+            signature.append(result.getTitle());
+            for (com.shuqiang.captain.xhs.model.XhsMediaItem item : result.getMediaItems()) {
+                signature.append('|').append(item.getMediaUrl()).append(':')
+                        .append(item.getWidth()).append(':').append(item.getHeight())
+                        .append(':').append(item.isCurrentPlayback());
+            }
+        }
+        String value = signature.toString();
+        if (!value.equals(lastDiscoverySignature)) {
+            lastDiscoverySignature = value;
+            callback.onResourcesChanged(result);
+        }
     }
 
     private boolean completeGenericResult(String source) {
@@ -582,6 +585,7 @@ public final class WebViewResourceSniffer {
         mainHandler.removeCallbacks(pageDelayedRunnable);
         mainHandler.removeCallbacks(genericPrimeRunnable);
         mainHandler.removeCallbacks(genericFinalScanRunnable);
+        mainHandler.removeCallbacks(interactiveSnapshotTimeout);
     }
 
     private boolean isActiveScan(long expectedSession, long expectedPage) {
@@ -742,8 +746,13 @@ public final class WebViewResourceSniffer {
                 return;
             }
             pageGeneration++;
+            pageErrorLogCount = 0;
             if (interactiveMode && genericCollector != null) {
                 genericCollector.resetForPage(url);
+                lastDiscoverySignature = null;
+                if (callback != null) callback.onResourcesChanged(null);
+                mainHandler.removeCallbacks(interactiveDiscoveryPoll);
+                mainHandler.postDelayed(interactiveDiscoveryPoll, 1000);
             }
             if (interactiveSnapshotPending && callback != null) {
                 callback.onCaptureStateChanged(false);
@@ -793,20 +802,53 @@ public final class WebViewResourceSniffer {
             if (completed || !canSniff(url) || !TextUtils.equals(url, view.getUrl())) {
                 return;
             }
-            pageGeneration++;
+            // 手动浏览期间仅监听请求；不反复扫描 DOM 或改变页面的懒加载策略。
+            if (interactiveMode) {
+                Log.d(TAG, "webview page finished, host=" + describeHost(url)
+                        + ", elapsedMs=" + elapsedMs());
+                return;
+            }
             removePageScanCallbacks();
             if (callback != null && !completed) {
                 callback.onStatusChanged(interactiveMode
                         ? "页面已打开，请完成确认、关闭弹窗或播放视频后手动提取。"
                         : taobaoMode
                         ? "页面已打开，正在扫描页面数据。"
-                        : "页面已打开，正在校验最终内容大图和实际预览状态。");
+                        : "页面已打开，正在整理资源来源信息。");
             }
             evaluatePageCandidates("webview_page_finished");
             mainHandler.postDelayed(pageDelayedRunnable, 1200);
             if (!taobaoMode && !interactiveMode) {
                 mainHandler.postDelayed(genericPrimeRunnable, GENERIC_PRIME_SCAN_MS);
                 mainHandler.postDelayed(genericFinalScanRunnable, GENERIC_FINAL_SCAN_MS);
+            }
+        }
+
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            logPageError("network", request.getUrl().toString(), error.getErrorCode());
+            if (request.isForMainFrame() && callback != null && !completed) {
+                callback.onStatusChanged("网页连接失败，可刷新重试（" + error.getErrorCode() + "）。");
+            }
+        }
+
+        @Override
+        public void onReceivedHttpError(WebView view, WebResourceRequest request,
+                                        WebResourceResponse response) {
+            logPageError("http", request.getUrl().toString(), response.getStatusCode());
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            handler.cancel();
+            logPageError("tls", error.getUrl(), error.getPrimaryError());
+        }
+
+        /** 每页限量记录主机和错误码，不记录 Cookie 或带签名的资源完整地址。 */
+        private void logPageError(String kind, String url, int code) {
+            if (!completed && pageErrorLogCount++ < 5) {
+                Log.w(TAG, "webview resource error, kind=" + kind + ", host=" + describeHost(url)
+                        + ", code=" + code + ", elapsedMs=" + elapsedMs());
             }
         }
     }

@@ -56,6 +56,16 @@ public class HlsPlaylistParserTest {
     }
 
     @Test
+    public void parseFragmentedMp4InitializationUrl() throws Exception {
+        HlsPlaylist playlist = parser.parse("https://cdn.example.com/video/index.m3u8",
+                "#EXTM3U\n#EXT-X-MAP:URI=\"init.mp4\"\n"
+                        + "#EXTINF:2,\npart0.m4s\n#EXT-X-ENDLIST\n");
+
+        Assert.assertEquals("https://cdn.example.com/video/init.mp4", playlist.getInitSegmentUrl());
+        Assert.assertFalse(playlist.hasMultipleMaps());
+    }
+
+    @Test
     public void parseKeepsRepeatedKeyDeclarationsAsSeparateRotations() throws Exception {
         String content = "#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI=\"key.bin\"\n"
                 + "#EXTINF:4,\none.ts\n#EXT-X-KEY:METHOD=AES-128,URI=\"key.bin\"\n"

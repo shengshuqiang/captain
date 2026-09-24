@@ -81,26 +81,31 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
         HlsPlaylist mediaPlaylist = resolveMediaPlaylist(context, source, item.getQualityHeight());
         supportValidator.validateMediaPlaylist(mediaPlaylist);
         Map<HlsPlaylist.Key, byte[]> keyCache = new IdentityHashMap<>();
+        byte[] initSegment = null;
         try {
-            File probeTs = context.file("probe.ts");
-            downloadProbe(context, source, mediaPlaylist, keyCache, probeTs);
-            context.transition(DownloadStage.PROBING, 0, 0);
-            if (!remuxer.probe(probeTs, context.file("probe.mp4"), item.getQualityHeight())) {
-                if (!source.hasDirectFallback()) {
-                    throw new IOException("当前系统不支持该 HLS 的无损转封装，且页面没有明确 MP4 回退");
+            if (mediaPlaylist.hasMap()) {
+                initSegment = downloadBytesWithRetry(context, source,
+                        mediaPlaylist.getInitSegmentUrl(), -2);
+            }
+            // 短探针缺少关键帧或轨道元数据时可能误判；无明确 MP4 回退则下载完整流再校验。
+            if (source.hasDirectFallback()) {
+                File probeTs = context.file("probe.ts");
+                downloadProbe(context, source, mediaPlaylist, keyCache, initSegment, probeTs);
+                context.transition(DownloadStage.PROBING, 0, 0);
+                if (!remuxer.probe(probeTs, context.file("probe.mp4"), item.getQualityHeight())) {
+                    ResolvedMediaSource fallback = new ResolvedMediaSource(source.getDirectFallbackUrl(),
+                            XhsMediaTransport.DIRECT_FILE, source.getUserAgent(), source.getReferer(),
+                            source.getDirectFallbackHeight(), null, 0);
+                    XhsDownloadItem fallbackItem = item.withResolvedTransport(
+                            XhsMediaTransport.DIRECT_FILE, source.getDirectFallbackHeight());
+                    return directEngine.downloadResolved(context, fallbackItem, fallback, true);
                 }
-                ResolvedMediaSource fallback = new ResolvedMediaSource(source.getDirectFallbackUrl(),
-                        XhsMediaTransport.DIRECT_FILE, source.getUserAgent(), source.getReferer(),
-                        source.getDirectFallbackHeight(), null, 0);
-                XhsDownloadItem fallbackItem = item.withResolvedTransport(
-                        XhsMediaTransport.DIRECT_FILE, source.getDirectFallbackHeight());
-                return directEngine.downloadResolved(context, fallbackItem, fallback, true);
             }
             File combinedTs = context.file("combined.ts");
             if (combinedTs.exists() && !combinedTs.delete()) {
                 throw new IOException("无法清理旧的 HLS 临时文件");
             }
-            downloadAllSegments(context, source, mediaPlaylist, keyCache, combinedTs);
+            downloadAllSegments(context, source, mediaPlaylist, keyCache, initSegment, combinedTs);
             context.transition(DownloadStage.REMUXING, 0, 0);
             File mp4 = context.file("output.mp4");
             remuxer.remuxAndVerify(combinedTs, mp4, item.getQualityHeight(), mediaPlaylist.getTotalDurationSec());
@@ -110,6 +115,7 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
                     context.getSelectedIndex(), mp4);
         } finally {
             wipeKeys(keyCache);
+            if (initSegment != null) Arrays.fill(initSegment, (byte) 0);
         }
     }
 
@@ -152,14 +158,16 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
 
     private void downloadProbe(MediaDownloadContext context, ResolvedMediaSource source,
                                HlsPlaylist playlist, Map<HlsPlaylist.Key, byte[]> keyCache,
-                               File probe) throws IOException {
+                               byte[] initSegment, File probe) throws IOException {
         if (probe.exists() && !probe.delete()) {
             throw new IOException("无法清理 HLS 能力探测文件");
         }
         int probeCount = Math.min(2, playlist.getSegments().size());
         try (FileOutputStream output = new FileOutputStream(probe, false)) {
+            if (initSegment != null) output.write(initSegment);
             for (int index = 0; index < probeCount; index++) {
-                byte[] bytes = downloadSegment(context, source, playlist.getSegments().get(index), keyCache, index);
+                byte[] bytes = downloadSegment(context, source, playlist.getSegments().get(index),
+                        keyCache, index, playlist.hasMap());
                 output.write(bytes);
                 Arrays.fill(bytes, (byte) 0);
             }
@@ -168,13 +176,15 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
 
     private void downloadAllSegments(MediaDownloadContext context, ResolvedMediaSource source,
                                      HlsPlaylist playlist, Map<HlsPlaylist.Key, byte[]> keyCache,
-                                     File combinedTs) throws IOException {
+                                     byte[] initSegment, File combinedTs) throws IOException {
         int total = playlist.getSegments().size();
         try (FileOutputStream output = new FileOutputStream(combinedTs, false)) {
+            if (initSegment != null) output.write(initSegment);
             for (int index = 0; index < total; index++) {
                 context.transition(DownloadStage.DOWNLOADING_SEGMENTS, index, total);
                 HlsPlaylist.Segment segment = playlist.getSegments().get(index);
-                byte[] bytes = downloadSegment(context, source, segment, keyCache, index);
+                byte[] bytes = downloadSegment(context, source, segment, keyCache,
+                        index, playlist.hasMap());
                 output.write(bytes);
                 Arrays.fill(bytes, (byte) 0);
             }
@@ -183,11 +193,11 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
     }
 
     private byte[] downloadSegment(MediaDownloadContext context, ResolvedMediaSource source,
-                                   HlsPlaylist.Segment segment, Map<HlsPlaylist.Key, byte[]> keyCache,
-                                   int segmentIndex) throws IOException {
+                                  HlsPlaylist.Segment segment, Map<HlsPlaylist.Key, byte[]> keyCache,
+                                  int segmentIndex, boolean fragmentedMp4) throws IOException {
         byte[] encrypted = downloadBytesWithRetry(context, source, segment.getUrl(), segmentIndex);
         if (segment.getKey() == null) {
-            validateTransportStream(encrypted);
+            if (!fragmentedMp4) validateTransportStream(encrypted);
             return encrypted;
         }
         context.transition(DownloadStage.DECRYPTING, segmentIndex, 0);

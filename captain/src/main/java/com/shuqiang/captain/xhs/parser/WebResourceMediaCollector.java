@@ -35,6 +35,7 @@ final class WebResourceMediaCollector {
     private final String entrySource;
     private final LinkedHashMap<String, Candidate> candidates = new LinkedHashMap<>();
     private String pageTitle;
+    private final java.util.Set<String> currentPlaybackUrls = new java.util.HashSet<>();
 
     WebResourceMediaCollector(String pageUrl, String entrySource) {
         this.pageUrl = pageUrl;
@@ -61,6 +62,13 @@ final class WebResourceMediaCollector {
         this.pageUrl = pageUrl;
         this.pageTitle = null;
         this.candidates.clear();
+        this.currentPlaybackUrls.clear();
+    }
+
+    /** blob 或跨域播放器无法关联时保持未知，不猜测网络候选与播放器的对应关系。 */
+    synchronized void setCurrentPlaybackUrls(java.util.Set<String> urls) {
+        currentPlaybackUrls.clear();
+        currentPlaybackUrls.addAll(urls);
     }
 
     synchronized void observeRequest(String rawUrl) {
@@ -160,6 +168,8 @@ final class WebResourceMediaCollector {
                     null,
                     0
             ));
+            mediaItems.get(mediaItems.size() - 1).setDiscoveryInfo(candidate.discoveredAtMs,
+                    currentPlaybackUrls.contains(candidate.url));
             index++;
         }
         if (coverUrl == null) {
@@ -172,7 +182,7 @@ final class WebResourceMediaCollector {
                 extractHost(pageUrl),
                 pageTitle == null ? "网页资源" : pageTitle,
                 coverUrl,
-                "WebView 资源监测 · 可预览大图默认选中",
+                "资源来源清单 · 按需选择",
                 entrySource,
                 mediaItems
         );
@@ -204,7 +214,8 @@ final class WebResourceMediaCollector {
         if (existing == null) {
             if (candidates.size() >= MAX_CANDIDATE_COUNT) {
                 if ((mediaType != XhsMediaType.VIDEO && !observedInFinalDom)
-                        || !evictOldestLowConfidenceImage()) {
+                        || (!evictOldestLowConfidenceImage()
+                        && !(mediaType == XhsMediaType.VIDEO && evictOldestImage()))) {
                     return;
                 }
             }
@@ -232,7 +243,8 @@ final class WebResourceMediaCollector {
         existing.contentSizedFinalPlacement |= observedInFinalDom
                 && isContentSize(renderedWidth, renderedHeight);
         existing.previewReady |= previewReady;
-        if (hints != null && !hints.trim().isEmpty()) {
+        if (hints != null && !hints.trim().isEmpty() && !existing.hints.contains(hints.trim())
+                && existing.hints.length() < 2048) {
             existing.hints = (existing.hints + " " + hints).trim();
         }
     }
@@ -243,6 +255,18 @@ final class WebResourceMediaCollector {
             Map.Entry<String, Candidate> entry = iterator.next();
             Candidate candidate = entry.getValue();
             if (candidate.mediaType == XhsMediaType.IMAGE && !candidate.observedInFinalDom) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 正片可能晚于大量正文图片出现；容量已满时优先为新视频保留位置。 */
+    private boolean evictOldestImage() {
+        Iterator<Map.Entry<String, Candidate>> iterator = candidates.entrySet().iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getValue().mediaType == XhsMediaType.IMAGE) {
                 iterator.remove();
                 return true;
             }
@@ -407,6 +431,7 @@ final class WebResourceMediaCollector {
     }
 
     private static final class Candidate {
+        private final long discoveredAtMs = System.currentTimeMillis();
         private final String url;
         private final XhsMediaType mediaType;
         private final int order;

@@ -22,16 +22,15 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ConcatAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.captain.base.BasePermissionActivity;
 import com.shuqiang.captain.xhs.download.XhsDownloadContract;
 import com.shuqiang.captain.xhs.download.XhsDownloadProgressStore;
@@ -89,7 +88,6 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private TextView metaTitleView;
     private TextView metaAuthorView;
     private TextView metaSummaryView;
-    private ImageView coverImageView;
     private TextView selectionSummaryView;
     private TextView selectAllButton;
     private TextView secondaryActionView;
@@ -158,22 +156,24 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     }
 
     private void initViews() {
-        inputView = findViewById(R.id.input_view);
-        statusText = findViewById(R.id.status_text);
-        statusProgress = findViewById(R.id.status_progress);
-        resultContainer = findViewById(R.id.result_container);
-        metaTypeView = findViewById(R.id.meta_type);
-        metaTitleView = findViewById(R.id.meta_title);
-        metaAuthorView = findViewById(R.id.meta_author);
-        metaSummaryView = findViewById(R.id.meta_summary);
-        coverImageView = findViewById(R.id.cover_image);
-        selectionSummaryView = findViewById(R.id.selection_summary);
-        selectAllButton = findViewById(R.id.select_all_button);
+        mediaListView = findViewById(R.id.media_list);
+        mediaListView.setLayoutManager(new LinearLayoutManager(this));
+        View header = getLayoutInflater().inflate(R.layout.item_xhs_download_header, mediaListView, false);
+        inputView = header.findViewById(R.id.input_view);
+        statusText = header.findViewById(R.id.status_text);
+        statusProgress = header.findViewById(R.id.status_progress);
+        resultContainer = header.findViewById(R.id.result_container);
+        metaTypeView = header.findViewById(R.id.meta_type);
+        metaTitleView = header.findViewById(R.id.meta_title);
+        metaAuthorView = header.findViewById(R.id.meta_author);
+        metaSummaryView = header.findViewById(R.id.meta_summary);
+        selectionSummaryView = header.findViewById(R.id.selection_summary);
+        selectAllButton = header.findViewById(R.id.select_all_button);
         secondaryActionView = findViewById(R.id.secondary_action);
-        parseButton = findViewById(R.id.parse_button);
+        parseButton = header.findViewById(R.id.parse_button);
         saveButton = findViewById(R.id.save_button);
-        mobileRetryButton = findViewById(R.id.mobile_retry_button);
-        manualWebViewButton = findViewById(R.id.manual_webview_button);
+        mobileRetryButton = header.findViewById(R.id.mobile_retry_button);
+        manualWebViewButton = header.findViewById(R.id.manual_webview_button);
         mediaListView = findViewById(R.id.media_list);
         resourceWebViewContainer = findViewById(R.id.resource_webview_container);
         resourceWebViewStatusView = findViewById(R.id.resource_webview_status);
@@ -189,15 +189,37 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 new ManualWebExtractionController.Listener() {
                     @Override
                     public void onExtractionReady(XhsParseResult result) {
-                        applyParseResult(result);
+                        updateLiveResources(result);
+                        findViewById(R.id.download_content).bringToFront();
+                        findViewById(R.id.return_webpage_button).setVisibility(View.VISIBLE);
+                        setUiState(UiState.PARSE_SUCCESS, "资源持续更新，选择后保存；返回网页可继续播放。");
+                    }
+
+                    @Override
+                    public void onResourcesUpdated(XhsParseResult result) {
+                        updateLiveResources(result);
+                    }
+
+                    @Override
+                    public boolean canUpdateResources() {
+                        return uiState != UiState.SAVING;
+                    }
+
+                    @Override
+                    public void onPageShown() {
+                        if (uiState != UiState.SAVING) {
+                            setUiState(UiState.MANUAL_BROWSING, "继续浏览网页并发现资源。");
+                        }
                     }
 
                     @Override
                     public void onClosed() {
-                        restoreUiAfterManualBrowsing();
+                        findViewById(R.id.return_webpage_button).setVisibility(View.GONE);
+                        if (uiState != UiState.SAVING) restoreUiAfterManualBrowsing();
                     }
                 }
         );
+        findViewById(R.id.return_webpage_button).setOnClickListener(v -> manualWebExtractionController.showPage());
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
@@ -211,8 +233,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 openPreview(position);
             }
         });
-        mediaListView.setLayoutManager(new GridLayoutManager(this, 1));
-        mediaListView.setAdapter(mediaAdapter);
+        mediaListView.setAdapter(new ConcatAdapter(new XhsDownloadHeaderAdapter(header), mediaAdapter));
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -265,12 +286,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 openSavedMedia();
             }
         });
-        coverImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openPreview(0);
-            }
-        });
+
     }
 
     private void handleIncomingIntent(Intent intent, boolean allowAutoParse) {
@@ -607,8 +623,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             Toast.makeText(this, "正在保存资源，请稍后再打开网页", Toast.LENGTH_SHORT).show();
             return;
         }
+        // 手动浏览接管页面后，之前静态解析的迟到结果不得重新打开旧链接。
+        parseRequestVersion++;
         inputView.clearFocus();
-        setUiState(UiState.MANUAL_BROWSING, "请在网页中完成验证，再手动提取当前页面媒体。");
+        setUiState(UiState.MANUAL_BROWSING, "正常浏览网页，点击查看资源后按需选择保存。");
         manualWebExtractionController.open(pageUrl, entrySource);
     }
 
@@ -624,6 +642,34 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         }
     }
 
+    /** 更新发现结果不触发下载，也不重置同一页面上的用户选择。 */
+    private void updateLiveResources(XhsParseResult result) {
+        if (uiState == UiState.SAVING) return;
+        java.util.Set<String> selectedUrls = new java.util.HashSet<>();
+        if (result != null && currentParseResult != null
+                && TextUtils.equals(result.getPageUrl(), currentParseResult.getPageUrl())) {
+            for (XhsMediaItem item : currentParseResult.getSelectedItems()) selectedUrls.add(item.getMediaUrl());
+        }
+        discardCurrentRuntimeSession();
+        currentParseResult = result;
+        runtimeSessionHandedOff = false;
+        resultContainer.setVisibility(View.VISIBLE);
+        if (result == null) {
+            mediaAdapter.setItems(null);
+            metaTypeView.setText("发现资源 0 项");
+            metaTitleView.setText("等待网页中的媒体资源");
+            metaAuthorView.setText("网页与嗅探仍在继续");
+        } else {
+            for (XhsMediaItem item : result.getMediaItems()) item.setSelected(selectedUrls.contains(item.getMediaUrl()));
+            metaTypeView.setText("发现资源 " + result.getMediaCount() + " 项");
+            metaTitleView.setText(result.getDisplayTitle());
+            metaAuthorView.setText("来源：" + result.getAuthorName());
+            mediaAdapter.setItems(result.getMediaItems());
+        }
+        metaSummaryView.setText("仅展示来源，默认不下载。广告属性与流是否可分离尚未确认；部分 blob 或跨域播放器无法直接关联。");
+        refreshSelectionSummary();
+    }
+
     private void applyParseResult(XhsParseResult parseResult) {
         discardCurrentRuntimeSession();
         currentParseResult = parseResult;
@@ -636,21 +682,13 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         metaTitleView.setText(parseResult.getDisplayTitle());
         metaAuthorView.setText("来源：" + (TextUtils.isEmpty(parseResult.getAuthorName()) ? "未知站点" : parseResult.getAuthorName()));
         metaSummaryView.setText("来源：" + parseResult.getParseStrategy());
-        if (parseResult.getPrimaryMediaType() == XhsMediaType.PDF) {
-            coverImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            coverImageView.setImageResource(R.drawable.ic_file_save);
-        } else {
-            coverImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Glide.with(this)
-                    .load(parseResult.getCoverUrl())
-                    .into(coverImageView);
+        // 发现资源不代表下载意愿；只有用户明确选择后才允许保存。
+        for (XhsMediaItem item : parseResult.getMediaItems()) {
+            item.setSelected(false);
         }
-
-        int spanCount = parseResult.getPrimaryMediaType() == XhsMediaType.VIDEO ? 1 : 3;
-        mediaListView.setLayoutManager(new GridLayoutManager(this, spanCount));
         mediaAdapter.setItems(parseResult.getMediaItems());
         refreshSelectionSummary();
-        setUiState(UiState.PARSE_SUCCESS, "解析完成，可勾选后保存图片、视频或 PDF。");
+        setUiState(UiState.PARSE_SUCCESS, "已发现资源，仅展示来源信息；选择需要的项目后保存。");
     }
 
     private void applyParseError(XhsParserException parserException) {
@@ -694,7 +732,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         for (XhsMediaItem mediaItem : currentParseResult.getMediaItems()) {
             mediaItem.setSelected(selected);
         }
-        mediaAdapter.notifyDataSetChanged();
+        mediaAdapter.notifySelectionChanged();
         refreshSelectionSummary();
     }
 
@@ -722,6 +760,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private void setUiState(UiState targetState, String message) {
         this.uiState = targetState;
+        mediaListView.setVisibility(targetState == UiState.MANUAL_BROWSING ? View.GONE : View.VISIBLE);
         statusText.setText(message);
         boolean saving = targetState == UiState.SAVING;
         boolean browsing = targetState == UiState.MANUAL_BROWSING;
@@ -819,6 +858,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             } else {
                 setUiState(UiState.PARSE_SUCCESS, summaryMessage);
             }
+            manualWebExtractionController.refreshList();
             secondaryActionView.setVisibility(saveSummary.hasAnySuccess() ? View.VISIBLE : View.GONE);
         } else {
             setUiState(UiState.SAVING, summaryMessage);
@@ -875,14 +915,28 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             position = 0;
         }
         XhsMediaItem previewItem = currentParseResult.getMediaItems().get(position);
-        if (previewItem.requiresSourceResolution()) {
+        if (previewItem.requiresSourceResolution() && !previewItem.requiresRuntimeSession()) {
             String message = previewItem.getMediaType() == XhsMediaType.VIDEO
                     ? "短效视频会在保存时取源；保存为 MP4 后可播放"
                     : "该资源依赖当前浏览会话，请保存后查看";
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             return;
         }
-        startActivity(XhsPreviewActivity.buildIntent(this, currentParseResult, position));
+        java.util.ArrayList<XhsMediaItem> previewItems = new java.util.ArrayList<>();
+        previewItems.add(previewItem);
+        XhsParseResult singlePreview = new XhsParseResult(currentParseResult.getNoteId(),
+                currentParseResult.getPageUrl(), currentParseResult.getCanonicalUrl(),
+                currentParseResult.getAuthorName(), currentParseResult.getTitle(),
+                previewItem.getCoverUrl(), currentParseResult.getParseStrategy(),
+                currentParseResult.getEntrySource(), previewItems);
+        if (previewItem.requiresRuntimeSession()) {
+            singlePreview = manualWebExtractionController.registerPreview(singlePreview);
+            if (singlePreview == null) {
+                Toast.makeText(this, "请重新打开网页后预览", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        startActivity(XhsPreviewActivity.buildIntent(this, singlePreview, 0));
     }
 
     @Override

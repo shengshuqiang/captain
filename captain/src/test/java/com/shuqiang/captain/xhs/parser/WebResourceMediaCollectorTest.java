@@ -12,6 +12,23 @@ import org.junit.Test;
 public class WebResourceMediaCollectorTest {
 
     @Test
+    public void lateMainVideoSurvivesFullImageListAndNavigationResetsPlayback() {
+        WebResourceMediaCollector collector = new WebResourceMediaCollector("https://fixture.example/one", "test");
+        for (int i = 0; i < 200; i++) {
+            collector.observeDom("https://fixture.example/" + i + ".jpg", "image", 400, 400,
+                    400, 400, true, true, true, "content");
+        }
+        collector.observeInteractiveRequest("https://fixture.example/main.m3u8");
+        collector.setCurrentPlaybackUrls(java.util.Collections.singleton("https://fixture.example/main.m3u8"));
+        XhsParseResult result = collector.buildResult();
+        Assert.assertEquals(200, result.getMediaCount());
+        Assert.assertTrue(result.getMediaItems().stream().anyMatch(item -> item.isCurrentPlayback()
+                && item.getMediaUrl().endsWith("main.m3u8") && item.getDiscoveredAtMs() > 0));
+        collector.resetForPage("https://fixture.example/two");
+        Assert.assertNull(collector.buildResult());
+    }
+
+    @Test
     public void buildResultKeepsProcessImagesButOnlySelectsFinalContentImage() {
         WebResourceMediaCollector collector = new WebResourceMediaCollector(
                 "https://example.com/dynamic/list",

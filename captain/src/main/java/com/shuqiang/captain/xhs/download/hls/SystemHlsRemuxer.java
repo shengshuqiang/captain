@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 
-/** 使用 Android MediaExtractor/MediaMuxer 将 H.264 + AAC TS 无损转封装为 MP4。 */
+/** 使用 Android MediaExtractor/MediaMuxer 将设备可解析的 HLS 片段无损转封装为 MP4。 */
 public final class SystemHlsRemuxer {
     private static final int DEFAULT_BUFFER_SIZE = 8 * 1024 * 1024;
     private static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
@@ -48,9 +48,7 @@ public final class SystemHlsRemuxer {
             extractor.setDataSource(transportStream.getAbsolutePath());
             int trackCount = extractor.getTrackCount();
             int[] outputTracks = new int[trackCount];
-            long[] lastPresentationTimes = new long[trackCount];
             Arrays.fill(outputTracks, -1);
-            Arrays.fill(lastPresentationTimes, -1);
             muxer = new MediaMuxer(output.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             int selectedCount = 0;
             boolean hasVideo = false;
@@ -80,8 +78,8 @@ public final class SystemHlsRemuxer {
                     bufferSize = Math.max(bufferSize, format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
                 }
             }
-            if (!hasVideo || !hasAudio || selectedCount != 2) {
-                throw new IOException("TS 必须同时包含单个 H.264 视频轨和 AAC 音频轨");
+            if (!hasVideo || selectedCount < 1 || selectedCount > 2) {
+                throw new IOException("流中没有可转封装的视频轨");
             }
             bufferSize = Math.min(bufferSize, MAX_BUFFER_SIZE);
             ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
@@ -112,13 +110,7 @@ public final class SystemHlsRemuxer {
                     firstPresentationTime = Math.max(sampleTime, 0);
                 }
                 long normalizedTime = Math.max(0, sampleTime - firstPresentationTime);
-                if (lastPresentationTimes[inputTrack] > normalizedTime) {
-                    throw new IOException("TS 样本时间戳不连续，无法安全转封装");
-                }
-                if (lastPresentationTimes[inputTrack] == normalizedTime) {
-                    normalizedTime = lastPresentationTimes[inputTrack] + 1;
-                }
-                lastPresentationTimes[inputTrack] = normalizedTime;
+                // B 帧按解码顺序读取时 PTS 可回退；交由 MediaMuxer 写入组合时间偏移。
                 bufferInfo.set(0, sampleSize, normalizedTime, extractor.getSampleFlags());
                 muxer.writeSampleData(outputTrack, buffer, bufferInfo);
                 extractor.advance();
@@ -156,26 +148,23 @@ public final class SystemHlsRemuxer {
         try {
             extractor.setDataSource(mp4File.getAbsolutePath());
             boolean hasVideo = false;
-            boolean hasAudio = false;
             int actualHeight = 0;
             long durationUs = 0;
             for (int track = 0; track < extractor.getTrackCount(); track++) {
                 MediaFormat format = extractor.getTrackFormat(track);
                 String mime = format.getString(MediaFormat.KEY_MIME);
-                if ("video/avc".equalsIgnoreCase(mime)) {
+                if (isSupportedVideo(mime)) {
                     hasVideo = true;
                     if (format.containsKey(MediaFormat.KEY_HEIGHT)) {
                         actualHeight = format.getInteger(MediaFormat.KEY_HEIGHT);
                     }
-                } else if (isAac(mime)) {
-                    hasAudio = true;
                 }
                 if (format.containsKey(MediaFormat.KEY_DURATION)) {
                     durationUs = Math.max(durationUs, format.getLong(MediaFormat.KEY_DURATION));
                 }
             }
-            if (!hasVideo || !hasAudio) {
-                throw new IOException("MP4 缺少 H.264 视频轨或 AAC 音频轨");
+            if (!hasVideo) {
+                throw new IOException("MP4 缺少可播放的视频轨");
             }
             if (expectedHeight > 0 && actualHeight > 0 && Math.abs(expectedHeight - actualHeight) > 16) {
                 throw new IOException("MP4 分辨率与所选画质不一致");
@@ -195,7 +184,11 @@ public final class SystemHlsRemuxer {
     }
 
     private boolean isSupportedMime(String mime) {
-        return "video/avc".equalsIgnoreCase(mime) || isAac(mime);
+        return isSupportedVideo(mime) || isAac(mime);
+    }
+
+    private boolean isSupportedVideo(String mime) {
+        return "video/avc".equalsIgnoreCase(mime) || "video/hevc".equalsIgnoreCase(mime);
     }
 
     private boolean isAac(String mime) {

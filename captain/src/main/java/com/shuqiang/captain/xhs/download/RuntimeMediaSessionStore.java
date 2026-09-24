@@ -64,6 +64,8 @@ public final class RuntimeMediaSessionStore {
                     item.isSelected(), item.getTransport(), pageUrl, XhsRequestMode.WEBVIEW,
                     item.getSourceKey(), item.getQualityHeight(), sessionId, candidateId
             ));
+            registeredItems.get(registeredItems.size() - 1)
+                    .setDiscoveryInfo(item.getDiscoveredAtMs(), item.isCurrentPlayback());
         }
         if (registeredItems.isEmpty()) {
             throw new IllegalArgumentException("页面媒体地址无效");
@@ -87,6 +89,22 @@ public final class RuntimeMediaSessionStore {
             return null;
         }
         return session;
+    }
+
+    /** 仅为用户主动预览的已登记地址提供请求头，既不消费下载句柄也不返回其它来源 Cookie。 */
+    public synchronized Map<String, String> previewHeaders(XhsMediaItem item) {
+        cleanupExpiredLocked(System.currentTimeMillis());
+        RuntimeMediaSession session = sessions.get(item.getRuntimeSessionId());
+        RuntimeMediaSession.Candidate candidate = session == null ? null : session.resolve(item.getRuntimeCandidateId());
+        if (candidate == null || !candidate.getUrl().equals(item.getMediaUrl())) {
+            throw new IllegalStateException("浏览会话已失效，请返回网页重新查看资源");
+        }
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("User-Agent", session.getUserAgent());
+        headers.put("Referer", session.getPageReferer());
+        String cookie = session.getCookieHeader(candidate.getUrl());
+        if (cookie != null) headers.put("Cookie", cookie);
+        return headers;
     }
 
     public synchronized void discard(String sessionId) {

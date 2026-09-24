@@ -118,6 +118,7 @@ public class XhsDownloadService extends Service {
         int failedCount = 0;
         int duplicateCount = 0;
         String lastSavedUri = null;
+        String lastFailureMessage = null;
 
         if (totalCount == 0) {
             finishWithSummary(new XhsSaveSummary(0, 0, 0, 0, 0, true, "没有可保存的资源", null));
@@ -170,6 +171,7 @@ public class XhsDownloadService extends Service {
                     lastSavedUri = saveItemResult.getSavedUri();
                 } else {
                     failedCount++;
+                    lastFailureMessage = saveItemResult.getMessage();
                 }
                 dispatchProgress(new XhsSaveSummary(totalCount, processedCount, successCount, failedCount, duplicateCount,
                         false, saveItemResult.getMessage(), lastSavedUri));
@@ -184,6 +186,7 @@ public class XhsDownloadService extends Service {
                 processedCount++;
                 failedCount++;
                 String message = safeFailureMessage(e, mediaItem, i + 1);
+                lastFailureMessage = message;
                 dispatchProgress(new XhsSaveSummary(totalCount, processedCount, successCount, failedCount, duplicateCount,
                         false, message, lastSavedUri));
                 updateNotification(message, processedCount, totalCount, true);
@@ -199,7 +202,8 @@ public class XhsDownloadService extends Service {
         } else if (successCount > 0 || duplicateCount > 0) {
             finishMessage = "部分资源已保存";
         } else {
-            finishMessage = getString(R.string.xhs_download_notification_failed);
+            finishMessage = lastFailureMessage == null
+                    ? getString(R.string.xhs_download_notification_failed) : lastFailureMessage;
         }
         finishWithSummary(new XhsSaveSummary(totalCount, processedCount, successCount, failedCount, duplicateCount,
                 true, finishMessage, lastSavedUri));
@@ -209,6 +213,26 @@ public class XhsDownloadService extends Service {
         String detail = exception == null ? null : exception.getMessage();
         if (detail != null && detail.startsWith("浏览会话已失效")) {
             return detail;
+        }
+        if (exception instanceof DownloadHttpSession.HttpStatusException) {
+            return "保存失败：站点返回 HTTP "
+                    + ((DownloadHttpSession.HttpStatusException) exception).getStatusCode();
+        }
+        if (exception instanceof java.net.SocketTimeoutException) {
+            return "保存失败：连接或读取超时";
+        }
+        if (exception instanceof javax.net.ssl.SSLException) {
+            return "保存失败：安全连接校验未通过";
+        }
+        if (exception instanceof java.net.UnknownHostException) {
+            return "保存失败：资源域名无法解析";
+        }
+        if (detail != null && detail.length() <= 60 && !detail.contains("/")
+                && !detail.contains("?") && !detail.contains("http")
+                && (detail.startsWith("HLS ") || detail.startsWith("暂不支持")
+                || detail.startsWith("当前系统") || detail.startsWith("响应不是")
+                || detail.startsWith("MP4 ") || detail.startsWith("TS "))) {
+            return "保存失败：" + detail;
         }
         return "保存失败：" + item.getMediaType().getDisplayName() + " " + index;
     }

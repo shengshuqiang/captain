@@ -17,18 +17,23 @@ public final class HlsPlaylist {
     private final List<Segment> segments;
     private final boolean endList;
     private final boolean hasMap;
+    private final String initSegmentUrl;
+    private final boolean hasMultipleMaps;
     private final boolean hasDiscontinuity;
     private final boolean hasByteRange;
     private final boolean hasAlternateAudio;
 
     HlsPlaylist(Type type, List<Variant> variants, List<Segment> segments, boolean endList,
-                boolean hasMap, boolean hasDiscontinuity, boolean hasByteRange,
+                boolean hasMap, String initSegmentUrl, boolean hasMultipleMaps,
+                boolean hasDiscontinuity, boolean hasByteRange,
                 boolean hasAlternateAudio) {
         this.type = type;
         this.variants = Collections.unmodifiableList(variants);
         this.segments = Collections.unmodifiableList(segments);
         this.endList = endList;
         this.hasMap = hasMap;
+        this.initSegmentUrl = initSegmentUrl;
+        this.hasMultipleMaps = hasMultipleMaps;
         this.hasDiscontinuity = hasDiscontinuity;
         this.hasByteRange = hasByteRange;
         this.hasAlternateAudio = hasAlternateAudio;
@@ -52,6 +57,14 @@ public final class HlsPlaylist {
 
     public boolean hasMap() {
         return hasMap;
+    }
+
+    public String getInitSegmentUrl() {
+        return initSegmentUrl;
+    }
+
+    public boolean hasMultipleMaps() {
+        return hasMultipleMaps;
     }
 
     public boolean hasDiscontinuity() {

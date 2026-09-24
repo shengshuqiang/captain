@@ -25,6 +25,8 @@ public class XhsMediaItem implements Serializable {
     private final String runtimeSessionId;
     private final String runtimeCandidateId;
     private boolean selected;
+    private long discoveredAtMs;
+    private boolean currentPlayback;
 
     public XhsMediaItem(String id, XhsMediaType mediaType, String mediaUrl, String coverUrl,
                         int width, int height, int durationSec, String fileExtension, boolean selected) {
@@ -138,6 +140,20 @@ public class XhsMediaItem implements Serializable {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    /** 只记录首次发现时间及播放器明确报告的地址，不据此判定广告或正片。 */
+    public void setDiscoveryInfo(long discoveredAtMs, boolean currentPlayback) {
+        this.discoveredAtMs = discoveredAtMs;
+        this.currentPlayback = currentPlayback;
+    }
+
+    public long getDiscoveredAtMs() {
+        return discoveredAtMs;
+    }
+
+    public boolean isCurrentPlayback() {
+        return currentPlayback;
     }
 
     public String getDisplayDuration() {
