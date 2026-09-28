@@ -80,7 +80,8 @@ final class AlipayVideoShareParser {
         JsonObject video = XhsStateJsonParser.getObject(data, "video");
         String apiVideoUrl = normalizeUrl(XhsStateJsonParser.getString(video, "vid"));
         String shareVideoUrl = buildVideoUrl(shareInfo == null ? null : shareInfo.videoInfo);
-        String mediaUrl = firstNonEmpty(shareVideoUrl, apiVideoUrl);
+        // 分享参数中的画质可能已失效；优先使用本次详情接口给出的地址。
+        String mediaUrl = firstNonEmpty(apiVideoUrl, shareVideoUrl);
         if (mediaUrl == null || !XhsNetworkPolicy.isAllowedMediaUrl(mediaUrl)) {
             return null;
         }

@@ -31,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,6 +80,7 @@ public final class WebViewResourceSniffer {
 
     private final WebView webView;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService alipayParseExecutor = Executors.newSingleThreadExecutor();
     private final Runnable timeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -237,9 +240,52 @@ public final class WebViewResourceSniffer {
             callback.onStatusChanged("正在整理资源来源，不下载媒体文件。");
             callback.onCaptureStateChanged(true);
         }
+        if (AlipayVideoShareParser.isSupportedPage(currentUrl)) {
+            resolveAlipayShare(currentUrl, sessionGeneration, pageGeneration);
+            return true;
+        }
         mainHandler.postDelayed(interactiveSnapshotTimeout, INTERACTIVE_SNAPSHOT_TIMEOUT_MS);
         evaluatePageCandidates("webview_manual_final");
         return true;
+    }
+
+    /** 支付宝分享页只有拉起 App 的壳；手动提取复用已有的详情接口解析。 */
+    private void resolveAlipayShare(final String shareUrl, final long expectedSession,
+                                    final long expectedPage) {
+        final String source = entrySource;
+        final String requestSniffId = sniffId;
+        alipayParseExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                XhsParseResult result = null;
+                try {
+                    result = new XhsParseRepository().parse(shareUrl, source);
+                } catch (Exception exception) {
+                    Log.w(TAG, "alipay manual parse failed, sniffId=" + requestSniffId
+                            + ", error=" + exception.getClass().getSimpleName());
+                }
+                final XhsParseResult resolved = result;
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isActiveScan(expectedSession, expectedPage) || !interactiveSnapshotPending) {
+                            return;
+                        }
+                        interactiveSnapshotPending = false;
+                        Callback activeCallback = callback;
+                        if (activeCallback == null) {
+                            return;
+                        }
+                        activeCallback.onCaptureStateChanged(false);
+                        if (resolved == null) {
+                            activeCallback.onSniffFailed("支付宝视频解析失败，请刷新页面后重试。");
+                        } else {
+                            activeCallback.onMediaFound(resolved);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     public void stop() {
@@ -268,6 +314,7 @@ public final class WebViewResourceSniffer {
 
     public void destroy() {
         stop();
+        alipayParseExecutor.shutdownNow();
         try {
             webView.destroy();
         } catch (Exception ignored) {
@@ -542,6 +589,7 @@ public final class WebViewResourceSniffer {
 
     private void publishInteractiveResources() {
         if (genericCollector == null || callback == null) return;
+        if (AlipayVideoShareParser.isSupportedPage(webView.getUrl())) return;
         XhsParseResult result = genericCollector.buildResult();
         StringBuilder signature = new StringBuilder();
         signature.append(pageGeneration);

@@ -14,6 +14,8 @@ public class AlipayVideoShareParserTest {
     private static final String CLARITY = "1080P_h265_EH";
     private static final String EXPECTED_VIDEO_URL = "https://gw.alipayobjects.com/v/open_content/afts/video/"
             + VIDEO_ID + "/" + CLARITY;
+    private static final String API_VIDEO_URL = "https://gw.alipayobjects.com/v/open_content/afts/video/"
+            + VIDEO_ID + "/720P_h265";
 
     @Test
     public void parseShareInfoOnlyBuildsDirectVideoUrlFromNestedScheme() throws Exception {
@@ -36,7 +38,7 @@ public class AlipayVideoShareParserTest {
     }
 
     @Test
-    public void parseDetailResponseUsesApiMetadataAndKeepsSharedClarityVideoUrl() throws Exception {
+    public void parseDetailResponsePrefersApiVideoUrlOverSharedClarity() throws Exception {
         String pageUrl = buildShareUrl(CONTENT_ID, VIDEO_ID, CLARITY);
         AlipayVideoShareParser.ShareInfo shareInfo = AlipayVideoShareParser.extractShareInfo(pageUrl);
         String responseJson = "{"
@@ -47,7 +49,7 @@ public class AlipayVideoShareParserTest {
                 + "\"author\":{\"nickName\":\"End筒子\"},"
                 + "\"ext\":{\"spmExt\":{\"_item_id\":\"" + CONTENT_ID + "\"}},"
                 + "\"video\":{"
-                + "\"vid\":\"http://gw.alipayobjects.com/v/open_content/afts/video/" + VIDEO_ID + "/720P_h265\","
+                + "\"vid\":\"" + API_VIDEO_URL.replace("https://", "http://") + "\","
                 + "\"djangoId\":\"" + VIDEO_ID + "\","
                 + "\"duration\":10.233332633972168,"
                 + "\"widthRatio\":2160,"
@@ -71,10 +73,23 @@ public class AlipayVideoShareParserTest {
         Assert.assertEquals("End筒子", parseResult.getAuthorName());
         Assert.assertEquals("https://mdn.alipayobjects.com/open_content/afts/img/cover/original",
                 parseResult.getCoverUrl());
-        Assert.assertEquals(EXPECTED_VIDEO_URL, parseResult.getMediaItems().get(0).getMediaUrl());
+        Assert.assertEquals(API_VIDEO_URL, parseResult.getMediaItems().get(0).getMediaUrl());
         Assert.assertEquals(10, parseResult.getMediaItems().get(0).getDurationSec());
         Assert.assertEquals(2160, parseResult.getMediaItems().get(0).getWidth());
         Assert.assertEquals(3840, parseResult.getMediaItems().get(0).getHeight());
+    }
+
+    @Test
+    public void parseDetailResponseFallsBackToShareWhenApiHasNoVideoUrl() throws Exception {
+        String pageUrl = buildShareUrl(CONTENT_ID, VIDEO_ID, CLARITY);
+        AlipayVideoShareParser.ShareInfo shareInfo = AlipayVideoShareParser.extractShareInfo(pageUrl);
+
+        XhsParseResult result = AlipayVideoShareParser.parseDetailResponse(
+                "{\"resultObj\":{\"data\":[{\"video\":{}}]}}",
+                pageUrl, "manual_input", "alipay_webgw", shareInfo);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(EXPECTED_VIDEO_URL, result.getMediaItems().get(0).getMediaUrl());
     }
 
     private static String buildShareUrl(String contentId, String vid, String clarity) throws Exception {
