@@ -12,7 +12,8 @@ import com.shuqiang.captain.xhs.model.XhsSaveSummary;
 public final class XhsDownloadContract {
     public static final String ACTION_START_DOWNLOAD = "com.shuqiang.captain.xhs.action.START_DOWNLOAD";
     public static final String ACTION_PROGRESS = "com.shuqiang.captain.xhs.action.PROGRESS";
-    public static final String EXTRA_PARSE_RESULT = "extra_parse_result";
+    public static final String ACTION_CANCEL_DOWNLOAD = "com.shuqiang.captain.xhs.action.CANCEL_DOWNLOAD";
+    public static final String EXTRA_DOWNLOAD_REQUEST = "extra_download_request";
     public static final String EXTRA_SAVE_SUMMARY = "extra_save_summary";
 
     private XhsDownloadContract() {
@@ -21,7 +22,7 @@ public final class XhsDownloadContract {
     public static Intent buildStartIntent(Context context, XhsParseResult parseResult) {
         Intent intent = new Intent(context, XhsDownloadService.class);
         intent.setAction(ACTION_START_DOWNLOAD);
-        intent.putExtra(EXTRA_PARSE_RESULT, parseResult);
+        intent.putExtra(EXTRA_DOWNLOAD_REQUEST, XhsDownloadRequest.from(parseResult));
         return intent;
     }
 
@@ -29,6 +30,12 @@ public final class XhsDownloadContract {
         Intent intent = new Intent(ACTION_PROGRESS);
         intent.setPackage(context.getPackageName());
         intent.putExtra(EXTRA_SAVE_SUMMARY, saveSummary);
+        return intent;
+    }
+
+    public static Intent buildCancelIntent(Context context) {
+        Intent intent = new Intent(context, XhsDownloadService.class);
+        intent.setAction(ACTION_CANCEL_DOWNLOAD);
         return intent;
     }
 }

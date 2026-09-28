@@ -17,10 +17,36 @@ public class XhsMediaItem implements Serializable {
     private final int height;
     private final int durationSec;
     private final String fileExtension;
+    private final XhsMediaTransport transport;
+    private final String sourcePageUrl;
+    private final XhsRequestMode requestMode;
+    private final String sourceKey;
+    private final int qualityHeight;
+    private final String runtimeSessionId;
+    private final String runtimeCandidateId;
     private boolean selected;
+    private long discoveredAtMs;
+    private boolean currentPlayback;
 
     public XhsMediaItem(String id, XhsMediaType mediaType, String mediaUrl, String coverUrl,
                         int width, int height, int durationSec, String fileExtension, boolean selected) {
+        this(id, mediaType, mediaUrl, coverUrl, width, height, durationSec, fileExtension, selected,
+                XhsMediaTransport.DIRECT_FILE, null, XhsRequestMode.AUTO, null, 0, null, null);
+    }
+
+    public XhsMediaItem(String id, XhsMediaType mediaType, String mediaUrl, String coverUrl,
+                        int width, int height, int durationSec, String fileExtension, boolean selected,
+                        XhsMediaTransport transport, String sourcePageUrl, XhsRequestMode requestMode,
+                        String sourceKey, int qualityHeight) {
+        this(id, mediaType, mediaUrl, coverUrl, width, height, durationSec, fileExtension, selected,
+                transport, sourcePageUrl, requestMode, sourceKey, qualityHeight, null, null);
+    }
+
+    public XhsMediaItem(String id, XhsMediaType mediaType, String mediaUrl, String coverUrl,
+                        int width, int height, int durationSec, String fileExtension, boolean selected,
+                        XhsMediaTransport transport, String sourcePageUrl, XhsRequestMode requestMode,
+                        String sourceKey, int qualityHeight, String runtimeSessionId,
+                        String runtimeCandidateId) {
         this.id = id;
         this.mediaType = mediaType;
         this.mediaUrl = mediaUrl;
@@ -29,6 +55,13 @@ public class XhsMediaItem implements Serializable {
         this.height = height;
         this.durationSec = durationSec;
         this.fileExtension = fileExtension;
+        this.transport = transport == null ? XhsMediaTransport.DIRECT_FILE : transport;
+        this.sourcePageUrl = sourcePageUrl;
+        this.requestMode = requestMode == null ? XhsRequestMode.AUTO : requestMode;
+        this.sourceKey = sourceKey;
+        this.qualityHeight = qualityHeight;
+        this.runtimeSessionId = runtimeSessionId;
+        this.runtimeCandidateId = runtimeCandidateId;
         this.selected = selected;
     }
 
@@ -64,12 +97,63 @@ public class XhsMediaItem implements Serializable {
         return fileExtension;
     }
 
+    public XhsMediaTransport getTransport() {
+        return transport;
+    }
+
+    public String getSourcePageUrl() {
+        return sourcePageUrl;
+    }
+
+    public XhsRequestMode getRequestMode() {
+        return requestMode;
+    }
+
+    public String getSourceKey() {
+        return sourceKey;
+    }
+
+    public int getQualityHeight() {
+        return qualityHeight;
+    }
+
+    public String getRuntimeSessionId() {
+        return runtimeSessionId;
+    }
+
+    public String getRuntimeCandidateId() {
+        return runtimeCandidateId;
+    }
+
+    public boolean requiresRuntimeSession() {
+        return runtimeSessionId != null && !runtimeSessionId.trim().isEmpty()
+                && runtimeCandidateId != null && !runtimeCandidateId.trim().isEmpty();
+    }
+
+    public boolean requiresSourceResolution() {
+        return requiresRuntimeSession() || sourceKey != null && !sourceKey.trim().isEmpty();
+    }
+
     public boolean isSelected() {
         return selected;
     }
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    /** 只记录首次发现时间及播放器明确报告的地址，不据此判定广告或正片。 */
+    public void setDiscoveryInfo(long discoveredAtMs, boolean currentPlayback) {
+        this.discoveredAtMs = discoveredAtMs;
+        this.currentPlayback = currentPlayback;
+    }
+
+    public long getDiscoveredAtMs() {
+        return discoveredAtMs;
+    }
+
+    public boolean isCurrentPlayback() {
+        return currentPlayback;
     }
 
     public String getDisplayDuration() {
