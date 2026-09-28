@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,8 +32,12 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.shuqiang.captain.xhs.download.RuntimeMediaSessionStore;
 import com.shuqiang.captain.xhs.download.XhsDownloadContract;
 import com.shuqiang.captain.xhs.download.XhsDownloadProgressStore;
@@ -410,8 +415,25 @@ public class XhsPreviewActivity extends AppCompatActivity {
             if (mediaItem.getMediaType() == XhsMediaType.VIDEO) {
                 loadingView.setVisibility(View.VISIBLE);
                 videoView.setVisibility(View.VISIBLE);
-                // 视频首帧由播放器提供，避免为了封面再下载另一条媒体。
-                imageView.setVisibility(View.GONE);
+                // 页面提供 poster 时先显示；真正首帧由播放器解码后替换。
+                String poster = mediaItem.getCoverUrl();
+                boolean hasPoster = poster != null
+                        && (poster.startsWith("https://") || poster.startsWith("http://"))
+                        && !poster.equals(mediaItem.getMediaUrl());
+                imageView.setVisibility(hasPoster ? View.VISIBLE : View.GONE);
+                if (hasPoster) {
+                    LazyHeaders.Builder posterHeaders = new LazyHeaders.Builder();
+                    if (mediaItem.getSourcePageUrl() != null) {
+                        posterHeaders.setHeader("Referer", mediaItem.getSourcePageUrl());
+                    }
+                    String posterCookie = CookieManager.getInstance().getCookie(poster);
+                    if (posterCookie != null && !posterCookie.isEmpty()) {
+                        posterHeaders.setHeader("Cookie", posterCookie);
+                    }
+                    Glide.with(imageView)
+                            .load(new GlideUrl(poster, posterHeaders.build()))
+                            .into(imageView);
+                }
                 OkHttpDataSource.Factory httpFactory = previewDataSource(headers);
                 DefaultDataSource.Factory sourceFactory = new DefaultDataSource.Factory(
                         XhsPreviewActivity.this, httpFactory);
@@ -423,6 +445,12 @@ public class XhsPreviewActivity extends AppCompatActivity {
                     @Override
                     public void onPlaybackStateChanged(int state) {
                         if (state == Player.STATE_READY) loadingView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onRenderedFirstFrame() {
+                        imageView.setVisibility(View.GONE);
+                        loadingView.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -461,14 +489,36 @@ public class XhsPreviewActivity extends AppCompatActivity {
                 loadingView.setVisibility(View.GONE);
                 videoView.setVisibility(View.GONE);
             } else {
+                loadingView.setVisibility(View.VISIBLE);
                 LazyHeaders.Builder headerBuilder = new LazyHeaders.Builder();
                 for (java.util.Map.Entry<String, String> header : headers.entrySet()) {
                     headerBuilder.setHeader(header.getKey(), header.getValue());
                 }
                 Glide.with(imageView.getContext())
                         .load(new GlideUrl(mediaItem.getMediaUrl(), headerBuilder.build()))
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(GlideException error, Object model,
+                                                        Target<Drawable> target, boolean first) {
+                                loadingView.setVisibility(View.GONE);
+                                Log.w(TAG, "image preview failed, host="
+                                        + Uri.parse(mediaItem.getMediaUrl()).getHost()
+                                        + ", error=" + (error == null ? "unknown"
+                                        : error.getClass().getSimpleName()));
+                                Toast.makeText(XhsPreviewActivity.this,
+                                        "图片预览失败，请返回网页刷新后重试", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model,
+                                                           Target<Drawable> target, DataSource source,
+                                                           boolean first) {
+                                loadingView.setVisibility(View.GONE);
+                                return false;
+                            }
+                        })
                         .into(imageView);
-                loadingView.setVisibility(View.GONE);
                 videoView.setVisibility(View.GONE);
             }
 

@@ -132,7 +132,8 @@ final class ManualWebExtractionController {
 
     /** 预览使用独立句柄，持续发现更新清单时不会释放正在预览的上下文。 */
     XhsParseResult registerPreview(XhsParseResult result) {
-        return active ? register(result) : null;
+        // 关闭网页后仍可从已登记的候选创建独立预览句柄。
+        return register(result);
     }
 
     void showPage() {

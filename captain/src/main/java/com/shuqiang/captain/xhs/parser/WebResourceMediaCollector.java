@@ -84,7 +84,7 @@ final class WebResourceMediaCollector {
         InferredMedia inferred = inferRequestMedia(normalizedUrl);
         if (inferred != null && (includeImages || inferred.mediaType != XhsMediaType.IMAGE)) {
             mergeCandidate(normalizedUrl, inferred.mediaType, inferred.transport, 0, 0, 0, 0,
-                    false, false, "request");
+                    false, false, "request", null);
         }
     }
 
@@ -99,6 +99,16 @@ final class WebResourceMediaCollector {
                                  int renderedWidth, int renderedHeight,
                                  int sourceWidth, int sourceHeight, boolean visible,
                                  boolean previewReady, boolean finalSnapshot, String hints) {
+        observeDom(rawUrl, kind, mimeType, renderedWidth, renderedHeight, sourceWidth, sourceHeight,
+                visible, previewReady, finalSnapshot, hints, null);
+    }
+
+    /** 只关联 video 元素明确声明的 poster，避免拿正文首图冒充视频首帧。 */
+    synchronized void observeDom(String rawUrl, String kind, String mimeType,
+                                 int renderedWidth, int renderedHeight,
+                                 int sourceWidth, int sourceHeight, boolean visible,
+                                 boolean previewReady, boolean finalSnapshot, String hints,
+                                 String posterUrl) {
         String normalizedUrl = normalizeUrl(rawUrl);
         InferredMedia inferred = inferDomMedia(kind, mimeType, normalizedUrl);
         if (inferred != null) {
@@ -112,7 +122,8 @@ final class WebResourceMediaCollector {
                     sourceHeight,
                     visible && finalSnapshot,
                     previewReady,
-                    hints
+                    hints,
+                    inferred.mediaType == XhsMediaType.VIDEO ? normalizeUrl(posterUrl) : null
             );
         }
     }
@@ -145,18 +156,14 @@ final class WebResourceMediaCollector {
         ArrayList<XhsMediaItem> mediaItems = new ArrayList<>();
         String coverUrl = findDefaultCover(orderedCandidates);
         int index = 1;
-        boolean videoSelected = false;
         for (Candidate candidate : orderedCandidates) {
             boolean selected = isSelectedByDefault(candidate);
-            if (candidate.mediaType == XhsMediaType.VIDEO) {
-                selected = selected && !videoSelected;
-                videoSelected |= selected;
-            }
             mediaItems.add(new XhsMediaItem(
                     noteId + "_" + index,
                     candidate.mediaType,
                     candidate.url,
-                    candidate.mediaType == XhsMediaType.IMAGE ? candidate.url : coverUrl,
+                    candidate.mediaType == XhsMediaType.IMAGE ? candidate.url
+                            : (candidate.mediaType == XhsMediaType.VIDEO ? candidate.posterUrl : coverUrl),
                     candidate.getPreferredWidth(),
                     candidate.getPreferredHeight(),
                     0,
@@ -182,7 +189,7 @@ final class WebResourceMediaCollector {
                 extractHost(pageUrl),
                 pageTitle == null ? "网页资源" : pageTitle,
                 coverUrl,
-                "资源来源清单 · 按需选择",
+                "资源来源清单 · 图片默认选择，视频按需选择",
                 entrySource,
                 mediaItems
         );
@@ -206,7 +213,8 @@ final class WebResourceMediaCollector {
                                 XhsMediaTransport transport,
                                 int renderedWidth, int renderedHeight,
                                 int sourceWidth, int sourceHeight,
-                                boolean observedInFinalDom, boolean previewReady, String hints) {
+                                boolean observedInFinalDom, boolean previewReady, String hints,
+                                String posterUrl) {
         if (normalizedUrl == null) {
             return;
         }
@@ -230,6 +238,7 @@ final class WebResourceMediaCollector {
                     observedInFinalDom,
                     previewReady,
                     hints,
+                    posterUrl,
                     candidates.size()
             ));
             return;
@@ -243,6 +252,7 @@ final class WebResourceMediaCollector {
         existing.contentSizedFinalPlacement |= observedInFinalDom
                 && isContentSize(renderedWidth, renderedHeight);
         existing.previewReady |= previewReady;
+        if (posterUrl != null) existing.posterUrl = posterUrl;
         if (hints != null && !hints.trim().isEmpty() && !existing.hints.contains(hints.trim())
                 && existing.hints.length() < 2048) {
             existing.hints = (existing.hints + " " + hints).trim();
@@ -275,6 +285,9 @@ final class WebResourceMediaCollector {
     }
 
     private static boolean isSelectedByDefault(Candidate candidate) {
+        if (candidate.mediaType == XhsMediaType.VIDEO) {
+            return false;
+        }
         if (candidate.mediaType != XhsMediaType.IMAGE) {
             return true;
         }
@@ -444,12 +457,13 @@ final class WebResourceMediaCollector {
         private boolean contentSizedFinalPlacement;
         private boolean previewReady;
         private String hints;
+        private String posterUrl;
 
         private Candidate(String url, XhsMediaType mediaType, XhsMediaTransport transport,
                           int renderedWidth, int renderedHeight,
                           int sourceWidth, int sourceHeight,
                           boolean observedInFinalDom, boolean previewReady,
-                          String hints, int order) {
+                          String hints, String posterUrl, int order) {
             this.url = url;
             this.mediaType = mediaType;
             this.transport = transport;
@@ -462,6 +476,7 @@ final class WebResourceMediaCollector {
                     && isContentSize(renderedWidth, renderedHeight);
             this.previewReady = previewReady;
             this.hints = hints == null ? "" : hints;
+            this.posterUrl = posterUrl;
             this.order = order;
         }
 

@@ -104,6 +104,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
     private UiState uiState = UiState.IDLE;
     private XhsParseResult currentParseResult;
     private XhsMediaAdapter mediaAdapter;
+    private final java.util.Map<String, Boolean> selectionOverrides = new java.util.HashMap<>();
     private ClipboardManager clipboardManager;
     private String lastSavedUri;
     private String lastAttemptedInputText;
@@ -224,7 +225,8 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
         mediaAdapter = new XhsMediaAdapter(new XhsMediaAdapter.OnMediaActionListener() {
             @Override
-            public void onSelectionChanged() {
+            public void onSelectionChanged(XhsMediaItem item) {
+                selectionOverrides.put(item.getMediaUrl(), item.isSelected());
                 refreshSelectionSummary();
             }
 
@@ -642,13 +644,12 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         }
     }
 
-    /** 更新发现结果不触发下载，也不重置同一页面上的用户选择。 */
+    /** 新图片沿用内容筛选的默认勾选；仅覆盖用户明确改过的选择状态。 */
     private void updateLiveResources(XhsParseResult result) {
         if (uiState == UiState.SAVING) return;
-        java.util.Set<String> selectedUrls = new java.util.HashSet<>();
-        if (result != null && currentParseResult != null
-                && TextUtils.equals(result.getPageUrl(), currentParseResult.getPageUrl())) {
-            for (XhsMediaItem item : currentParseResult.getSelectedItems()) selectedUrls.add(item.getMediaUrl());
+        if (result == null || (currentParseResult != null
+                && !TextUtils.equals(result.getPageUrl(), currentParseResult.getPageUrl()))) {
+            selectionOverrides.clear();
         }
         discardCurrentRuntimeSession();
         currentParseResult = result;
@@ -660,17 +661,22 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             metaTitleView.setText("等待网页中的媒体资源");
             metaAuthorView.setText("网页与嗅探仍在继续");
         } else {
-            for (XhsMediaItem item : result.getMediaItems()) item.setSelected(selectedUrls.contains(item.getMediaUrl()));
+            for (XhsMediaItem item : result.getMediaItems()) {
+                Boolean override = selectionOverrides.get(item.getMediaUrl());
+                if (override != null) item.setSelected(override);
+                else if (item.getMediaType() == XhsMediaType.VIDEO) item.setSelected(false);
+            }
             metaTypeView.setText("发现资源 " + result.getMediaCount() + " 项");
             metaTitleView.setText(result.getDisplayTitle());
             metaAuthorView.setText("来源：" + result.getAuthorName());
             mediaAdapter.setItems(result.getMediaItems());
         }
-        metaSummaryView.setText("仅展示来源，默认不下载。广告属性与流是否可分离尚未确认；部分 blob 或跨域播放器无法直接关联。");
+        metaSummaryView.setText("合格正文图片默认勾选，视频按需选择；部分 blob 或跨域播放器无法直接关联。");
         refreshSelectionSummary();
     }
 
     private void applyParseResult(XhsParseResult parseResult) {
+        selectionOverrides.clear();
         discardCurrentRuntimeSession();
         currentParseResult = parseResult;
         runtimeSessionHandedOff = false;
@@ -682,16 +688,17 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         metaTitleView.setText(parseResult.getDisplayTitle());
         metaAuthorView.setText("来源：" + (TextUtils.isEmpty(parseResult.getAuthorName()) ? "未知站点" : parseResult.getAuthorName()));
         metaSummaryView.setText("来源：" + parseResult.getParseStrategy());
-        // 发现资源不代表下载意愿；只有用户明确选择后才允许保存。
+        // 保留解析器对正文图片的保守默认选择；视频由用户逐项决定。
         for (XhsMediaItem item : parseResult.getMediaItems()) {
-            item.setSelected(false);
+            if (item.getMediaType() == XhsMediaType.VIDEO) item.setSelected(false);
         }
         mediaAdapter.setItems(parseResult.getMediaItems());
         refreshSelectionSummary();
-        setUiState(UiState.PARSE_SUCCESS, "已发现资源，仅展示来源信息；选择需要的项目后保存。");
+        setUiState(UiState.PARSE_SUCCESS, "正文图片已按原规则默认勾选；视频请按需选择。");
     }
 
     private void applyParseError(XhsParserException parserException) {
+        selectionOverrides.clear();
         Log.w(TAG, "parse failed, error=" + parserException.getParseError()
                 + ", inputUrl=" + summarizeUrlForLog(extractUrlFromText(lastAttemptedInputText)));
         discardCurrentRuntimeSession();
@@ -731,6 +738,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         }
         for (XhsMediaItem mediaItem : currentParseResult.getMediaItems()) {
             mediaItem.setSelected(selected);
+            selectionOverrides.put(mediaItem.getMediaUrl(), selected);
         }
         mediaAdapter.notifySelectionChanged();
         refreshSelectionSummary();

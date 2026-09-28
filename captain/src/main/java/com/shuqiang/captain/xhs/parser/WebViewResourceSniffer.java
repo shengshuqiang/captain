@@ -472,7 +472,8 @@ public final class WebViewResourceSniffer {
                             item.optBoolean("ready"),
                             "webview_page_final".equals(source)
                                     || "webview_manual_final".equals(source),
-                            item.optString("hints")
+                            item.optString("hints"),
+                            item.optString("poster")
                     );
                 }
             }
@@ -549,7 +550,8 @@ public final class WebViewResourceSniffer {
             for (com.shuqiang.captain.xhs.model.XhsMediaItem item : result.getMediaItems()) {
                 signature.append('|').append(item.getMediaUrl()).append(':')
                         .append(item.getWidth()).append(':').append(item.getHeight())
-                        .append(':').append(item.isCurrentPlayback());
+                        .append(':').append(item.isCurrentPlayback())
+                        .append(':').append(item.getCoverUrl());
             }
         }
         String value = signature.toString();

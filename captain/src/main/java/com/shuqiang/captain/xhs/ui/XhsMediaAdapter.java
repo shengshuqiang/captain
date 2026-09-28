@@ -1,15 +1,22 @@
 package com.shuqiang.captain.xhs.ui;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.shuqiang.captain.xhs.download.RuntimeMediaSessionStore;
 import com.shuqiang.captain.xhs.model.XhsMediaItem;
 import com.shuqiang.captain.xhs.model.XhsMediaType;
 
@@ -18,12 +25,13 @@ import java.util.List;
 
 import captain.R;
 
-/** 资源清单只展示已知信息；列表绑定、滚动和勾选均不请求媒体或封面。 */
+/** 图片与明确的视频封面只在列表行可见时加载；视频流本身仍需用户点击播放。 */
 public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaViewHolder> {
+    private static final String TAG = "XhsMediaAdapter";
     private static final String SELECTION_PAYLOAD = "selection";
 
     public interface OnMediaActionListener {
-        void onSelectionChanged();
+        void onSelectionChanged(XhsMediaItem item);
         void onPreviewRequested(int position);
     }
 
@@ -78,7 +86,14 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
         return items.size();
     }
 
+    @Override
+    public void onViewRecycled(@NonNull MediaViewHolder holder) {
+        Glide.with(holder.thumbnail).clear(holder.thumbnail);
+        super.onViewRecycled(holder);
+    }
+
     class MediaViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView thumbnail;
         private final TextView type;
         private final TextView source;
         private final TextView address;
@@ -87,6 +102,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
 
         MediaViewHolder(@NonNull View view) {
             super(view);
+            thumbnail = view.findViewById(R.id.media_thumbnail);
             type = view.findViewById(R.id.media_type);
             source = view.findViewById(R.id.media_source);
             address = view.findViewById(R.id.media_address);
@@ -98,7 +114,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
                 XhsMediaItem item = items.get(position);
                 item.setSelected(!item.isSelected());
                 notifyItemChanged(position, SELECTION_PAYLOAD);
-                if (listener != null) listener.onSelectionChanged();
+                if (listener != null) listener.onSelectionChanged(item);
             });
             preview.setOnClickListener(v -> {
                 int position = getBindingAdapterPosition();
@@ -113,6 +129,7 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
         }
 
         void bind(XhsMediaItem item, int position) {
+            bindThumbnail(item);
             String format = item.getMediaType() == XhsMediaType.VIDEO
                     ? item.getTransport().getDisplayName() : item.getFileExtension();
             type.setText((position + 1) + " · " + item.getMediaType().getDisplayName()
@@ -127,6 +144,29 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             address.setText(item.getMediaUrl());
             preview.setText(item.getMediaType() == XhsMediaType.VIDEO ? "播放" : "预览");
             bindSelection(item);
+        }
+
+        /** 不探测视频流；HLS 卡片只使用页面明确提供的 poster。 */
+        private void bindThumbnail(XhsMediaItem item) {
+            Glide.with(thumbnail).clear(thumbnail);
+            String imageUrl = item.getMediaType() == XhsMediaType.IMAGE
+                    ? item.getMediaUrl() : item.getCoverUrl();
+            if (item.getMediaType() == XhsMediaType.PDF
+                    || imageUrl == null || imageUrl.isEmpty()
+                    || item.getMediaType() == XhsMediaType.VIDEO
+                    && (imageUrl.equals(item.getMediaUrl())
+                    || !(imageUrl.startsWith("https://") || imageUrl.startsWith("http://")))) {
+                thumbnail.setVisibility(View.GONE);
+                return;
+            }
+            thumbnail.setVisibility(View.VISIBLE);
+            thumbnail.setContentDescription(item.getMediaType() == XhsMediaType.VIDEO
+                    ? "页面提供的视频封面" : "图片缩略图");
+            Glide.with(thumbnail)
+                    .load(thumbnailModel(item, imageUrl))
+                    .override(480, 270)
+                    .centerCrop()
+                    .into(thumbnail);
         }
 
         void bindSelection(XhsMediaItem item) {
@@ -152,6 +192,27 @@ public class XhsMediaAdapter extends RecyclerView.Adapter<XhsMediaAdapter.MediaV
             TextView message = dialog.findViewById(android.R.id.message);
             if (message != null) message.setTextIsSelectable(true);
         }
+    }
+
+    /** 图片复用浏览会话请求头；封面按自己的域名取 Cookie，避免跨域发送视频 Cookie。 */
+    private GlideUrl thumbnailModel(XhsMediaItem item, String imageUrl) {
+        if (!item.requiresRuntimeSession()) return new GlideUrl(imageUrl);
+        LazyHeaders.Builder headers = new LazyHeaders.Builder();
+        if (imageUrl.equals(item.getMediaUrl())) {
+            try {
+                for (java.util.Map.Entry<String, String> header :
+                        RuntimeMediaSessionStore.getInstance().previewHeaders(item).entrySet()) {
+                    headers.setHeader(header.getKey(), header.getValue());
+                }
+            } catch (IllegalStateException error) {
+                Log.w(TAG, "thumbnail session expired, host=" + describeHost(imageUrl));
+            }
+        } else {
+            if (item.getSourcePageUrl() != null) headers.setHeader("Referer", item.getSourcePageUrl());
+            String cookie = CookieManager.getInstance().getCookie(imageUrl);
+            if (cookie != null && !cookie.isEmpty()) headers.setHeader("Cookie", cookie);
+        }
+        return new GlideUrl(imageUrl, headers.build());
     }
 
     private static String describeHost(String url) {

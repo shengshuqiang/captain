@@ -34,8 +34,13 @@ assert.equal(before.items.filter(x => x.kind === 'image').length, 3);
 assert.equal(img.loading, 'lazy');
 assert.deepEqual(before.playingUrls, [video.src, video.src]);
 const queries = imageQueries;
-video = media('https://fixture.example/main.mp4');
-assert.equal(run(true).items[0].url, video.src);
+video = media('https://fixture.example/main.mp4', {
+  poster: '/main-poster.jpg',
+  getAttribute: key => key === 'poster' ? '/main-poster.jpg' : ''
+});
+const mainVideo = run(true).items[0];
+assert.equal(mainVideo.url, video.src);
+assert.equal(mainVideo.poster, 'https://fixture.example/main-poster.jpg');
 assert.equal(imageQueries, queries, 'periodic player observation must not scan images');
 video = media('blob:https://fixture.example/test');
 assert.equal(run(true).items.length, 0, 'blob must not become a downloadable URL');

@@ -226,7 +226,7 @@ public class WebResourceMediaCollectorTest {
         Assert.assertEquals(2, result.getMediaCount());
         XhsMediaItem item = result.getMediaItems().get(0);
         Assert.assertEquals(XhsMediaType.VIDEO, item.getMediaType());
-        Assert.assertTrue(item.isSelected());
+        Assert.assertFalse(item.isSelected());
         XhsMediaItem hls = result.getMediaItems().get(1);
         Assert.assertEquals(XhsMediaTransport.HLS_STREAM, hls.getTransport());
         Assert.assertEquals("mp4", hls.getFileExtension());
@@ -315,15 +315,29 @@ public class WebResourceMediaCollectorTest {
 
         Assert.assertNotNull(result);
         Assert.assertEquals(200, result.getMediaCount());
-        Assert.assertEquals(2, result.getSelectedCount());
+        Assert.assertEquals(1, result.getSelectedCount());
         boolean hasHls = false;
         boolean hasContentImage = false;
         for (XhsMediaItem item : result.getSelectedItems()) {
             hasHls |= item.getTransport() == XhsMediaTransport.HLS_STREAM;
             hasContentImage |= "https://cdn.example.com/content.jpg".equals(item.getMediaUrl());
         }
-        Assert.assertTrue(hasHls);
+        Assert.assertFalse(hasHls);
         Assert.assertTrue(hasContentImage);
+    }
+
+    @Test
+    public void videoUsesExplicitPosterWithoutSelectingStream() {
+        WebResourceMediaCollector collector = new WebResourceMediaCollector(
+                "https://fixture.example/page", "manual_input");
+        collector.observeInteractiveRequest("https://media.example.com/stream.m3u8");
+        collector.observeDom("https://media.example.com/stream.m3u8", "video",
+                "application/vnd.apple.mpegurl", 640, 360, 640, 360,
+                true, true, true, "player", "https://media.example.com/poster.jpg");
+
+        XhsMediaItem video = collector.buildResult().getMediaItems().get(0);
+        Assert.assertEquals("https://media.example.com/poster.jpg", video.getCoverUrl());
+        Assert.assertFalse(video.isSelected());
     }
 
     @Test
