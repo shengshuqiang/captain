@@ -387,7 +387,9 @@ public class XhsPreviewActivity extends AppCompatActivity {
             View pageView = LayoutInflater.from(container.getContext())
                     .inflate(R.layout.item_xhs_preview_page, container, false);
             final XhsMediaItem mediaItem = mediaItems.get(position);
-            java.util.Map<String, String> headers = java.util.Collections.emptyMap();
+            java.util.Map<String, String> headers = new java.util.LinkedHashMap<>();
+            headers.put("User-Agent", XhsHttpClient.MOBILE_USER_AGENT);
+            if (mediaItem.getSourcePageUrl() != null) headers.put("Referer", mediaItem.getSourcePageUrl());
             if (mediaItem.requiresRuntimeSession()) {
                 try {
                     headers = RuntimeMediaSessionStore.getInstance().previewHeaders(mediaItem);

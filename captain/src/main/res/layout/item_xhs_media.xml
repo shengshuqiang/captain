@@ -14,7 +14,7 @@
     <ImageView
         android:id="@+id/media_thumbnail"
         android:layout_width="match_parent"
-        android:layout_height="156dp"
+        android:layout_height="112dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/bg_xhs_input"
         android:scaleType="centerCrop"

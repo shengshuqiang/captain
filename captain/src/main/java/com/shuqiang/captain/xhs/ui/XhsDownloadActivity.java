@@ -231,6 +231,14 @@ public class XhsDownloadActivity extends BasePermissionActivity {
             }
 
             @Override
+            public void onCategorySelectionChanged(java.util.List<XhsMediaItem> items) {
+                for (XhsMediaItem item : items) {
+                    selectionOverrides.put(item.getMediaUrl(), item.isSelected());
+                }
+                refreshSelectionSummary();
+            }
+
+            @Override
             public void onPreviewRequested(int position) {
                 openPreview(position);
             }
@@ -650,6 +658,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         if (result == null || (currentParseResult != null
                 && !TextUtils.equals(result.getPageUrl(), currentParseResult.getPageUrl()))) {
             selectionOverrides.clear();
+            mediaAdapter.resetExpansion();
         }
         discardCurrentRuntimeSession();
         currentParseResult = result;
@@ -677,6 +686,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
 
     private void applyParseResult(XhsParseResult parseResult) {
         selectionOverrides.clear();
+        mediaAdapter.resetExpansion();
         discardCurrentRuntimeSession();
         currentParseResult = parseResult;
         runtimeSessionHandedOff = false;
@@ -775,6 +785,7 @@ public class XhsDownloadActivity extends BasePermissionActivity {
         boolean controlsLocked = saving || browsing;
         inputView.setEnabled(!controlsLocked);
         selectAllButton.setEnabled(!controlsLocked);
+        mediaAdapter.setSelectionEnabled(!controlsLocked);
         mobileRetryButton.setEnabled(!controlsLocked && targetState != UiState.PARSING);
         manualWebViewButton.setEnabled(!controlsLocked && targetState != UiState.PARSING);
         switch (targetState) {
@@ -919,10 +930,10 @@ public class XhsDownloadActivity extends BasePermissionActivity {
                 || currentParseResult.getMediaItems().isEmpty()) {
             return;
         }
-        if (position < 0 || position >= currentParseResult.getMediaItems().size()) {
+        if (position < 0 || position >= mediaAdapter.getItems().size()) {
             position = 0;
         }
-        XhsMediaItem previewItem = currentParseResult.getMediaItems().get(position);
+        XhsMediaItem previewItem = mediaAdapter.getItems().get(position);
         if (previewItem.requiresSourceResolution() && !previewItem.requiresRuntimeSession()) {
             String message = previewItem.getMediaType() == XhsMediaType.VIDEO
                     ? "短效视频会在保存时取源；保存为 MP4 后可播放"

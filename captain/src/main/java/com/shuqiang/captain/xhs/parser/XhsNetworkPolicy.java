@@ -8,13 +8,17 @@ import java.util.Locale;
  * 页面抓取仍保留小红书直连判断，媒体下载放宽到通用 http/https 资源。
  */
 public final class XhsNetworkPolicy {
+    // 平台路由与短链跳转使用同一组域名，防止新增短链只在某一个入口生效。
+    static final String SHORT_LINK_COM_HOST = "xhslink.com";
+    static final String SHORT_LINK_CN_HOST = "xhslink.cn";
     private static final String[] PAGE_HOST_SUFFIXES = {
             "xiaohongshu.com",
-            "xhslink.com"
+            SHORT_LINK_COM_HOST,
+            SHORT_LINK_CN_HOST
     };
     private static final String[] MEDIA_HOST_SUFFIXES = {
             "xiaohongshu.com",
-            "xhslink.com",
+            SHORT_LINK_COM_HOST,
             "xhscdn.com",
             "xhscdn.net"
     };

@@ -9,6 +9,37 @@ import org.junit.Test;
 public class XhsHtmlParserTest {
 
     @Test
+    public void imageFileIdOverridesWatermarkedPreviewAndReachesDownloadRequest() throws Exception {
+        String key = "spectrum/1040g34o3268u28vbk46g5n6t5v11c68hj48vjhg";
+        String expected = "https://ci.xiaohongshu.com/" + key + "?imageView2/format/jpeg";
+        String page = "https://www.xiaohongshu.com/discovery/item/example";
+        String html = "<script>window.__INITIAL_STATE__={\"note\":{\"noteId\":\"example\","
+                + "\"imageList\":[{\"fileId\":\"" + key + "\",\"width\":3001,\"height\":3001,"
+                + "\"urlDefault\":\"https://sns-webpic-qc.xhscdn.com/preview.jpg\"}]}};</script>";
+        XhsParseResult result = XhsHtmlParser.parse(html, page, "test", "desktop");
+        com.shuqiang.captain.xhs.model.XhsMediaItem image = result.getMediaItems().get(0);
+        Assert.assertEquals(expected, image.getMediaUrl());
+        Assert.assertEquals(expected, image.getCoverUrl());
+        Assert.assertEquals(3001, image.getWidth());
+        Assert.assertEquals("jpg", image.getFileExtension());
+        com.shuqiang.captain.xhs.download.XhsDownloadItem download =
+                com.shuqiang.captain.xhs.download.XhsDownloadRequest.from(result).getItems().get(0);
+        Assert.assertEquals(expected, download.getDirectUrl());
+        Assert.assertEquals(page, download.getSourcePageUrl());
+    }
+
+    @Test
+    public void metaOnlyImageAlsoUsesOriginalTemplateSource() throws Exception {
+        String key = "spectrum/1040g34o3268u28vbk46g5n6t5v11c68hj48vjhg";
+        String url = "https://sns-webpic-qc.xhscdn.com/202610132000/hash/" + key + "!h5_1080jpg";
+        XhsParseResult result = XhsHtmlParser.parse("<meta property=\"og:image\" content=\"" + url + "\">",
+                "https://www.xiaohongshu.com/discovery/item/example", "test", "desktop");
+        Assert.assertEquals("https://ci.xiaohongshu.com/" + key + "?imageView2/format/jpeg",
+                result.getMediaItems().get(0).getMediaUrl());
+        Assert.assertEquals("jpg", result.getMediaItems().get(0).getFileExtension());
+    }
+
+    @Test
     public void parseVideoPageUsesOgVideo() throws Exception {
         String html = "<html><head>"
                 + "<meta name=\"og:url\" content=\"https://www.xiaohongshu.com/explore/6832d99d0000000021003156\"/>"

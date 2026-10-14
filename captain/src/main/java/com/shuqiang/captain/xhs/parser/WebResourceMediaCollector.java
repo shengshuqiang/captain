@@ -218,6 +218,8 @@ final class WebResourceMediaCollector {
         if (normalizedUrl == null) {
             return;
         }
+        // 展示图的不同模板归并到同一原图，避免重复保存同一张小红书图片。
+        if (mediaType == XhsMediaType.IMAGE) normalizedUrl = XhsImageUrlResolver.resolve(normalizedUrl);
         Candidate existing = candidates.get(normalizedUrl);
         if (existing == null) {
             if (candidates.size() >= MAX_CANDIDATE_COUNT) {
@@ -401,6 +403,7 @@ final class WebResourceMediaCollector {
 
     private static String guessExtension(String url, XhsMediaType mediaType,
                                          XhsMediaTransport transport) {
+        if (mediaType == XhsMediaType.IMAGE && XhsImageUrlResolver.isOriginalJpegUrl(url)) return "jpg";
         if (transport == XhsMediaTransport.HLS_STREAM) {
             return "mp4";
         }

@@ -55,7 +55,13 @@ public final class XhsInputParser {
 
     public static boolean isShortLink(String url) {
         String host = extractHost(url);
-        return "xhslink.com".equals(host) || (host != null && host.endsWith(".xhslink.com"));
+        return isHostOrSubdomain(host, XhsNetworkPolicy.SHORT_LINK_COM_HOST)
+                || isHostOrSubdomain(host, XhsNetworkPolicy.SHORT_LINK_CN_HOST);
+    }
+
+    /** 按完整域名边界识别短链，避免相似后缀误入平台解析。 */
+    private static boolean isHostOrSubdomain(String host, String domain) {
+        return domain.equals(host) || (host != null && host.endsWith("." + domain));
     }
 
     private static String normalizeUrl(String url) {

@@ -12,6 +12,24 @@ import org.junit.Test;
 public class WebResourceMediaCollectorTest {
 
     @Test
+    public void xhsPreviewVariantsMergeIntoOneOriginalImageBeforeSessionCapture() {
+        String path = "spectrum/1040g34o3268u28vbk46g5n6t5v11c68hj48vjhg";
+        String prefix = "https://sns-webpic-qc.xhscdn.com/202610132000/hash/" + path;
+        WebResourceMediaCollector collector = new WebResourceMediaCollector(
+                "https://www.xiaohongshu.com/discovery/item/example", "test");
+        collector.observeDom(prefix + "!h5_1080jpg", "image", 400, 400,
+                1080, 1080, true, true, true, "content");
+        collector.observeDom(prefix + "!preview", "image", 100, 100,
+                240, 240, true, true, true, "content");
+        XhsParseResult result = collector.buildResult();
+        Assert.assertEquals(1, result.getMediaCount());
+        Assert.assertEquals("https://ci.xiaohongshu.com/" + path + "?imageView2/format/jpeg",
+                result.getMediaItems().get(0).getMediaUrl());
+        Assert.assertEquals(1080, result.getMediaItems().get(0).getWidth());
+        Assert.assertEquals("jpg", result.getMediaItems().get(0).getFileExtension());
+    }
+
+    @Test
     public void lateMainVideoSurvivesFullImageListAndNavigationResetsPlayback() {
         WebResourceMediaCollector collector = new WebResourceMediaCollector("https://fixture.example/one", "test");
         for (int i = 0; i < 200; i++) {

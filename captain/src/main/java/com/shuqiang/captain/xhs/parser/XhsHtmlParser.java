@@ -2,6 +2,8 @@ package com.shuqiang.captain.xhs.parser;
 
 import com.shuqiang.captain.xhs.model.XhsMediaItem;
 import com.shuqiang.captain.xhs.model.XhsMediaType;
+import com.shuqiang.captain.xhs.model.XhsMediaTransport;
+import com.shuqiang.captain.xhs.model.XhsRequestMode;
 import com.shuqiang.captain.xhs.model.XhsParseError;
 import com.shuqiang.captain.xhs.model.XhsParseResult;
 
@@ -45,7 +47,7 @@ public final class XhsHtmlParser {
                 normalizeResourceUrl(extractMeta(document, "og:url")),
                 pageUrl
         );
-        String ogImage = normalizeResourceUrl(extractMeta(document, "og:image"));
+        String ogImage = XhsImageUrlResolver.resolve(normalizeResourceUrl(extractMeta(document, "og:image")));
         String ogVideo = normalizeResourceUrl(extractMeta(document, "og:video"));
         String ogTitle = cleanMetaTitle(extractMeta(document, "og:title"));
         int metaDuration = parseDuration(extractMeta(document, "og:videotime"));
@@ -89,7 +91,7 @@ public final class XhsHtmlParser {
             ));
             parseStrategy = noteObject != null ? requestStrategy + " · meta + initialState" : requestStrategy + " · meta";
         } else if (noteObject != null) {
-            mediaItems.addAll(extractImageItems(noteObject, noteId));
+            mediaItems.addAll(extractImageItems(noteObject, noteId, pageUrl));
             parseStrategy = requestStrategy + " · meta + initialState";
         }
         if (mediaItems.isEmpty() && ogImage != null && XhsNetworkPolicy.isAllowedMediaUrl(ogImage)) {
@@ -102,7 +104,7 @@ public final class XhsHtmlParser {
                     0,
                     0,
                     guessExtension(ogImage, XhsMediaType.IMAGE),
-                    true
+                    true, XhsMediaTransport.DIRECT_FILE, pageUrl, XhsRequestMode.AUTO, null, 0
             ));
         }
         if (mediaItems.isEmpty()) {
@@ -173,7 +175,8 @@ public final class XhsHtmlParser {
         return hasMedia && hasIdentity;
     }
 
-    private static ArrayList<XhsMediaItem> extractImageItems(JsonObject noteObject, String noteId) {
+    private static ArrayList<XhsMediaItem> extractImageItems(JsonObject noteObject, String noteId,
+                                                           String pageUrl) {
         ArrayList<XhsMediaItem> imageItems = new ArrayList<>();
         JsonArray imageList = getArray(noteObject, "imageList");
         if (imageList == null) {
@@ -184,7 +187,7 @@ public final class XhsHtmlParser {
             if (imageObject == null) {
                 continue;
             }
-            String imageUrl = pickImageUrl(imageObject);
+            String imageUrl = XhsImageUrlResolver.resolve(pickImageUrl(imageObject));
             if (imageUrl == null || !XhsNetworkPolicy.isAllowedMediaUrl(imageUrl)) {
                 continue;
             }
@@ -197,13 +200,15 @@ public final class XhsHtmlParser {
                     getInt(imageObject, "height"),
                     0,
                     guessExtension(imageUrl, XhsMediaType.IMAGE),
-                    true
+                    true, XhsMediaTransport.DIRECT_FILE, pageUrl, XhsRequestMode.AUTO, null, 0
             ));
         }
         return imageItems;
     }
 
     private static String pickImageUrl(JsonObject imageObject) {
+        String originalUrl = XhsImageUrlResolver.fromFileId(getString(imageObject, "fileId"));
+        if (originalUrl != null) return originalUrl;
         String directUrl = normalizeResourceUrl(firstNonEmpty(
                 getString(imageObject, "urlDefault"),
                 getString(imageObject, "urlPre"),
@@ -437,6 +442,7 @@ public final class XhsHtmlParser {
     }
 
     private static String guessExtension(String url, XhsMediaType mediaType) {
+        if (XhsImageUrlResolver.isOriginalJpegUrl(url)) return "jpg";
         if (url == null || url.isEmpty()) {
             return mediaType == XhsMediaType.VIDEO ? "mp4" : "jpg";
         }
