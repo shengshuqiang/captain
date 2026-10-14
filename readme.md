@@ -1,4 +1,6 @@
 # 命令行
+语音记事本：支持离线中文语音转文字、本机持久化、日期归档和飞书分享。首次使用及验证步骤见 [使用说明](docs/voice-notebook.md)。
+
 1. Android依赖信息：` ./gradlew captain:dependencies > log_dependencies.txt `
 2. Release 打包：
    ```bash

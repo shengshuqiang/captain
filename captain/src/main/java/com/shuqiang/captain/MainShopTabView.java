@@ -18,6 +18,7 @@ import com.captain.base.LLDWebViewActivity;
 import com.captain.base.WebViewActivity;
 import com.shuqiang.captain.chess.ui.ChessLobbyActivity;
 import com.shuqiang.captain.qr.QRActivity;
+import com.shuqiang.captain.voice.VoiceNotebookActivity;
 import com.shuqiang.captain.qr.scan.QrScanActivity;
 import com.shuqiang.captain.timer.TimerChannelActivity;
 import com.shuqiang.captain.xhs.ui.XhsDownloadActivity;
@@ -30,6 +31,8 @@ import captain.R;
 // 首页功能区升级为桌面式入口面板，支持拖拽换位和本地持久化。
 public class MainShopTabView extends FrameLayout {
     private static final int HOME_SPAN_COUNT = 3;
+    // Stable ID keeps the new entry compatible with saved launcher ordering.
+    private static final String VOICE_NOTEBOOK_FEATURE_ID = "voice_notebook";
     private static final String QR_SCAN_FEATURE_ID = "qr_scan";
     private static final String SUAN_SUAN_LE_ASSET_URL = "file:///android_asset/suansuanle/index.html";
 
@@ -107,6 +110,13 @@ public class MainShopTabView extends FrameLayout {
                 R.drawable.zxing,
                 false,
                 createIntentFactory(QRActivity.class)
+        ));
+        defaultFeatureSpecs.add(new HomeFeatureSpec(
+                VOICE_NOTEBOOK_FEATURE_ID,
+                "语音记事本",
+                R.drawable.ic_voice_note,
+                false,
+                createIntentFactory(VoiceNotebookActivity.class)
         ));
         defaultFeatureSpecs.add(new HomeFeatureSpec(
                 "ledongli",
