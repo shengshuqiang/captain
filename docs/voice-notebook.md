@@ -14,7 +14,7 @@
 
 ## 方案选择与边界
 
-- 固定依赖 `com.alphacephei:vosk-android:0.3.75@aar`、`net.java.dev.jna:jna:5.18.1@aar`，均采用官方 Android 示例的版本组合。
+- 固定依赖 `com.alphacephei:vosk-android:0.3.75@aar`、`net.java.dev.jna:jna:5.13.0@aar`。当前 AGP 4.1.3 / D8 2.1.86 在处理 JNA 5.18.1 的 `CallbackReference$DefaultCallbackProxy` 时发生空指针错误；仅将 JNA 调整为 5.13.0 后 Release 构建通过，保留现有工具链。构建通过不代表真实麦克风、模型推理或各 Android 版本兼容性已经验收。
 - 官方中文小模型约 **42 MB 下载大小**，Apache 2.0，定位 Android / Raspberry Pi。解压大小及运行内存高于下载体积，需预留空间；此实现限制解压总量 256 MiB、文件数量 4096。
 - 在此旧版 Android Java 项目中，Vosk 的 Maven AAR、流式 PCM 识别和轻量中文模型带来的接入成本较低。Sherpa-ONNX / SenseVoice 等是可评估的替代方案；本实现没有跨设备准确率/延迟对比数据，不声称 Vosk 是所有场景中的最佳识别器。
 - 模型不打入 APK，避免给每次应用安装/更新附加 42 MB 模型；首次识别前需要明确导入。这里没有联网自动下载逻辑，也不会自动退回云端识别。
