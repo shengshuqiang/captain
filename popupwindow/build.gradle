@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '29.0.3'
+    namespace 'com.example.popupwindow'
+    compileSdkVersion rootProject.ext.captainCompileSdk
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 31
@@ -20,5 +20,5 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':keyboard')
+    api project(':keyboard')
 }

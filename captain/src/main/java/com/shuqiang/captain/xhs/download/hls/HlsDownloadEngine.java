@@ -21,13 +21,15 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import okhttp3.Response;
 
 /**
  * VOD HLS 下载引擎：能力预检后串行拉取 TS，按需 AES-128 解密，再无损转封装并发布。
  */
 public final class HlsDownloadEngine implements MediaDownloadEngine {
     private static final String TAG = "HlsDownloadEngine";
+    // 密钥只走内存；初始化片段与媒体分片才允许复用播放缓存。
+    private static final int KEY_REQUEST_INDEX = -1;
+    private static final int INIT_REQUEST_INDEX = -2;
     private static final int MAX_SOURCE_REFRESH = 2;
     private static final int MAX_REQUEST_ATTEMPTS = 3;
     private static final int MAX_SEGMENT_BYTES = 64 * 1024 * 1024;
@@ -85,7 +87,7 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
         try {
             if (mediaPlaylist.hasMap()) {
                 initSegment = downloadBytesWithRetry(context, source,
-                        mediaPlaylist.getInitSegmentUrl(), -2);
+                        mediaPlaylist.getInitSegmentUrl(), INIT_REQUEST_INDEX);
             }
             // 短探针缺少关键帧或轨道元数据时可能误判；无明确 MP4 回退则下载完整流再校验。
             if (source.hasDirectFallback()) {
@@ -214,7 +216,7 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
         if (cached != null) {
             return cached;
         }
-        byte[] key = downloadBytesWithRetry(context, source, keySpec.getUrl(), -1);
+        byte[] key = downloadBytesWithRetry(context, source, keySpec.getUrl(), KEY_REQUEST_INDEX);
         if (key.length != 16) {
             Arrays.fill(key, (byte) 0);
             throw new IOException("AES-128 密钥长度无效");
@@ -228,16 +230,14 @@ public final class HlsDownloadEngine implements MediaDownloadEngine {
         IOException lastFailure = null;
         for (int attempt = 1; attempt <= MAX_REQUEST_ATTEMPTS; attempt++) {
             context.throwIfCancelled();
-            try (Response response = context.getHttpSession().execute(url, source.getUserAgent(),
-                    source.getReferer(), "*/*")) {
-                if (!response.isSuccessful() || response.body() == null) {
-                    throw new DownloadHttpSession.HttpStatusException(response.code());
-                }
-                long contentLength = response.body().contentLength();
+            // -1 是 AES 密钥，必须只存在于原有内存路径；初始化片段 -2 可以缓存。
+            try (com.shuqiang.captain.xhs.download.DownloadMediaInput response =
+                         context.openMedia(source, url, segmentIndex != KEY_REQUEST_INDEX)) {
+                long contentLength = response.length();
                 if (contentLength > MAX_SEGMENT_BYTES) {
                     throw new IOException("HLS 分片超过安全大小限制");
                 }
-                return readBounded(response.body().byteStream());
+                return readBounded(response.stream());
             } catch (DownloadHttpSession.HttpStatusException exception) {
                 if (exception.indicatesExpiredSource()) {
                     throw exception;

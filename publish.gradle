@@ -27,7 +27,6 @@ def developerAuthorId = mavenUsername
 def developerAuthorName = mavenUsername
 
 
-println("${mavenUsername} ${mavenPassword} - ${projectGroupId}:${projectArtifactId}:${projectVersionName}")
 println("${projectLicense} - ${projectLicenseUrl}")
 
 if (!mavenUsername || !mavenPassword || !projectGroupId || !projectArtifactId || !projectVersionName) {

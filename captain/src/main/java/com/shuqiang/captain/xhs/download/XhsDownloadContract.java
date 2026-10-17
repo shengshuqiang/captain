@@ -20,9 +20,15 @@ public final class XhsDownloadContract {
     }
 
     public static Intent buildStartIntent(Context context, XhsParseResult parseResult) {
+        return buildStartIntent(context, parseResult, null);
+    }
+
+    /** 资源预览可移交本次缓存；不带句柄的清单保存仍按原合同执行。 */
+    public static Intent buildStartIntent(Context context, XhsParseResult parseResult,
+                                          String playbackCacheSessionId) {
         Intent intent = new Intent(context, XhsDownloadService.class);
         intent.setAction(ACTION_START_DOWNLOAD);
-        intent.putExtra(EXTRA_DOWNLOAD_REQUEST, XhsDownloadRequest.from(parseResult));
+        intent.putExtra(EXTRA_DOWNLOAD_REQUEST, XhsDownloadRequest.from(parseResult, playbackCacheSessionId));
         return intent;
     }
 

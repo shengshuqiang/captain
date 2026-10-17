@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.SparseArray;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,22 +49,13 @@ import com.shuqiang.captain.xhs.model.XhsSaveItemResult;
 import com.shuqiang.captain.xhs.storage.XhsMediaSaver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import android.webkit.CookieManager;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
 import com.shuqiang.captain.xhs.parser.XhsHttpClient;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.shuqiang.captain.xhs.playback.CaptainVideoPlayer;
+import com.shuqiang.captain.xhs.playback.PreviewVideoPlayback;
 
 import captain.R;
 
@@ -78,7 +68,8 @@ public class XhsPreviewActivity extends AppCompatActivity {
     private static final String EXTRA_PARSE_RESULT = "extra_parse_result";
     private static final String EXTRA_POSITION = "extra_position";
 
-    private final SparseArray<ExoPlayer> videoPlayers = new SparseArray<>();
+    private PreviewVideoPlayback videoPlayback;
+    private boolean serviceSaveInProgress;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final XhsMediaSaver mediaSaver = new XhsMediaSaver();
@@ -93,8 +84,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
     private final BroadcastReceiver saveReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (saveInProgress && mediaItems != null && !mediaItems.isEmpty()
-                    && mediaItems.get(0).requiresRuntimeSession()) {
+            if (saveInProgress && serviceSaveInProgress) {
                 XhsSaveSummary summary = (XhsSaveSummary) intent.getSerializableExtra(
                         XhsDownloadContract.EXTRA_SAVE_SUMMARY);
                 if (summary != null) updateRuntimeSave(summary);
@@ -147,6 +137,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
             }
         });
 
+        videoPlayback = new PreviewVideoPlayback(this);
         previewPager.setAdapter(new PreviewPagerAdapter());
         previewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -175,7 +166,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         registerReceiver(saveReceiver, new IntentFilter(XhsDownloadContract.ACTION_PROGRESS));
-        if (saveInProgress) {
+        if (saveInProgress && serviceSaveInProgress) {
             XhsSaveSummary latest = XhsDownloadProgressStore.getLatest();
             if (latest != null) updateRuntimeSave(latest);
         }
@@ -204,47 +195,29 @@ public class XhsPreviewActivity extends AppCompatActivity {
     }
 
     private void pauseAllVideos() {
-        for (int i = 0; i < videoPlayers.size(); i++) videoPlayers.valueAt(i).pause();
+        if (videoPlayback != null) videoPlayback.pause();
     }
 
     private void stopAllVideos() {
-        for (int i = 0; i < videoPlayers.size(); i++) videoPlayers.valueAt(i).release();
-        videoPlayers.clear();
+        if (videoPlayback != null) videoPlayback.close();
     }
 
     private void resumeCurrentVideo(int activePosition) {
-        pauseAllVideos();
-        ExoPlayer player = videoPlayers.get(activePosition);
-        if (player != null) player.play();
+        if (videoPlayback != null) videoPlayback.select(activePosition);
     }
 
-    /** 每次媒体请求只读取该地址所属站点的浏览器 Cookie，HLS 分片也遵守同一规则。 */
-    private OkHttpDataSource.Factory previewDataSource(Map<String, String> sessionHeaders) {
-        final String userAgent = sessionHeaders.containsKey("User-Agent")
-                ? sessionHeaders.get("User-Agent") : XhsHttpClient.MOBILE_USER_AGENT;
-        Map<String, String> defaults = new HashMap<>(sessionHeaders);
-        defaults.remove("Cookie");
-        defaults.put("User-Agent", userAgent);
-        OkHttpClient client = new OkHttpClient.Builder().addNetworkInterceptor(chain -> {
-            Request request = chain.request();
-            String cookie = CookieManager.getInstance().getCookie(request.url().toString());
-            Request.Builder builder = request.newBuilder().removeHeader("Cookie");
-            if (cookie != null && !cookie.trim().isEmpty()) builder.header("Cookie", cookie);
-            return chain.proceed(builder.build());
-        }).build();
-        return new OkHttpDataSource.Factory(client).setDefaultRequestProperties(defaults);
+    @Override
+    public void onBackPressed() {
+        if (videoPlayback == null || !videoPlayback.exitFullscreen()) super.onBackPressed();
     }
 
     private void triggerSaveCurrentItem() {
         if (saveInProgress || mediaItems == null || mediaItems.isEmpty()) {
             return;
         }
-        if (mediaItems.get(previewPager.getCurrentItem()).requiresRuntimeSession()) {
-            if (runtimeSessionHandedOff) {
-                finish();
-            } else {
-                startRuntimeSave();
-            }
+        XhsMediaItem currentItem = mediaItems.get(previewPager.getCurrentItem());
+        if (currentItem.requiresRuntimeSession() && runtimeSessionHandedOff) {
+            finish();
             return;
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
@@ -255,10 +228,14 @@ public class XhsPreviewActivity extends AppCompatActivity {
                     REQUEST_WRITE_STORAGE);
             return;
         }
+        if (currentItem.getMediaType() == XhsMediaType.VIDEO || currentItem.requiresRuntimeSession()) {
+            startRuntimeSave();
+            return;
+        }
         saveCurrentItem();
     }
 
-    /** 预览页单项保存沿用前台服务与一次性会话，离开页面也能完成。 */
+    /** 预览视频沿用前台下载服务；浏览会话仍只移交一次，离开页面也能完成。 */
     private void startRuntimeSave() {
         XhsSaveSummary active = XhsDownloadProgressStore.getLatest();
         if (active != null && !active.isComplete()) {
@@ -272,14 +249,18 @@ public class XhsPreviewActivity extends AppCompatActivity {
         }
         XhsDownloadProgressStore.clear();
         saveInProgress = true;
+        serviceSaveInProgress = true;
         saveView.setEnabled(false);
         saveView.setText("正在保存所选资源…");
+        String cacheSessionId = videoPlayback == null ? null : videoPlayback.reserveSave(currentPosition);
         try {
-            Intent intent = XhsDownloadContract.buildStartIntent(this, parseResult);
+            Intent intent = XhsDownloadContract.buildStartIntent(this, parseResult, cacheSessionId);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent);
             else startService(intent);
-            runtimeSessionHandedOff = true;
+            runtimeSessionHandedOff = mediaItems.get(currentPosition).requiresRuntimeSession();
         } catch (RuntimeException exception) {
+            if (videoPlayback != null) videoPlayback.cancelSaveReservation(cacheSessionId);
+            serviceSaveInProgress = false;
             saveInProgress = false;
             saveView.setEnabled(true);
             saveView.setText(R.string.xhs_preview_save);
@@ -291,6 +272,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
     private void updateRuntimeSave(XhsSaveSummary summary) {
         saveView.setText(summary.getCurrentMessage());
         if (summary.isComplete()) {
+            serviceSaveInProgress = false;
             saveInProgress = false;
             saveView.setEnabled(true);
             saveView.setText(summary.hasAnySuccess() ? "已保存 · 返回清单" : "保存失败 · 返回清单重试");
@@ -370,7 +352,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                saveCurrentItem();
+                triggerSaveCurrentItem();
             } else {
                 Toast.makeText(this, R.string.xhs_preview_save_permission_denied, Toast.LENGTH_SHORT).show();
             }
@@ -408,7 +390,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
                 }
             }
             final ImageView imageView = pageView.findViewById(R.id.preview_image);
-            final PlayerView videoView = pageView.findViewById(R.id.preview_video);
+            final CaptainVideoPlayer videoView = pageView.findViewById(R.id.preview_video);
             final ProgressBar loadingView = pageView.findViewById(R.id.preview_loading);
             pageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -429,62 +411,23 @@ public class XhsPreviewActivity extends AppCompatActivity {
                 boolean hasPoster = poster != null
                         && (poster.startsWith("https://") || poster.startsWith("http://"))
                         && !poster.equals(mediaItem.getMediaUrl());
-                imageView.setVisibility(hasPoster ? View.VISIBLE : View.GONE);
+                // 全屏和普通视图各自绑定同一封面，避免搬移 View 或提前撤封面。
+                imageView.setVisibility(View.GONE);
+                GlideUrl posterSource = null;
                 if (hasPoster) {
                     LazyHeaders.Builder posterHeaders = new LazyHeaders.Builder();
                     if (mediaItem.getSourcePageUrl() != null) {
                         posterHeaders.setHeader("Referer", mediaItem.getSourcePageUrl());
                     }
-                    String posterCookie = CookieManager.getInstance().getCookie(poster);
-                    if (posterCookie != null && !posterCookie.isEmpty()) {
-                        posterHeaders.setHeader("Cookie", posterCookie);
-                    }
-                    Glide.with(imageView)
-                            .load(new GlideUrl(poster, posterHeaders.build()))
-                            .into(imageView);
+                    String cookie = CookieManager.getInstance().getCookie(poster);
+                    if (cookie != null && !cookie.isEmpty()) posterHeaders.setHeader("Cookie", cookie);
+                    posterSource = new GlideUrl(poster, posterHeaders.build());
                 }
-                OkHttpDataSource.Factory httpFactory = previewDataSource(headers);
-                DefaultDataSource.Factory sourceFactory = new DefaultDataSource.Factory(
-                        XhsPreviewActivity.this, httpFactory);
-                com.google.android.exoplayer2.MediaItem source =
-                        com.google.android.exoplayer2.MediaItem.fromUri(mediaItem.getMediaUrl());
-                ExoPlayer player = new ExoPlayer.Builder(XhsPreviewActivity.this).build();
-                videoView.setPlayer(player);
-                player.addListener(new Player.Listener() {
-                    @Override
-                    public void onPlaybackStateChanged(int state) {
-                        if (state == Player.STATE_READY) loadingView.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onRenderedFirstFrame() {
-                        imageView.setVisibility(View.GONE);
-                        loadingView.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onPlayerError(PlaybackException error) {
-                        loadingView.setVisibility(View.GONE);
-                        Log.w(TAG, "video preview failed, transport=" + mediaItem.getTransport()
-                                + ", host=" + Uri.parse(mediaItem.getMediaUrl()).getHost()
-                                + ", code=" + error.getErrorCodeName()
-                                + ", cause=" + (error.getCause() == null ? "unknown"
-                                : error.getCause().getClass().getSimpleName()));
-                        Toast.makeText(XhsPreviewActivity.this,
-                                "播放失败：" + error.getErrorCodeName() + "，可返回网页重试",
-                                Toast.LENGTH_SHORT).show();
-                    }
+                videoView.setPreviewPoster(posterSource);
+                videoPlayback.bind(position, videoView, mediaItem, headers, loadingView, () -> {
+                    imageView.setVisibility(View.GONE);
+                    loadingView.setVisibility(View.GONE);
                 });
-                if (mediaItem.getTransport() == XhsMediaTransport.HLS_STREAM) {
-                    player.setMediaSource(new HlsMediaSource.Factory(sourceFactory).createMediaSource(source));
-                } else {
-                    player.setMediaSource(new ProgressiveMediaSource.Factory(sourceFactory)
-                            .createMediaSource(source));
-                }
-                player.setRepeatMode(Player.REPEAT_MODE_ONE);
-                videoPlayers.put(position, player);
-                player.prepare();
-                if (position == previewPager.getCurrentItem()) player.play();
             } else if (mediaItem.getMediaType() == XhsMediaType.PDF) {
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -537,11 +480,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
 
         @Override
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            ExoPlayer player = videoPlayers.get(position);
-            if (player != null) {
-                player.release();
-                videoPlayers.remove(position);
-            }
+            if (videoPlayback != null) videoPlayback.remove(position);
             container.removeView((View) object);
         }
     }

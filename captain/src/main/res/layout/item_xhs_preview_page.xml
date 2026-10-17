@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <com.shuqiang.captain.xhs.playback.CaptainVideoPlayer
         android:id="@+id/preview_video"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -3,6 +3,7 @@ package com.shuqiang.captain.xhs.download;
 import android.content.Context;
 
 import com.shuqiang.captain.xhs.storage.XhsMediaPublisher;
+import com.shuqiang.captain.xhs.playback.cache.PreviewPlaybackCache;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,16 +24,26 @@ public final class MediaDownloadContext {
     private final XhsMediaPublisher publisher;
     private final File taskDirectory;
     private final ProgressListener progressListener;
+    private final PreviewPlaybackCache.ExportLease playbackCache;
+    private volatile DownloadMediaInput activeInput;
     private volatile boolean cancelled;
     private DownloadStage stage = DownloadStage.RESOLVING;
 
     MediaDownloadContext(Context context, String noteId, XhsDownloadItem item, int selectedIndex,
                          ProgressListener progressListener, DownloadHttpSession httpSession,
                          RuntimeMediaSession runtimeSession) throws IOException {
+        this(context, noteId, item, selectedIndex, progressListener, httpSession, runtimeSession, null);
+    }
+
+    MediaDownloadContext(Context context, String noteId, XhsDownloadItem item, int selectedIndex,
+                         ProgressListener progressListener, DownloadHttpSession httpSession,
+                         RuntimeMediaSession runtimeSession,
+                         PreviewPlaybackCache.ExportLease playbackCache) throws IOException {
         this.appContext = context.getApplicationContext();
         this.noteId = noteId;
         this.selectedIndex = selectedIndex;
         this.progressListener = progressListener;
+        this.playbackCache = playbackCache;
         this.httpSession = httpSession == null ? new DownloadHttpSession() : httpSession;
         this.sourceResolver = new MediaSourceResolver(this.httpSession, runtimeSession);
         this.publisher = new XhsMediaPublisher();
@@ -59,6 +70,24 @@ public final class MediaDownloadContext {
     public void cancel() {
         cancelled = true;
         httpSession.cancel();
+        DownloadMediaInput input = activeInput;
+        if (input != null) {
+            try { input.close(); } catch (IOException ignored) { }
+        }
+    }
+
+    /** 只有媒体字节可读写缓存，清单及密钥继续使用原来的内存 HTTP 路径。 */
+    public DownloadMediaInput openMedia(ResolvedMediaSource source, String url, boolean cacheable)
+            throws IOException {
+        throwIfCancelled();
+        DownloadMediaInput input = DownloadMediaInput.open(httpSession, source, url,
+                cacheable ? playbackCache : null);
+        activeInput = input;
+        if (cancelled) {
+            input.close();
+            throw new DownloadCancelledException();
+        }
+        return input;
     }
 
     public Context getAppContext() {
@@ -94,6 +123,11 @@ public final class MediaDownloadContext {
     }
 
     public void cleanUp() {
+        DownloadMediaInput input = activeInput;
+        activeInput = null;
+        if (input != null) {
+            try { input.close(); } catch (IOException ignored) { }
+        }
         deleteRecursively(taskDirectory);
         File parent = taskDirectory.getParentFile();
         if (parent != null) {

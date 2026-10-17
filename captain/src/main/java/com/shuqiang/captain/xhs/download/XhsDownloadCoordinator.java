@@ -2,6 +2,7 @@ package com.shuqiang.captain.xhs.download;
 
 import android.content.Context;
 import android.util.Log;
+import com.shuqiang.captain.xhs.playback.cache.PreviewPlaybackCache;
 
 import com.shuqiang.captain.xhs.model.XhsSaveItemResult;
 
@@ -20,12 +21,20 @@ public final class XhsDownloadCoordinator {
                                       int selectedIndex, MediaDownloadContext.ProgressListener listener,
                                       DownloadHttpSession httpSession, RuntimeMediaSession runtimeSession)
             throws IOException {
+        return download(context, noteId, item, selectedIndex, listener, httpSession, runtimeSession, null);
+    }
+
+    /** 缓存使用权归整个保存任务，单项清理只回收输出临时文件。 */
+    public XhsSaveItemResult download(Context context, String noteId, XhsDownloadItem item,
+                                      int selectedIndex, MediaDownloadContext.ProgressListener listener,
+                                      DownloadHttpSession httpSession, RuntimeMediaSession runtimeSession,
+                                      PreviewPlaybackCache.ExportLease playbackCache) throws IOException {
         MediaDownloadContext downloadContext = null;
         try {
             Log.i(TAG, "download started, itemId=" + item.getId() + ", transport=" + item.getTransport()
                     + ", quality=" + item.getQualityHeight());
             downloadContext = new MediaDownloadContext(context, noteId, item, selectedIndex, listener,
-                    httpSession, runtimeSession);
+                    httpSession, runtimeSession, playbackCache);
             currentContext = downloadContext;
             if (cancellationRequested) {
                 downloadContext.cancel();

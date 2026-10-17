@@ -11,8 +11,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Locale;
 
-import okhttp3.Response;
-
 /** 下载并校验单个直链文件，禁止将 HTML、JSON 或 HLS 清单伪装成媒体发布。 */
 public final class DirectMediaDownloadEngine implements MediaDownloadEngine {
     @Override
@@ -35,14 +33,11 @@ public final class DirectMediaDownloadEngine implements MediaDownloadEngine {
                                               ResolvedMediaSource source, boolean explicitFallback) throws IOException {
         context.transition(DownloadStage.DIRECT_DOWNLOAD, 0, 0);
         File target = context.file("direct.part");
-        try (Response response = context.getHttpSession().execute(source.getUrl(), source.getUserAgent(),
-                source.getReferer(), "*/*")) {
-            if (!response.isSuccessful() || response.body() == null) {
-                throw new DownloadHttpSession.HttpStatusException(response.code());
-            }
-            rejectTextResponse(response);
-            long totalBytes = response.body().contentLength();
-            try (InputStream input = response.body().byteStream();
+        try (DownloadMediaInput response = context.openMedia(source, source.getUrl(),
+                item.getMediaType() == XhsMediaType.VIDEO)) {
+            rejectTextResponse(response.contentType());
+            long totalBytes = response.length();
+            try (InputStream input = response.stream();
                  FileOutputStream output = new FileOutputStream(target, false)) {
                 copyWithProgress(context, input, output, totalBytes);
             }
@@ -82,8 +77,8 @@ public final class DirectMediaDownloadEngine implements MediaDownloadEngine {
         output.flush();
     }
 
-    private void rejectTextResponse(Response response) throws IOException {
-        String contentType = response.header("Content-Type", "").toLowerCase(Locale.US);
+    private void rejectTextResponse(String responseType) throws IOException {
+        String contentType = responseType.toLowerCase(Locale.US);
         if (contentType.contains("text/html") || contentType.contains("application/json")
                 || contentType.contains("mpegurl")) {
             throw new IOException("直链响应不是媒体文件");

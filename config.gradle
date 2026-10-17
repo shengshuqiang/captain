@@ -1,4 +1,6 @@
 ext {
+    // GSY/Media3 的 API 36 要求由所有 Android 模块共享。
+    captainCompileSdk = 36
     cfgs = [
             versionCode                   : 91,
             versionName                   : "v3.11.1",

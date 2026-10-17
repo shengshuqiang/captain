@@ -26,8 +26,8 @@ if (enablePublishPlugins) {
 version = "1.2.5"
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    namespace 'com.gigamole.navigationtabbar'
+    compileSdkVersion rootProject.ext.captainCompileSdk
 
     defaultConfig {
         minSdkVersion 14

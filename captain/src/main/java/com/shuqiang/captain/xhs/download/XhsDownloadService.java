@@ -17,6 +17,7 @@ import com.shuqiang.captain.MainActivity;
 import com.shuqiang.captain.xhs.model.XhsSaveItemResult;
 import com.shuqiang.captain.xhs.model.XhsSaveStatus;
 import com.shuqiang.captain.xhs.model.XhsSaveSummary;
+import com.shuqiang.captain.xhs.playback.cache.PreviewPlaybackCache;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,6 +60,7 @@ public class XhsDownloadService extends Service {
             return START_NOT_STICKY;
         }
         if (running) {
+            PreviewPlaybackCache.cancelExportReservation(downloadRequest.getPlaybackCacheSessionId());
             RuntimeMediaSessionStore.getInstance().discard(downloadRequest.getRuntimeSessionId());
             return START_NOT_STICKY;
         }
@@ -85,7 +87,17 @@ public class XhsDownloadService extends Service {
     private void handleDownload(final XhsDownloadRequest downloadRequest) {
         RuntimeMediaSession runtimeSession = null;
         DownloadHttpSession httpSession = null;
+        PreviewPlaybackCache.ExportLease playbackCache = null;
         try {
+            if (downloadRequest.getItems().size() == 1) {
+                playbackCache = PreviewPlaybackCache.claimExport(downloadRequest.getPlaybackCacheSessionId(),
+                        downloadRequest.getItems().get(0).getId());
+                if (playbackCache == null) {
+                    PreviewPlaybackCache.cancelExportReservation(downloadRequest.getPlaybackCacheSessionId());
+                }
+            } else {
+                PreviewPlaybackCache.cancelExportReservation(downloadRequest.getPlaybackCacheSessionId());
+            }
             if (downloadRequest.getRuntimeSessionId() != null) {
                 runtimeSession = RuntimeMediaSessionStore.getInstance().claim(
                         downloadRequest.getRuntimeSessionId());
@@ -96,9 +108,10 @@ public class XhsDownloadService extends Service {
                     return;
                 }
             }
-            httpSession = new DownloadHttpSession(runtimeSession);
-            handleDownloadItems(downloadRequest, httpSession, runtimeSession);
+            httpSession = new DownloadHttpSession(runtimeSession, playbackCache != null);
+            handleDownloadItems(downloadRequest, httpSession, runtimeSession, playbackCache);
         } finally {
+            if (playbackCache != null) playbackCache.close();
             if (httpSession != null) {
                 httpSession.close();
             }
@@ -110,7 +123,8 @@ public class XhsDownloadService extends Service {
 
     private void handleDownloadItems(final XhsDownloadRequest downloadRequest,
                                      final DownloadHttpSession httpSession,
-                                     final RuntimeMediaSession runtimeSession) {
+                                     final RuntimeMediaSession runtimeSession,
+                                     final PreviewPlaybackCache.ExportLease playbackCache) {
         List<XhsDownloadItem> selectedItems = downloadRequest.getItems();
         int totalCount = selectedItems.size();
         int processedCount = 0;
@@ -161,7 +175,8 @@ public class XhsDownloadService extends Service {
                             }
                         },
                         httpSession,
-                        runtimeSession);
+                        runtimeSession,
+                        playbackCache);
                 processedCount++;
                 if (saveItemResult.getSaveStatus() == XhsSaveStatus.SUCCESS) {
                     successCount++;

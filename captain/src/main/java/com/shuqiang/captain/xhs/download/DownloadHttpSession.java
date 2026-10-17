@@ -20,6 +20,11 @@ import okhttp3.Response;
  * 单个下载任务共享的内存 Cookie 会话；任务结束即释放，不落盘也不输出日志。
  */
 public final class DownloadHttpSession {
+    static final String ACCEPT_ANY = "*/*";
+    private static final String ACCEPT_LANGUAGE = "zh-CN,zh;q=0.9";
+    private static final String USER_AGENT_HEADER = "User-Agent";
+    private static final String REFERER_HEADER = "Referer";
+
     private final MemoryCookieJar cookieJar = new MemoryCookieJar();
     private final OkHttpClient client;
 
@@ -28,6 +33,11 @@ public final class DownloadHttpSession {
     }
 
     public DownloadHttpSession(final RuntimeMediaSession runtimeSession) {
+        this(runtimeSession, false);
+    }
+
+    /** 仅本次预览导出读取实时浏览 Cookie；旧清单下载仍使用原内存会话。 */
+    DownloadHttpSession(final RuntimeMediaSession runtimeSession, final boolean previewCookies) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(45, TimeUnit.SECONDS)
@@ -36,12 +46,14 @@ public final class DownloadHttpSession {
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .cookieJar(cookieJar);
-        if (runtimeSession != null) {
+        if (runtimeSession != null || previewCookies) {
             builder.addNetworkInterceptor(new Interceptor() {
                 @Override
                 public Response intercept(Chain chain) throws IOException {
                     Request request = chain.request();
-                    String capturedCookie = runtimeSession.getCookieHeader(request.url().toString());
+                    String capturedCookie = previewCookies
+                            ? android.webkit.CookieManager.getInstance().getCookie(request.url().toString())
+                            : runtimeSession.getCookieHeader(request.url().toString());
                     if (capturedCookie == null || capturedCookie.trim().isEmpty()) {
                         return chain.proceed(request);
                     }
@@ -56,14 +68,28 @@ public final class DownloadHttpSession {
     public Response execute(String url, String userAgent, String referer, String accept) throws IOException {
         Request.Builder request = new Request.Builder()
                 .url(url)
-                .header("User-Agent", userAgent)
-                .header("Accept", accept == null ? "*/*" : accept)
-                .header("Accept-Language", "zh-CN,zh;q=0.9")
+                .header(USER_AGENT_HEADER, userAgent)
+                .header("Accept", accept == null ? ACCEPT_ANY : accept)
+                .header("Accept-Language", ACCEPT_LANGUAGE)
                 .get();
         if (referer != null && !referer.trim().isEmpty()) {
-            request.header("Referer", referer);
+            request.header(REFERER_HEADER, referer);
         }
         return client.newCall(request.build()).execute();
+    }
+
+    /** Media3 补齐缓存时复用下载任务原来的 Cookie 会话和取消能力。 */
+    @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
+    androidx.media3.datasource.DataSource.Factory mediaDataSourceFactory(ResolvedMediaSource source) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(USER_AGENT_HEADER, source.getUserAgent());
+        headers.put("Accept", ACCEPT_ANY);
+        headers.put("Accept-Language", ACCEPT_LANGUAGE);
+        if (source.getReferer() != null && !source.getReferer().trim().isEmpty()) {
+            headers.put(REFERER_HEADER, source.getReferer());
+        }
+        return new androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(client)
+                .setDefaultRequestProperties(headers);
     }
 
     public String readText(String url, String userAgent, String referer, String accept) throws IOException {

@@ -27,7 +27,7 @@ public class XhsDownloadRequestTest {
                 "https://example.com/watch/1", "example", "video", null,
                 "test", "manual", items);
 
-        XhsDownloadRequest request = XhsDownloadRequest.from(parseResult);
+        XhsDownloadRequest request = XhsDownloadRequest.from(parseResult, "opaque-preview-session");
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try (ObjectOutputStream output = new ObjectOutputStream(bytes)) {
             output.writeObject(request);
@@ -39,6 +39,8 @@ public class XhsDownloadRequestTest {
         Assert.assertFalse(serialized.contains("master.m3u8"));
         Assert.assertTrue(serialized.contains("https://example.com/watch/1"));
         Assert.assertTrue(serialized.contains("generic_static_hls"));
+        Assert.assertEquals("opaque-preview-session", request.getPlaybackCacheSessionId());
+        Assert.assertTrue(serialized.contains("opaque-preview-session"));
     }
 
     @Test

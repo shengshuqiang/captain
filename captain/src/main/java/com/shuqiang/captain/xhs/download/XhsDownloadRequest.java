@@ -17,14 +17,22 @@ public final class XhsDownloadRequest implements Serializable {
     private final String noteId;
     private final ArrayList<XhsDownloadItem> items;
     private final String runtimeSessionId;
+    private final String playbackCacheSessionId;
 
-    private XhsDownloadRequest(String noteId, ArrayList<XhsDownloadItem> items, String runtimeSessionId) {
+    private XhsDownloadRequest(String noteId, ArrayList<XhsDownloadItem> items, String runtimeSessionId,
+                               String playbackCacheSessionId) {
         this.noteId = noteId;
         this.items = items;
         this.runtimeSessionId = runtimeSessionId;
+        this.playbackCacheSessionId = playbackCacheSessionId;
     }
 
     public static XhsDownloadRequest from(XhsParseResult parseResult) {
+        return from(parseResult, null);
+    }
+
+    /** 仅携带不含资源地址或凭证的缓存句柄，旧下载入口继续不带缓存。 */
+    public static XhsDownloadRequest from(XhsParseResult parseResult, String playbackCacheSessionId) {
         ArrayList<XhsDownloadItem> items = new ArrayList<>();
         String runtimeSessionId = null;
         if (parseResult != null) {
@@ -40,7 +48,7 @@ public final class XhsDownloadRequest implements Serializable {
             }
         }
         return new XhsDownloadRequest(parseResult == null ? "web" : parseResult.getNoteId(), items,
-                runtimeSessionId);
+                runtimeSessionId, playbackCacheSessionId);
     }
 
     public String getNoteId() {
@@ -54,4 +62,6 @@ public final class XhsDownloadRequest implements Serializable {
     public String getRuntimeSessionId() {
         return runtimeSessionId;
     }
+
+    public String getPlaybackCacheSessionId() { return playbackCacheSessionId; }
 }
