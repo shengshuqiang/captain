@@ -21,7 +21,8 @@
             android:background="@drawable/bg_toolbar_surface"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextColor="?attr/captainColorText" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -29,7 +30,7 @@
         android:id="@+id/content_stub"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#fff"
+        android:background="?attr/captainColorPage"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

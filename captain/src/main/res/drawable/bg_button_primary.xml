@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 主按钮背景 - 品牌渐变,含按下/禁用态 -->
+<!-- 语义填充及禁用/按压/焦点状态，不依赖额外阴影或描边。 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 禁用态:中性灰 -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <solid android:color="@color/captain_gray_300" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>
-    <!-- 按下态:更深品牌色 -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="@color/captain_brand_800" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>
-    <!-- 默认态:品牌渐变 -->
-    <item>
+    <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <gradient
-                android:angle="135"
-                android:startColor="@color/captain_brand_700"
-                android:endColor="@color/captain_brand_accent"
-                android:type="linear" />
+            <solid android:color="@color/captain_brand_800" />
+            <corners android:radius="@dimen/captain_radius_control" />
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle">
+            <solid android:color="@color/captain_brand_primary" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chess_lobby_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/captain_surface_page"
@@ -14,7 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_hero_gradient"
+            android:background="@color/captain_surface_page"
             android:orientation="vertical"
             android:padding="@dimen/captain_space_hero_inner">
 
@@ -81,7 +82,7 @@
                         style="@style/CaptainText.PageTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp" />
+                        android:layout_marginTop="@dimen/captain_space_inline" />
 
                 </LinearLayout>
 
@@ -98,7 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_block"
-                android:background="@drawable/bg_card"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
                 android:padding="@dimen/captain_space_card_inner">
 
@@ -115,23 +116,35 @@
                     android:orientation="horizontal">
 
                     <RadioButton
+                        android:minHeight="@dimen/captain_size_button_height"
+                        android:textSize="@dimen/captain_text_body"
                         android:id="@+id/radio_white"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:minWidth="0dp"
                         android:layout_height="wrap_content"
                         android:text="执白" />
 
                     <RadioButton
+                        android:minHeight="@dimen/captain_size_button_height"
+                        android:textSize="@dimen/captain_text_body"
                         android:id="@+id/radio_black"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:minWidth="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="0dp"
                         android:text="执黑" />
 
                     <RadioButton
+                        android:minHeight="@dimen/captain_size_button_height"
+                        android:textSize="@dimen/captain_text_body"
                         android:id="@+id/radio_random"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:minWidth="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="0dp"
                         android:text="随机" />
 
                 </RadioGroup>
@@ -142,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_block"
-                android:background="@drawable/bg_card"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
                 android:padding="@dimen/captain_space_card_inner">
 
@@ -156,7 +169,7 @@
                     style="@style/CaptainText.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/captain_space_inline"
                     android:text="@string/chess_host_desc" />
 
                 <Button
@@ -173,7 +186,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_block"
-                android:background="@drawable/bg_card"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
                 android:padding="@dimen/captain_space_card_inner">
 
@@ -187,7 +200,7 @@
                     style="@style/CaptainText.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/captain_space_inline"
                     android:text="@string/chess_join_desc" />
 
                 <Button
@@ -219,7 +232,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_block"
-                android:background="@drawable/bg_card"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
                 android:padding="@dimen/captain_space_card_inner">
 
@@ -233,7 +246,7 @@
                     style="@style/CaptainText.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/captain_space_inline"
                     android:text="@string/chess_history_desc" />
 
                 <Button
@@ -250,7 +263,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_block"
-                android:background="@drawable/bg_card"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
                 android:padding="@dimen/captain_space_card_inner">
 
@@ -265,7 +278,7 @@
                     style="@style/CaptainText.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="@dimen/captain_space_inline" />
 
                 <Button
                     android:id="@+id/resume_game_button"

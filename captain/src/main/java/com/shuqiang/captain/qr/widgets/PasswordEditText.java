@@ -4,7 +4,9 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import androidx.core.content.ContextCompat;
+
+import captain.R;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -52,7 +54,7 @@ public class PasswordEditText extends AppCompatEditText {
     public PasswordEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        paint = buildPaint(Color.BLACK);
+        paint = buildPaint(ContextCompat.getColor(context, R.color.captain_text_primary));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setTextSize(getTextSize());
@@ -60,11 +62,11 @@ public class PasswordEditText extends AppCompatEditText {
         drawWidth = (int) (getTextSize() * 2);
         drawSpaceWidth = (int) (getTextSize() / 3);
 
-        cursorPaint = buildPaint(Color.GRAY);
+        cursorPaint = buildPaint(ContextCompat.getColor(context, R.color.captain_brand_900));
         cursorPaint.setStyle(Paint.Style.STROKE);
         cursorPaint.setStrokeWidth(Utils.dip2px(context, 2));
 
-        backgroundPaint = buildPaint(Color.LTGRAY);
+        backgroundPaint = buildPaint(ContextCompat.getColor(context, R.color.captain_border_strong));
         backgroundPaint.setStyle(Paint.Style.STROKE);
         backgroundPaint.setStrokeWidth(Utils.dip2px(context, 2));
 
@@ -106,7 +108,13 @@ public class PasswordEditText extends AppCompatEditText {
         int paddingBottom = getPaddingBottom();
 
         int width = getMeasuredWidth();
-        int height = drawWidth + paddingTop + paddingBottom;
+        // 六格是既有密码呈现契约；只约束当前自绘几何，避免字体放大后超出可见宽度。
+        int availableWidth = Math.max(0, width - paddingLeft - paddingRight);
+        drawSpaceWidth = Math.min((int) (getTextSize() / 3), availableWidth / (drawTxtCount * 4));
+        drawWidth = Math.min((int) (getTextSize() * 2),
+                Math.max(0, (availableWidth - (drawTxtCount - 1) * drawSpaceWidth) / drawTxtCount));
+        int height = Math.max(drawWidth, getResources().getDimensionPixelSize(
+                R.dimen.captain_size_button_height)) + paddingTop + paddingBottom;
 
         int drawSumWidth = drawTxtCount * drawWidth + (drawTxtCount - 1) * drawSpaceWidth;
         drawX = paddingLeft + (width - paddingLeft - paddingRight - drawSumWidth) / 2;

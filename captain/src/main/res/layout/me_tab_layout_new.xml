@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/captain_surface_page"
@@ -24,7 +23,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_card_large"
             android:padding="@dimen/captain_space_card_inner">
 
             <ImageView
@@ -51,8 +49,11 @@
                 android:paddingEnd="@dimen/captain_space_inline"
                 android:paddingTop="@dimen/captain_space_badge_padding"
                 android:paddingBottom="@dimen/captain_space_badge_padding"
-                android:background="@drawable/bg_badge"
-                android:textColor="@color/captain_text_on_brand" />
+                android:background="@drawable/bg_button_secondary"
+                android:minHeight="48dp"
+                android:gravity="center"
+                android:focusable="true"
+                android:textColor="@color/captain_brand_900" />
 
         </LinearLayout>
 
@@ -64,7 +65,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/captain_space_block"
             android:orientation="vertical"
-            android:background="@drawable/bg_card"
             android:padding="@dimen/captain_space_card_inner">
 
             <TextView
@@ -85,6 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/captain_space_block"
+            android:nestedScrollingEnabled="false"
             android:orientation="vertical" />
 
     </LinearLayout>

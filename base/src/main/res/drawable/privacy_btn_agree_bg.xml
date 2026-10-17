@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 保留隐私授权动作，仅统一操作视觉与状态。 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/permission_btn_pressed_bg" android:state_pressed="true" />
-    <item android:drawable="@drawable/permission_btn_default_bg"/>
+    <item android:state_enabled="false">
+        <shape>
+            <solid android:color="?attr/captainColorDisabled" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape>
+            <solid android:color="?attr/captainColorPrimaryPressed" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape>
+            <solid android:color="?attr/captainColorPrimaryPressed" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item >
+        <shape>
+            <solid android:color="?attr/captainColorPrimary" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
 </selector>

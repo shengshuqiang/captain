@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@drawable/bg_card"
+    android:background="?attr/selectableItemBackground"
+    android:focusable="true"
     android:padding="@dimen/captain_space_card_inner"
     android:gravity="center_vertical"
     android:minHeight="@dimen/captain_size_list_item_height">
@@ -20,7 +21,7 @@
     <ImageView
         android:layout_width="@dimen/captain_size_icon_small"
         android:layout_height="@dimen/captain_size_icon_small"
-        android:contentDescription="@string/feature_icon"
+        android:importantForAccessibility="no"
         android:src="@drawable/right_arrow_forward"
         android:tint="@color/captain_text_tertiary" />
 

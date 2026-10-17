@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 次按钮背景 - 白底品牌描边,含按下/禁用态 -->
+<!-- 语义填充及禁用/按压/焦点状态，不依赖额外阴影或描边。 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 禁用态:中性灰底 + 灰描边 -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <solid android:color="@color/captain_gray_100" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/captain_gray_400" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>
-    <!-- 按下态:浅品牌底 -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/captain_brand_100" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/captain_brand_500" />
+            <solid android:color="@color/captain_brand_200" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>
-    <!-- 默认态:白底 + 品牌描边 -->
-    <item>
+    <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/captain_surface_card" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/captain_brand_500" />
+            <solid android:color="@color/captain_brand_200" />
+            <corners android:radius="@dimen/captain_radius_control" />
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle">
+            <solid android:color="@color/captain_brand_100" />
             <corners android:radius="@dimen/captain_radius_control" />
         </shape>
     </item>

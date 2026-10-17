@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#FFFFFF" />
-        </shape>
-    </item>
-    <item android:gravity="bottom">
-        <shape android:shape="rectangle">
-            <size android:height="1dp" />
-            <solid android:color="#EDE7E3" />
-        </shape>
-    </item>
-</layer-list>
+<!-- 标题栏靠表面色分组，不额外叠加分隔描边。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="?attr/captainColorSurface" />
+</shape>

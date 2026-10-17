@@ -1,6 +1,7 @@
 package com.captain.base;
 
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
@@ -39,7 +40,15 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void initToolbar(View appBarLayout, Toolbar toolbar) {
         setSupportActionBar(toolbar);
         toolbar.setBackgroundResource(R.drawable.bg_toolbar_surface);
-        toolbar.setTitleTextColor(0xFF241C2D);
+        // 标题与按钮共享宿主文字语义，不在base模块复制品牌色板。
+        TypedValue titleColor = new TypedValue();
+        if (getTheme().resolveAttribute(R.attr.captainColorText, titleColor, true)) {
+            toolbar.setTitleTextColor(titleColor.data);
+        }
+        TypedValue titleAppearance = new TypedValue();
+        if (getTheme().resolveAttribute(R.attr.captainToolbarTitleAppearance, titleAppearance, true)) {
+            toolbar.setTitleTextAppearance(this, titleAppearance.resourceId);
+        }
         toolbar.setNavigationIcon(R.drawable.ic_toolbar_back);
         toolbar.setNavigationContentDescription(R.string.toolbar_navigate_up);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());

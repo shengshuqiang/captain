@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/captain_surface_page"
     tools:context="com.shuqiang.captain.qr.QRActivity">
 
     <include
@@ -15,18 +16,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="50dp">
+        android:layout_margin="@dimen/captain_space_page_horizontal">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/scan"
+            android:contentDescription="扫码"
+            app:backgroundTint="@color/captain_brand_primary"
+            app:tint="@color/captain_text_primary"
+            app:elevation="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
+            android:layout_gravity="start|center_vertical"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_qr_code"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add"
+            android:contentDescription="新增账号"
+            app:backgroundTint="@color/captain_brand_primary"
+            app:tint="@color/captain_text_primary"
+            app:elevation="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
@@ -35,9 +44,13 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/produce"
+            android:contentDescription="生成二维码"
+            app:backgroundTint="@color/captain_brand_primary"
+            app:tint="@color/captain_text_primary"
+            app:elevation="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
+            android:layout_gravity="end|center_vertical"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_file_save"/>
 

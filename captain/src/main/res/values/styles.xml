@@ -3,23 +3,77 @@
     <!-- ============================================ -->
     <!-- 基础主题 -->
     <!-- ============================================ -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- 共用主题项只维护一次；AppTheme各API版本仅调整系统栏。 -->
+    <style name="CaptainBaseTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/captain_brand_primary</item>
         <item name="colorPrimaryDark">@color/captain_brand_primary</item>
-        <item name="colorAccent">@color/captain_brand_accent</item>
-        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorAccent">@color/captain_brand_900</item>
+        <item name="colorControlNormal">@color/captain_text_secondary</item>
+        <item name="colorControlActivated">@color/captain_brand_900</item>
+        <item name="android:colorAccent">@color/captain_brand_900</item>
+        <item name="android:colorControlHighlight">@color/captain_brand_200</item>
+        <item name="android:colorBackground">@color/captain_surface_page</item>
+        <item name="android:textColorPrimary">@color/captain_text_primary</item>
+        <item name="android:textColorSecondary">@color/captain_text_secondary</item>
+        <item name="android:textViewStyle">@style/CaptainNativeTextView</item>
+        <item name="android:textAppearanceLarge">@style/CaptainNativeText.Large</item>
+        <item name="android:textAppearanceMedium">@style/CaptainNativeText.Body</item>
+        <item name="android:textAppearanceSmall">@style/CaptainNativeText.Small</item>
+        <item name="android:textAppearanceListItem">@style/CaptainNativeText.Large</item>
+        <item name="android:textAppearanceListItemSmall">@style/CaptainNativeText.Large</item>
+        <item name="android:textAppearanceListItemSecondary">@style/CaptainNativeText.Small</item>
+        <!-- API21-22没有深色状态栏图标，默认深底白图标。 -->
+        <item name="android:statusBarColor">@color/captain_text_primary</item>
+        <!-- windowLightNavigationBar主题属性从API27起可用，旧版默认深底白图标。 -->
+        <item name="android:navigationBarColor">@color/captain_text_primary</item>
+        <item name="captainToolbarTitleAppearance">@style/CaptainToolbarTitle</item>
+        <item name="captainColorPage">@color/captain_surface_page</item>
+        <item name="captainColorSurface">@color/captain_surface_card</item>
+        <item name="captainColorText">@color/captain_text_primary</item>
+        <item name="captainColorTextSecondary">@color/captain_text_secondary</item>
+        <item name="captainColorPrimary">@color/captain_brand_primary</item>
+        <item name="captainColorOnPrimary">@color/captain_text_on_brand</item>
+        <item name="captainColorPrimaryText">@color/captain_brand_900</item>
+        <item name="captainColorPrimaryPressed">@color/captain_brand_800</item>
+        <item name="captainColorContainer">@color/captain_brand_100</item>
+        <item name="captainColorDisabled">@color/captain_gray_300</item>
         <item name="android:windowBackground">@color/captain_surface_page</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme" parent="CaptainBaseTheme" />
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light"/>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <!-- 平台TextView/Preference/ZXing列表共享字号；只设appearance，显式页面样式仍可覆盖。 -->
+    <style name="CaptainNativeTextView" parent="@android:style/Widget.TextView">
+        <item name="android:textAppearance">@style/CaptainNativeText.Body</item>
+    </style>
+
+    <style name="CaptainNativeText.Large" parent="@android:style/TextAppearance.Large">
+        <item name="android:textSize">@dimen/captain_text_card_title</item>
+        <item name="android:textColor">?attr/captainColorText</item>
+    </style>
+
+    <style name="CaptainNativeText.Body" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">@dimen/captain_text_body</item>
+        <item name="android:textColor">?attr/captainColorText</item>
+    </style>
+
+    <style name="CaptainNativeText.Small" parent="@android:style/TextAppearance.Small">
+        <item name="android:textSize">@dimen/captain_text_caption</item>
+        <item name="android:textColor">?attr/captainColorTextSecondary</item>
+    </style>
 
     <!-- ============================================ -->
     <!-- 按钮样式(button 类) -->
     <!-- P2-12: 背景走 selector(见 bg_button_*),文字态由 color selector 承载 -->
     <!-- ============================================ -->
     <style name="CaptainButton">
-        <item name="android:textSize">@dimen/captain_text_card_title</item>
+        <item name="android:textSize">@dimen/captain_text_body</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:paddingTop">@dimen/captain_space_inline</item>
+        <item name="android:paddingBottom">@dimen/captain_space_inline</item>
         <item name="android:minHeight">@dimen/captain_size_button_height</item>
         <item name="android:paddingStart">@dimen/captain_space_card_inner</item>
         <item name="android:paddingEnd">@dimen/captain_space_card_inner</item>
@@ -36,6 +90,29 @@
     <style name="CaptainButton.Secondary" parent="CaptainButton">
         <item name="android:background">@drawable/bg_button_secondary</item>
         <item name="android:textColor">@color/captain_button_secondary_text</item>
+    </style>
+
+    <!-- 文本操作保留48dp触控区，用系统状态层反馈而不加卡片描边。 -->
+    <style name="CaptainButton.Text" parent="CaptainButton">
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:textColor">@color/captain_button_secondary_text</item>
+    </style>
+
+    <!-- 输入框沿用原生编辑行为，仅统一字号、触控高度与主题色。 -->
+    <style name="CaptainInput" parent="Widget.AppCompat.EditText">
+        <item name="android:textSize">@dimen/captain_text_body</item>
+        <item name="android:textColor">@color/captain_text_primary</item>
+        <item name="android:textColorHint">@color/captain_text_secondary</item>
+        <item name="android:minHeight">@dimen/captain_size_button_height</item>
+        <item name="android:padding">@dimen/captain_space_inline</item>
+        <item name="android:gravity">top|start</item>
+    </style>
+
+    <!-- 标题栏由base容器消费，同步页面标题字号。 -->
+    <style name="CaptainToolbarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">@dimen/captain_text_page_title</item>
+        <item name="android:textColor">@color/captain_text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <!-- ============================================ -->

@@ -3,7 +3,7 @@ package com.shuqiang.captain.qr.widgets;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
-import android.graphics.Color;
+import androidx.core.content.ContextCompat;
 import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -49,7 +49,7 @@ public class MorseItemDetailInfoView extends LinearLayout {
 
     private void init(Context context) {
         setOrientation(VERTICAL);
-        setBackgroundColor(Color.WHITE);
+        setBackgroundColor(ContextCompat.getColor(context, R.color.captain_surface_page));
         setClickable(true);
         inflate(context, R.layout.normal_item_detail_info_view, this);
 

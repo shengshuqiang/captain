@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chess_onboarding_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/captain_surface_page"
@@ -48,7 +49,7 @@
                 style="@style/CaptainText.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/captain_space_inline"
                 android:text="@string/chess_avatar_preview" />
 
             <TextView
@@ -64,12 +65,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/captain_space_inline"
-                android:background="@drawable/bg_button_secondary"
+                style="@style/CaptainInput"
                 android:hint="@string/chess_username_hint"
                 android:maxLines="1"
-                android:padding="14dp"
+                android:padding="@dimen/captain_space_card_inner"
                 android:textColor="@color/captain_text_primary"
-                android:textColorHint="@color/captain_text_tertiary" />
+                android:textColorHint="@color/captain_text_secondary" />
 
         </LinearLayout>
 

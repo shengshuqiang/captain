@@ -4,9 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 
 import androidx.core.content.ContextCompat;
 
@@ -39,21 +37,12 @@ final class TimerControlPainter {
     }
 
     void drawGlassButton(Canvas canvas, RectF bounds, boolean day, int icon) {
-        float radius = bounds.width() / 2f;
+        // 只统一外围控件；沿用原触控边界、昼夜模式及自绘图标。
         paint.setStyle(Paint.Style.FILL);
-        paint.setShader(new RadialGradient(bounds.centerX() - radius * 0.35f,
-                bounds.centerY() - radius * 0.45f,
-                radius * 1.35f,
-                color(day ? R.color.captain_timer_button_glass_core_day : R.color.captain_timer_button_glass_core_night),
-                color(day ? R.color.captain_timer_button_glass_edge_day : R.color.captain_timer_button_glass_edge_night),
-                Shader.TileMode.CLAMP));
-        canvas.drawOval(bounds, paint);
-        paint.setShader(null);
-        strokePaint.setStrokeWidth(dp(1.2f));
-        strokePaint.setColor(color(day ? R.color.captain_timer_button_stroke_day : R.color.captain_timer_button_stroke_night));
-        canvas.drawOval(bounds, strokePaint);
-        paint.setColor(color(day ? R.color.captain_timer_button_inner_shadow_day : R.color.captain_timer_button_inner_shadow_night));
-        canvas.drawCircle(bounds.centerX(), bounds.centerY() + dp(1.5f), radius * 0.72f, paint);
+        paint.setColor(color(day ? R.color.captain_brand_100
+                : R.color.captain_timer_button_glass_core_night));
+        float corner = context.getResources().getDimension(R.dimen.captain_radius_control);
+        canvas.drawRoundRect(bounds, corner, corner, paint);
         drawIcon(canvas, bounds, day, icon);
     }
 

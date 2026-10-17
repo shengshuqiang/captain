@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Capture overlay roles remain feature-local; shared controls use Captain styles. -->
+    <color name="captain_voice_scrim">#B3000000</color>
+    <dimen name="voice_record_height">64dp</dimen>
+    <dimen name="voice_cancel_distance">72dp</dimen>
+    <dimen name="voice_cancel_hysteresis">8dp</dimen>
+    <string name="voice_draft_title">当前笔记</string>
+    <string name="voice_draft_hint">写下想法，或按住下方按钮说话</string>
+    <string name="voice_save_contract">手输文字自动保存 · 语音确认后保存</string>
+    <string name="voice_hold_to_record">按住说话</string>
+    <string name="voice_hold_accessibility">按住说话，松开检查文字，上滑取消</string>
+    <string name="voice_hold_hint">按住开始说话，松开后检查文字</string>
+    <string name="voice_model_download">下载模型</string>
+    <string name="voice_model_import">导入模型</string>
+    <string name="voice_finish_note">完成 / 新建</string>
+    <string name="voice_retry_read">重试读取</string>
+    <string name="voice_archive_title">按日期归档</string>
+    <string name="voice_archive_hint">点击笔记编辑、分享或删除</string>
+    <string name="voice_archive_empty">还没有笔记，记下今天的第一个想法吧。</string>
+    <string name="voice_capture_recording">正在聆听</string>
+    <string name="voice_capture_stopping">正在整理最后一句</string>
+    <string name="voice_capture_review">检查识别文字</string>
+    <string name="voice_capture_discard">松开取消</string>
+    <string name="voice_capture_slide_hint">松开转文字 · 上滑取消</string>
+    <string name="voice_capture_listening_hint">请开始说话…</string>
+    <string name="voice_capture_empty_hint">没有识别到文字，可手动补充或取消</string>
+    <string name="voice_capture_stop">停止并检查</string>
+    <string name="voice_capture_cancel">取消</string>
+    <string name="voice_capture_confirm">保存文字</string>
+    <string name="voice_permission_hint">录音需要麦克风权限。授权后请重新按住说话，仍可手动输入。</string>
+</resources>

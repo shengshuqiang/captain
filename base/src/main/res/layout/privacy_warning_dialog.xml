@@ -14,9 +14,9 @@
         android:layout_marginTop="24dp"
         android:text="船长需要您同意本隐私政策"
         android:paddingHorizontal="20dp"
-        android:textSize="17sp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="#E6000000"/>
+        android:textColor="?attr/captainColorText"/>
 
     <TextView
         android:id="@+id/sub_title"
@@ -26,8 +26,8 @@
         android:gravity="center"
         android:text="如果您不同意《隐私政策》，只能浏览部分内容"
         android:textSize="14sp"
-        android:textColor="#B8000000"
-        android:textColorLink="#0FB12C"/>
+        android:textColor="?attr/captainColorTextSecondary"
+        android:textColorLink="?attr/captainColorPrimaryText"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,27 +41,31 @@
             android:id="@+id/disagree"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="39dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:paddingVertical="12dp"
             android:gravity="center"
             android:text="仍不同意"
             android:paddingHorizontal="6dp"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginRight="9dp"
-            android:textColor="#E6000000"
+            android:textColor="?attr/captainColorText"
             android:background="@drawable/privacy_btn_disagree" />
 
         <TextView
             android:id="@+id/agree"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="39dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:paddingVertical="12dp"
             android:gravity="center"
             android:text="同意并继续"
             android:paddingHorizontal="6dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/captainColorOnPrimary"
             android:background="@drawable/privacy_btn_agree_bg"/>
 
     </LinearLayout>

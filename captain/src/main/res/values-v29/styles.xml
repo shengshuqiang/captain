@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native Activities also remain light; automatic Force Dark is available from API 29. -->
+    <style name="AppTheme" parent="CaptainBaseTheme">
+        <item name="android:statusBarColor">@color/captain_surface_toolbar</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/captain_surface_page</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

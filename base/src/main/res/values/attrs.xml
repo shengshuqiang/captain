@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 共享容器只消费主题角色；品牌色唯一来源由宿主 AppTheme 提供。 -->
+    <attr name="captainColorPage" format="color" />
+    <attr name="captainColorSurface" format="color" />
+    <attr name="captainColorText" format="color" />
+    <attr name="captainColorTextSecondary" format="color" />
+    <attr name="captainColorPrimary" format="color" />
+    <attr name="captainColorOnPrimary" format="color" />
+    <attr name="captainColorPrimaryText" format="color" />
+    <attr name="captainColorPrimaryPressed" format="color" />
+    <attr name="captainColorContainer" format="color" />
+    <attr name="captainColorDisabled" format="color" />
+    <attr name="captainToolbarTitleAppearance" format="reference" />
+</resources>

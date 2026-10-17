@@ -47,10 +47,12 @@ public class NormalItemView extends LinearLayout {
         viewConfiguration = ViewConfiguration.get(context);
         scroller = new Scroller(context);
 
-        setPadding(50, 15, 50, 15);
+        // 列表行跟随共享间距与内容高度，避免原始像素在高密度/大字体下截断。
+        int innerSpace = getResources().getDimensionPixelSize(R.dimen.captain_space_card_inner);
+        setPadding(innerSpace, innerSpace, innerSpace, innerSpace);
         setOrientation(HORIZONTAL);
         setGravity(Gravity.CENTER_VERTICAL);
-        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         inflate(context, R.layout.normal_item_view, this);
 
         titleTxtView = (TextView) findViewById(R.id.title);

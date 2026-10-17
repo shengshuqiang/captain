@@ -1,4 +1,5 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/captain_xhs_brand_primary" />
-    <corners android:radius="@dimen/captain_radius_control" />
-</shape>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 与全局按钮共用品牌色、禁用及按压状态，避免功能页出现独立色系。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_button_primary" />
+</selector>

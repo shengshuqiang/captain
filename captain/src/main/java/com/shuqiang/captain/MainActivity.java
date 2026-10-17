@@ -44,6 +44,14 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        // 字体或方向改变后，按 ViewPager 已恢复的页面同步标题，不重置 Tab 状态。
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        updateShellTitle(viewPager.getCurrentItem());
+    }
+
+    @Override
     protected int getContentViewResource() {
         return R.layout.activity_content;
     }

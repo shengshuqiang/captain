@@ -1,7 +1,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@android:color/white" />
+    <solid android:color="@color/captain_brand_100" />
     <corners android:radius="@dimen/captain_radius_card" />
     <stroke
         android:width="2dp"
-        android:color="@color/captain_xhs_brand_primary" />
+        android:color="@color/captain_brand_900" />
 </shape>

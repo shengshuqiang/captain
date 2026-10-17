@@ -22,7 +22,8 @@
             android:background="@drawable/bg_toolbar_surface"
             android:paddingStart="@dimen/captain_space_toolbar_horizontal"
             android:paddingEnd="@dimen/captain_space_toolbar_horizontal"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextAppearance="@style/CaptainToolbarTitle" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -80,7 +81,7 @@
         app:ntb_inactive_color="@color/captain_text_secondary"
         app:ntb_scaled="false"
         app:ntb_titled="true"
-        app:ntb_title_size="11sp"
+        app:ntb_title_size="@dimen/captain_text_tab"
         app:ntb_title_mode="all"
         app:ntb_tinted="true"
         app:ntb_badge_gravity="top"

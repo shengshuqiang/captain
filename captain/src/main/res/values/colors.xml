@@ -60,7 +60,8 @@
     <color name="captain_text_primary">@color/captain_gray_1000</color>
     <color name="captain_text_secondary">@color/captain_gray_700</color>
     <color name="captain_text_tertiary">@color/captain_gray_500</color>
-    <color name="captain_text_on_brand">#FFFFFF</color>
+    <!-- 粉色填充上的深色文字满足正文对比度；由单一正文语义派生。 -->
+    <color name="captain_text_on_brand">@color/captain_text_primary</color>
     <color name="captain_text_on_soft">#7A4252</color>
 
     <!-- ============================================ -->
@@ -105,10 +106,10 @@
     <!-- 小红书功能模块颜色 - P0-2 归一命名空间 -->
     <!-- 差异化保留 5 个;通用语义复用 captain 主 token -->
     <!-- ============================================ -->
-    <color name="captain_xhs_brand_primary">#E64A5B</color>
-    <color name="captain_xhs_brand_primary_dark">#C83A4A</color>
-    <color name="captain_xhs_page_background">#F4F6FB</color>
-    <color name="captain_xhs_surface">#FFFFFFFF</color>
+    <color name="captain_xhs_brand_primary">@color/captain_brand_primary</color>
+    <color name="captain_xhs_brand_primary_dark">@color/captain_brand_800</color>
+    <color name="captain_xhs_page_background">@color/captain_surface_page</color>
+    <color name="captain_xhs_surface">@color/captain_surface_card</color>
     <color name="captain_xhs_selection_mask">#66213846</color>
     <!-- 通用语义复用主 token,不再独立定义色值 -->
     <color name="captain_xhs_text_primary">@color/captain_text_primary</color>

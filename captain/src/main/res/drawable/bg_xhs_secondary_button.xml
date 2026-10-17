@@ -1,20 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 与全局按钮共用品牌色、禁用及按压状态，避免功能页出现独立色系。 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape>
-            <solid android:color="#14E64A5B" />
-            <corners android:radius="@dimen/captain_radius_card" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/captain_xhs_brand_primary_dark" />
-        </shape>
-    </item>
-    <item>
-        <shape>
-            <solid android:color="#FFFFFFFF" />
-            <corners android:radius="@dimen/captain_radius_card" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/captain_xhs_divider" />
-        </shape>
-    </item>
+    <item android:drawable="@drawable/bg_button_secondary" />
 </selector>

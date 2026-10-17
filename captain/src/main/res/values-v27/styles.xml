@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 支持深色系统图标的API才使用浅色系统栏；业务主题项继承共用定义。 -->
+    <style name="AppTheme" parent="CaptainBaseTheme">
+        <item name="android:colorBackgroundFloating">@color/captain_surface_card</item>
+        <item name="android:statusBarColor">@color/captain_surface_toolbar</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/captain_surface_page</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

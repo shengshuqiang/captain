@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 共享隐私表面由主题提供，保留弹层/内容块的形状层级。 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid
-        android:color="#FFFFFF" />
-    <corners
-        android:radius="21dp"/>
+    <solid android:color="?attr/captainColorSurface" />
+    <corners android:radius="28dp" />
 </shape>

@@ -12,26 +12,28 @@
     android:padding="10dp">
 
     <TextView
+        style="@style/CaptainText.CardTitle"
         android:id="@+id/media_group_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:minHeight="44dp"
+        android:minHeight="@dimen/captain_size_button_height"
         android:gravity="center_vertical"
         android:paddingRight="8dp"
         android:textColor="@color/captain_xhs_text_primary"
-        android:textSize="14sp"
+        android:textSize="@dimen/captain_text_card_title"
         android:textStyle="bold" />
 
     <TextView
+        style="@style/CaptainButton.Secondary"
         android:id="@+id/media_group_selection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="44dp"
+        android:minHeight="@dimen/captain_size_button_height"
         android:background="@drawable/bg_xhs_secondary_button"
         android:gravity="center"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:textColor="@color/captain_xhs_text_primary"
-        android:textSize="13sp" />
+        android:textSize="@dimen/captain_text_body" />
 </LinearLayout>

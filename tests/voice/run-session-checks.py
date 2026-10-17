@@ -11,6 +11,7 @@ public class Context {
     public static final int MODE_PRIVATE = 0;
     public final SharedPreferences prefs = new SharedPreferences();
     public boolean failReads;
+    public final java.util.Map<String,com.shuqiang.captain.voice.VoiceNote> notes = new java.util.LinkedHashMap<>();
     public Context getApplicationContext() { return this; }
     public SharedPreferences getSharedPreferences(String name, int mode) { return prefs; }
 }
@@ -41,11 +42,11 @@ import android.content.Context;
 import java.util.*;
 public final class VoiceNoteStore {
     public static VoiceNoteStore last;
-    public final Map<String,VoiceNote> data = new LinkedHashMap<>();
+    public final Map<String,VoiceNote> data;
     public boolean failWrites, failReads, failDeletes;
-    public int closeCount;
-    public VoiceNoteStore(Context context) { last=this; failReads=context.failReads; }
-    public void save(VoiceNote note) { if(failWrites) throw new RuntimeException(); data.put(note.id,note); }
+    public int closeCount, writes;
+    public VoiceNoteStore(Context context) { last=this; data=context.notes; failReads=context.failReads; }
+    public void save(VoiceNote note) { if(failWrites) throw new RuntimeException(); data.put(note.id,note); writes++; }
     public VoiceNote find(String id) { if(failReads) throw new RuntimeException(); return data.get(id); }
     public void delete(String id) { if(failDeletes) throw new RuntimeException(); data.remove(id); }
     public Map<String,List<VoiceNote>> grouped() {

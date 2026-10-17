@@ -1,12 +1,16 @@
 package com.shuqiang.captain.voice;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONObject;
 import org.vosk.Model;
@@ -85,6 +89,11 @@ public final class OfflineVoiceEngine {
             AudioRecord audio = null;
             try {
                 if (model == null) throw new IOException("请先导入并加载模型");
+                // Recheck at the microphone boundary: permission can change after the UI check.
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("录音需要麦克风权限，请授权后重新按住说话");
+                }
                 int minimum = AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO,
                         AudioFormat.ENCODING_PCM_16BIT);
                 if (minimum <= 0) throw new IOException("设备不支持 16 kHz 录音");

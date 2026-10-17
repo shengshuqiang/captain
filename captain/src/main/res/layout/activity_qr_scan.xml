@@ -22,30 +22,24 @@
             android:text="@string/qr_scan_idle_status" />
 
         <Button
+            style="@style/CaptainButton.Primary"
             android:id="@+id/qr_scan_start"
-            style="@style/CaptainButton"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/captain_size_button_height"
+            android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
             android:layout_marginTop="@dimen/captain_space_card_inner"
-            android:background="@drawable/bg_xhs_primary_button"
-            android:ellipsize="end"
-            android:singleLine="true"
             android:text="@string/qr_scan_start"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            android:textAllCaps="false" />
 
         <Button
+            style="@style/CaptainButton.Secondary"
             android:id="@+id/qr_scan_show_generator"
-            style="@style/CaptainButton"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/captain_size_button_height"
+            android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
             android:layout_marginTop="@dimen/captain_space_inline"
-            android:background="@drawable/bg_xhs_secondary_button"
-            android:ellipsize="end"
-            android:singleLine="true"
             android:text="@string/qr_scan_show_generator"
-            android:textAllCaps="false"
-            android:textColor="@color/captain_xhs_brand_primary_dark" />
+            android:textAllCaps="false" />
 
         <LinearLayout
             android:id="@+id/qr_scan_result_container"
@@ -71,48 +65,39 @@
                 android:layout_marginTop="@dimen/captain_space_inline"
                 android:background="@drawable/bg_xhs_input"
                 android:minHeight="120dp"
-                android:padding="14dp"
+                android:padding="@dimen/captain_space_card_inner"
                 android:textIsSelectable="true" />
 
             <Button
+            style="@style/CaptainButton.Secondary"
                 android:id="@+id/qr_scan_copy"
-                style="@style/CaptainButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
                 android:layout_marginTop="@dimen/captain_space_card_gap"
-                android:background="@drawable/bg_xhs_secondary_button"
-                android:ellipsize="end"
-                android:singleLine="true"
                 android:text="@string/qr_scan_copy"
-                android:textAllCaps="false"
-                android:textColor="@color/captain_xhs_brand_primary_dark" />
+                android:textAllCaps="false" />
 
             <Button
+            style="@style/CaptainButton.Secondary"
                 android:id="@+id/qr_scan_open_link"
-                style="@style/CaptainButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
                 android:layout_marginTop="@dimen/captain_space_inline"
-                android:background="@drawable/bg_xhs_secondary_button"
-                android:ellipsize="end"
-                android:singleLine="true"
                 android:text="@string/qr_scan_open_link"
                 android:textAllCaps="false"
-                android:textColor="@color/captain_xhs_brand_primary_dark"
                 android:visibility="gone" />
 
             <Button
+            style="@style/CaptainButton.Secondary"
                 android:id="@+id/qr_scan_decrypt"
-                style="@style/CaptainButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
                 android:layout_marginTop="@dimen/captain_space_inline"
-                android:background="@drawable/bg_xhs_secondary_button"
-                android:ellipsize="end"
-                android:singleLine="true"
                 android:text="@string/qr_scan_decrypt"
-                android:textAllCaps="false"
-                android:textColor="@color/captain_xhs_brand_primary_dark" />
+                android:textAllCaps="false" />
         </LinearLayout>
 
         <LinearLayout
@@ -132,30 +117,29 @@
                 android:text="@string/qr_scan_generator_title" />
 
             <EditText
+            style="@style/CaptainInput"
                 android:id="@+id/qr_scan_generator_input"
-                style="@style/CaptainText.Body"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
+                android:minLines="4"
+                android:maxLines="8"
                 android:layout_marginTop="@dimen/captain_space_inline"
                 android:background="@drawable/bg_xhs_input"
                 android:gravity="top|start"
                 android:hint="@string/qr_scan_generator_hint"
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine|textNoSuggestions"
-                android:padding="14dp" />
+                android:padding="@dimen/captain_space_card_inner" />
 
             <Button
+            style="@style/CaptainButton.Primary"
                 android:id="@+id/qr_scan_generate"
-                style="@style/CaptainButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/captain_size_button_height"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/captain_size_button_height"
                 android:layout_marginTop="@dimen/captain_space_card_gap"
-                android:background="@drawable/bg_xhs_primary_button"
-                android:ellipsize="end"
-                android:singleLine="true"
                 android:text="@string/qr_scan_generate"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white" />
+                android:textAllCaps="false" />
 
             <ImageView
                 android:id="@+id/qr_scan_preview"

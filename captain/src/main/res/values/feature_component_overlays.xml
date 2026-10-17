@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 仅覆盖三方公开的外围颜色与按钮样式；扫码画布、媒体底色和图片内容保持原样。 -->
+    <color name="contents_text">@color/captain_text_primary</color>
+    <color name="encode_view">@color/captain_surface_card</color>
+    <!-- 选择器固定白色按钮文案，使用品牌深色确保对比度。 -->
+    <color name="ps_color_20c064">@color/captain_brand_900</color>
+    <color name="ps_color_394a3e">@color/captain_gray_800</color>
+    <style name="ResultButton" parent="CaptainButton.Secondary">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    <style name="ShareButton" parent="CaptainButton.Secondary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+</resources>

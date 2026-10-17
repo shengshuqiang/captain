@@ -16,7 +16,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="16dp"
-        android:paddingTop="20dp"
+        android:paddingTop="@dimen/captain_space_card_inner"
         android:paddingRight="16dp"
         android:paddingBottom="12dp">
 
@@ -25,13 +25,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_xhs_preview_chip"
+            android:minHeight="@dimen/captain_size_button_height"
+            android:minWidth="@dimen/captain_size_button_height"
+            android:gravity="center"
             android:paddingLeft="14dp"
             android:paddingTop="8dp"
             android:paddingRight="14dp"
             android:paddingBottom="8dp"
             android:text="@string/xhs_preview_close"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="@dimen/captain_text_caption"
             android:textStyle="bold" />
 
         <TextView
@@ -40,13 +43,16 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="12dp"
             android:background="@drawable/bg_xhs_preview_chip"
+            android:minHeight="@dimen/captain_size_button_height"
+            android:minWidth="@dimen/captain_size_button_height"
+            android:gravity="center"
             android:paddingLeft="14dp"
             android:paddingTop="8dp"
             android:paddingRight="14dp"
             android:paddingBottom="8dp"
             android:text="@string/xhs_preview_save"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="@dimen/captain_text_caption"
             android:textStyle="bold" />
 
         <TextView
@@ -55,12 +61,15 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="12dp"
             android:background="@drawable/bg_xhs_preview_chip"
+            android:minHeight="@dimen/captain_size_button_height"
+            android:minWidth="@dimen/captain_size_button_height"
+            android:gravity="center"
             android:paddingLeft="14dp"
             android:paddingTop="8dp"
             android:paddingRight="14dp"
             android:paddingBottom="8dp"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="@dimen/captain_text_caption"
             android:textStyle="bold" />
     </LinearLayout>
 </FrameLayout>

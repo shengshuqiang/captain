@@ -113,6 +113,13 @@ public class XhsPreviewActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xhs_preview);
+        // 媒体画布保留深色，系统栏也使用深色，避免白色控制与浅色背景混合。
+        getWindow().setStatusBarColor(android.graphics.Color.BLACK);
+        getWindow().setNavigationBarColor(android.graphics.Color.BLACK);
+        getWindow().getDecorView().setSystemUiVisibility(
+                getWindow().getDecorView().getSystemUiVisibility()
+                        & ~android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        & ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         parseResult = (XhsParseResult) getIntent().getSerializableExtra(EXTRA_PARSE_RESULT);
         mediaItems = parseResult == null ? null : parseResult.getMediaItems();
         int startPosition = getIntent().getIntExtra(EXTRA_POSITION, 0);

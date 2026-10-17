@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
-/** Application-owned draft: recording can finish saving after its screen is destroyed. */
+/** Owns the saved draft and a separate, process-only capture awaiting confirmation. */
 public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     interface Observer { void onChanged(boolean refreshNotes); }
     private static final String DRAFT_KEY = "draft";
@@ -25,6 +25,8 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     private Observer observer;
     private VoiceNote current;
     private TranscriptBuffer transcript;
+    private String pendingText = "";
+    private VoiceNote captureTarget;
     private String text = "", status = "首次使用请导入中文模型，之后可断网识别。";
     private boolean draftLoaded, ready, recording, stopping, loading, closing, recognitionError;
 
@@ -61,7 +63,7 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
         if (pendingModel != null) beginImport();
         else if (engine.installed()) {
             loading = true;
-            status = "正在加载本机模型…";
+            if (!hasPendingCapture()) status = "正在加载本机模型…";
             engine.load();
         }
     }
@@ -173,7 +175,7 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     }
 
     void importModel(Uri uri) {
-        if (recording || stopping || ready) return;
+        if (hasPendingCapture() || recording || stopping || ready) return;
         // Document results may arrive before onStart or while the previous engine closes.
         pendingModel = uri;
         beginImport();
@@ -191,10 +193,12 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
 
     void startRecording() {
         if (busy() || !canRecord() || observer == null || !persist()) return;
-        transcript = new TranscriptBuffer(text);
+        transcript = new TranscriptBuffer("");
+        pendingText = "";
+        captureTarget = null;
         recognitionError = false;
         recording = true;
-        status = "正在离线识别 · 文字自动保存 · 点击停止结束录音";
+        status = "正在离线识别 · 松开后确认文字";
         engine.start();
         changed(false);
     }
@@ -203,7 +207,7 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
         if (!recording) return;
         recording = false;
         stopping = true;
-        status = "正在保存最后一段文字…";
+        status = "正在识别最后一段文字…";
         engine.stop();
         changed(false);
     }
@@ -211,21 +215,74 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     @Override public void onReady() {
         loading = false;
         ready = !closing;
-        if (!closing) status = "中文模型已就绪 · 识别完全离线 · 文字保存在本机";
+        if (!closing && !hasPendingCapture()) status = "中文模型已就绪 · 识别完全离线 · 文字保存在本机";
         changed(false);
     }
 
     @Override public void onText(String value, boolean finalSegment) {
-        text = transcript.update(value, finalSegment);
-        persist();
+        // Cancellation clears the buffer while the worker drains already queued results.
+        if (transcript == null || (!recording && !stopping)) return;
+        pendingText = transcript.update(value, finalSegment);
         changed(false);
     }
 
     @Override public void onStopped() {
         recording = false;
         stopping = false;
-        if (persist() && !recognitionError) status = "录音已结束 · 文字已保存到本机";
-        changed(true);
+        if (!recognitionError) status = hasPendingCapture()
+                ? "录音已结束 · 可修改识别文字，确认后保存"
+                : "已取消本次录音，原笔记未改变";
+        changed(false);
+    }
+
+    /** Changes only the candidate; the saved draft remains locked until confirm or cancel. */
+    void updatePendingText(String value) {
+        if (!reviewReady()) return;
+        pendingText = value;
+        changed(false);
+    }
+
+    void cancelCapture() {
+        if (!hasPendingCapture()) return;
+        stopRecording();
+        clearCapture();
+        status = "已取消本次录音，原笔记未改变";
+        changed(false);
+    }
+
+    /** Retry writes the same combined value and identity, never appends onto a failed attempt. */
+    boolean confirmCapture() {
+        if (!canConfirmCapture()) return false;
+        String combined = text.isEmpty() ? pendingText : text + "\n" + pendingText;
+        if (captureTarget == null) {
+            long now = System.currentTimeMillis();
+            captureTarget = current == null
+                    ? new VoiceNote(UUID.randomUUID().toString(),
+                            VoiceNote.dayAt(now, TimeZone.getDefault()), now, combined)
+                    : current;
+        }
+        VoiceNote confirmed = new VoiceNote(captureTarget.id, captureTarget.day,
+                captureTarget.createdAt, combined);
+        try {
+            // Commit the pointer first: a failed preference write must not publish a candidate.
+            if (!preferences.edit().putString(DRAFT_KEY, confirmed.id).commit()) throw new IllegalStateException();
+            store.save(confirmed);
+            current = confirmed;
+            text = combined;
+            clearCapture();
+            status = "文字已确认并保存到本机";
+            changed(true);
+            return true;
+        } catch (RuntimeException e) {
+            fail("capture_save_failed", "保存失败，待确认文字仍保留，可重试或取消。");
+            return false;
+        }
+    }
+
+    private void clearCapture() {
+        transcript = null;
+        pendingText = "";
+        captureTarget = null;
     }
 
     @Override public void onError(String message) {
@@ -235,7 +292,7 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     }
 
     @Override public void onClosed() {
-        // FIFO main-thread callbacks guarantee final text has been saved first.
+        // FIFO callbacks finish the process-only candidate before releasing platform resources.
         engine = null;
         closing = ready = loading = stopping = recording = false;
         store.close();
@@ -244,11 +301,16 @@ public final class VoiceNotebookSession implements OfflineVoiceEngine.Listener {
     }
 
     String text() { return text; }
+    String pendingText() { return pendingText; }
     String status() { return status; }
-    boolean busy() { return recording || stopping || closing; }
+    boolean busy() { return recording || stopping || closing || hasPendingCapture(); }
+    boolean hasPendingCapture() { return transcript != null; }
+    boolean reviewReady() { return hasPendingCapture() && !recording && !stopping; }
+    boolean canConfirmCapture() { return reviewReady() && !pendingText.trim().isEmpty(); }
+    boolean canEditDraft() { return draftLoaded && !busy(); }
     boolean recording() { return recording; }
     boolean draftLoaded() { return draftLoaded; }
-    boolean canRecord() { return draftLoaded && ready && !stopping && !closing; }
+    boolean canRecord() { return draftLoaded && ready && !busy(); }
     boolean canImport() { return engine != null && !loading && !closing && !ready && !busy(); }
     private void changed(boolean refreshNotes) { if (observer != null) observer.onChanged(refreshNotes); }
     private void fail(String reason, String message) {

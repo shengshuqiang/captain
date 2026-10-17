@@ -6,6 +6,8 @@ trap 'rm -rf "$test_classes"' EXIT
 voice_source="$project_root/captain/src/main/java/com/shuqiang/captain/voice"
 javac -encoding UTF-8 -source 8 -target 8 -d "$test_classes" \
   "$voice_source/VoiceNote.java" "$voice_source/ModelArchive.java" \
-  "$voice_source/TranscriptBuffer.java" "$project_root/tests/voice/VoiceCoreChecks.java"
+  "$voice_source/TranscriptBuffer.java" "$voice_source/VoiceHoldGesture.java" \
+  "$project_root/tests/voice/VoiceCoreChecks.java" "$project_root/tests/voice/VoiceHoldGestureChecks.java"
 java -cp "$test_classes" VoiceCoreChecks
+java -cp "$test_classes" com.shuqiang.captain.voice.VoiceHoldGestureChecks
 python3 "$project_root/tests/voice/run-session-checks.py"

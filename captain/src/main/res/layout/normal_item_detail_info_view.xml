@@ -7,50 +7,58 @@
     <LinearLayout
         android:id="@+id/operate"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
+        android:layout_height="@dimen/captain_size_button_height"
+        android:paddingLeft="@dimen/captain_space_card_inner"
+        android:paddingRight="@dimen/captain_space_card_inner"
         android:gravity="right|center_vertical"
         android:orientation="horizontal"
-        android:background="@color/captain_brand_primary">
+        android:background="@color/captain_surface_toolbar">
 
         <ImageView
             android:id="@+id/cancel"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:scaleType="fitXY"
+            android:layout_width="@dimen/captain_size_button_height"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:scaleType="centerInside"
+            android:padding="12dp"
             android:src="@drawable/ic_close"
-            android:background="@android:color/holo_orange_dark"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/captain_text_primary"/>
         <View
             android:layout_width="0dp"
-            android:layout_height="32dp"
+            android:layout_height="@dimen/captain_size_button_height"
             android:layout_weight="1"/>
 
         <ImageView
             android:id="@+id/edit"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:scaleType="fitXY"
+            android:layout_width="@dimen/captain_size_button_height"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:scaleType="centerInside"
+            android:padding="12dp"
             android:src="@drawable/ic_edit_note"
-            android:background="@android:color/holo_blue_bright"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/captain_text_primary"/>
 
         <ImageView
             android:id="@+id/delete"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:scaleType="fitXY"
+            android:layout_width="@dimen/captain_size_button_height"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:scaleType="centerInside"
+            android:padding="12dp"
             android:layout_marginLeft="10dp"
             android:src="@drawable/ic_delete"
-            android:background="@android:color/holo_red_dark"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/captain_text_primary"/>
 
         <ImageView
             android:id="@+id/ok"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:scaleType="fitXY"
+            android:layout_width="@dimen/captain_size_button_height"
+            android:layout_height="@dimen/captain_size_button_height"
+            android:scaleType="centerInside"
+            android:padding="12dp"
             android:layout_marginLeft="10dp"
             android:src="@drawable/ic_done"
-            android:background="@android:color/holo_green_dark"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/captain_text_primary"/>
 
     </LinearLayout>
 
@@ -62,34 +70,37 @@
         android:orientation="vertical">
 
         <EditText
+            style="@style/CaptainInput"
             android:id="@+id/user_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:textColor="@android:color/black"
+            android:textColor="@color/captain_text_primary"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:hint="账号"
-            android:textSize="22dp"/>
+            android:textSize="@dimen/captain_text_body"/>
 
         <EditText
+            style="@style/CaptainInput"
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/captain_text_secondary"
             android:inputType="textVisiblePassword"
             android:hint="密码"
-            android:textSize="18dp"/>
+            android:textSize="@dimen/captain_text_body"/>
 
         <EditText
+            style="@style/CaptainInput"
             android:id="@+id/remarks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/captain_text_secondary"
             android:inputType="textPhonetic"
             android:layout_marginTop="10dp"
             android:hint="备注"
-            android:textSize="18dp"/>
+            android:textSize="@dimen/captain_text_body"/>
     </LinearLayout>
 </merge>

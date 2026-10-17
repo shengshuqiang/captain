@@ -3,25 +3,27 @@
     <!-- 船长App视觉Token - 字号层级 -->
     <!-- ============================================ -->
     <dimen name="captain_text_hero">22sp</dimen>
-    <dimen name="captain_text_page_title">20sp</dimen>
-    <dimen name="captain_text_card_title">16sp</dimen>
-    <dimen name="captain_text_body">14sp</dimen>
-    <dimen name="captain_text_caption">12sp</dimen>
-    <dimen name="captain_text_tab">12sp</dimen>
+    <dimen name="captain_text_page_title">22sp</dimen>
+    <dimen name="captain_text_card_title">18sp</dimen>
+    <dimen name="captain_text_body">16sp</dimen>
+    <dimen name="captain_text_caption">14sp</dimen>
+    <dimen name="captain_text_tab">14sp</dimen>
 
     <!-- ============================================ -->
     <!-- 船长App视觉Token - 圆角规范 -->
-    <!-- P2-10: 收敛为 control/card/container/pill 四档,消灭 14/18 孤值 -->
+    <!-- M3形状：控件12dp、卡片16dp、弹层28dp；保留兼容别名。 -->
     <!-- ============================================ -->
     <dimen name="captain_radius_control">12dp</dimen>
     <dimen name="captain_radius_card">16dp</dimen>
-    <dimen name="captain_radius_container">20dp</dimen>
+    <dimen name="captain_radius_container">28dp</dimen>
+    <!-- 弹层语义复用container，避免voice与隐私再定义圆角档。 -->
+    <dimen name="captain_radius_modal">@dimen/captain_radius_container</dimen>
     <dimen name="captain_radius_pill">9999dp</dimen>
     <!-- 既有语义名保留为指向四档的别名,不破坏现有引用 -->
     <dimen name="captain_radius_button">@dimen/captain_radius_control</dimen>
     <dimen name="captain_radius_badge">@dimen/captain_radius_control</dimen>
     <dimen name="captain_radius_card_large">@dimen/captain_radius_container</dimen>
-    <dimen name="captain_radius_icon_tile">@dimen/captain_radius_container</dimen>
+    <dimen name="captain_radius_icon_tile">@dimen/captain_radius_card</dimen>
     <dimen name="captain_radius_tab_shell">@dimen/captain_radius_container</dimen>
     <dimen name="captain_radius_avatar">24dp</dimen>
 
@@ -47,7 +49,7 @@
     <!-- ============================================ -->
     <dimen name="captain_size_tab_height">66dp</dimen>
     <dimen name="captain_size_tab_icon">24dp</dimen>
-    <dimen name="captain_size_button_height">44dp</dimen>
+    <dimen name="captain_size_button_height">48dp</dimen>
     <dimen name="captain_size_list_item_height">56dp</dimen>
     <dimen name="captain_size_avatar">72dp</dimen>
     <dimen name="captain_size_badge">12dp</dimen>
@@ -72,7 +74,7 @@
     <dimen name="captain_elevation_raised">2dp</dimen>
     <dimen name="captain_elevation_popover">8dp</dimen>
     <dimen name="captain_elevation_modal">16dp</dimen>
-    <dimen name="captain_elevation_tab_shell">10dp</dimen>
+    <dimen name="captain_elevation_tab_shell">2dp</dimen>
 
     <!-- ============================================ -->
     <!-- 旧版尺寸 - 保留用于兼容性 -->

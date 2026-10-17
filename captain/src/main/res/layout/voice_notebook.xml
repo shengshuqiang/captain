@@ -1,32 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/voice_notebook"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:padding="16dp" android:background="#F6F8F7">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="说下来，留在本机" android:textSize="22sp" android:textColor="#194B40" />
-    <TextView android:id="@+id/voice_status" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:paddingTop="8dp"
-        android:text="首次使用请导入中文模型，之后可断网识别。" android:accessibilityLiveRegion="polite" />
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-        <Button android:id="@+id/voice_model_download" android:layout_width="0dp"
-            android:layout_weight="1" android:layout_height="wrap_content" android:text="下载中文模型" />
-        <Button android:id="@+id/voice_model_import" android:layout_width="0dp"
-            android:layout_weight="1" android:layout_height="wrap_content" android:text="导入模型 ZIP" />
-    </LinearLayout>
-    <EditText android:id="@+id/voice_editor" android:layout_width="match_parent"
-        android:layout_height="150dp" android:gravity="top|start" android:inputType="textMultiLine|textCapSentences"
-        android:hint="点击开始录音，也可以直接输入文字。内容自动保存。"
-        android:background="#FFFFFF" android:padding="12dp" android:scrollbars="vertical" />
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-        <Button android:id="@+id/voice_record" android:layout_width="0dp" android:layout_weight="1"
-            android:layout_height="wrap_content" android:text="开始录音" />
-        <Button android:id="@+id/voice_save" android:layout_width="0dp" android:layout_weight="1"
-            android:layout_height="wrap_content" android:text="完成 / 新建" />
-    </LinearLayout>
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="按日期归档 · 可分享单条或当天汇总到飞书" android:padding="8dp" />
-    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
-        <LinearLayout android:id="@+id/voice_notes" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical" />
+    android:orientation="vertical" android:background="@color/captain_surface_page">
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="@dimen/captain_space_page_horizontal">
+            <TextView android:id="@+id/voice_status" style="@style/CaptainText.Caption"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="首次使用请导入中文模型，之后可断网识别。" android:accessibilityLiveRegion="polite" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                <Button android:id="@+id/voice_model_download" style="@style/CaptainButton.Text"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:minWidth="0dp" android:singleLine="false"
+                    android:text="@string/voice_model_download" />
+                <Button android:id="@+id/voice_model_import" style="@style/CaptainButton.Text"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:minWidth="0dp" android:singleLine="false"
+                    android:text="@string/voice_model_import" />
+            </LinearLayout>
+            <TextView style="@style/CaptainText.CardTitle" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="@string/voice_draft_title"
+                android:layout_marginTop="@dimen/captain_space_card_inner" />
+            <TextView style="@style/CaptainText.Caption" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="@string/voice_save_contract"
+                android:layout_marginTop="@dimen/captain_space_inline" />
+            <EditText android:id="@+id/voice_editor" style="@style/CaptainInput"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minLines="4" android:maxLines="8" android:gravity="top|start"
+                android:inputType="textMultiLine|textCapSentences" android:hint="@string/voice_draft_hint"
+                android:scrollbars="vertical" android:layout_marginTop="@dimen/captain_space_card_inner"
+                android:contentDescription="当前笔记文字" />
+            <Button android:id="@+id/voice_save" style="@style/CaptainButton.Text"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="end" android:text="@string/voice_finish_note" />
+            <TextView style="@style/CaptainText.CardTitle" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="@string/voice_archive_title"
+                android:layout_marginTop="@dimen/captain_space_block" />
+            <TextView style="@style/CaptainText.Caption" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="@string/voice_archive_hint"
+                android:layout_marginTop="@dimen/captain_space_inline" />
+            <LinearLayout android:id="@+id/voice_notes" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:layout_marginTop="@dimen/captain_space_card_inner" />
+        </LinearLayout>
     </ScrollView>
+    <Button android:id="@+id/voice_record" style="@style/CaptainButton.Primary"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="@dimen/voice_record_height" android:text="@string/voice_hold_to_record"
+        android:contentDescription="@string/voice_hold_accessibility"
+        android:layout_marginStart="@dimen/captain_space_page_horizontal"
+        android:layout_marginEnd="@dimen/captain_space_page_horizontal"
+        android:layout_marginTop="@dimen/captain_space_inline"
+        android:layout_marginBottom="@dimen/captain_space_page_bottom" />
 </LinearLayout>
