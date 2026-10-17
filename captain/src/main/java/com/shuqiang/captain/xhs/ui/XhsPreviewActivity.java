@@ -70,6 +70,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
 
     private PreviewVideoPlayback videoPlayback;
     private boolean serviceSaveInProgress;
+    private String retainedRuntimeSessionId;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final XhsMediaSaver mediaSaver = new XhsMediaSaver();
@@ -116,6 +117,15 @@ public class XhsPreviewActivity extends AppCompatActivity {
         if (mediaItems == null || mediaItems.isEmpty()) {
             finish();
             return;
+        }
+        if (mediaItems.get(0).requiresRuntimeSession()) {
+            String sessionId = mediaItems.get(0).getRuntimeSessionId();
+            if (!RuntimeMediaSessionStore.getInstance().retainForPreview(sessionId)) {
+                Toast.makeText(this, "浏览会话已失效，请返回网页重新查看", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+            retainedRuntimeSessionId = sessionId;
         }
         if (startPosition < 0 || startPosition >= mediaItems.size()) {
             startPosition = 0;
@@ -187,6 +197,7 @@ public class XhsPreviewActivity extends AppCompatActivity {
             RuntimeMediaSessionStore.getInstance().discard(mediaItems.get(0).getRuntimeSessionId());
         }
         saveExecutor.shutdownNow();
+        RuntimeMediaSessionStore.getInstance().releasePreview(retainedRuntimeSessionId);
         super.onDestroy();
     }
 

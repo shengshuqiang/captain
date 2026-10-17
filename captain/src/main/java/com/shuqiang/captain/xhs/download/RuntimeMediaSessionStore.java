@@ -25,10 +25,17 @@ public final class RuntimeMediaSessionStore {
 
     private final SecureRandom secureRandom = new SecureRandom();
     private final Map<String, RuntimeMediaSession> sessions = new LinkedHashMap<>();
+    private final Map<String, Integer> previewOwners = new LinkedHashMap<>();
     private final long ttlMs;
+    private final java.util.function.LongSupplier clock;
 
     RuntimeMediaSessionStore(long ttlMs) {
+        this(ttlMs, System::currentTimeMillis);
+    }
+
+    RuntimeMediaSessionStore(long ttlMs, java.util.function.LongSupplier clock) {
         this.ttlMs = Math.max(1L, ttlMs);
+        this.clock = clock;
     }
 
     public static RuntimeMediaSessionStore getInstance() {
@@ -40,7 +47,7 @@ public final class RuntimeMediaSessionStore {
         if (rawResult == null || rawResult.getMediaItems() == null || rawResult.getMediaItems().isEmpty()) {
             throw new IllegalArgumentException("没有可登记的页面媒体");
         }
-        cleanupExpiredLocked(System.currentTimeMillis());
+        cleanupExpiredLocked(clock.getAsLong());
         String pageUrl = XhsNetworkPolicy.isAllowedMediaUrl(finalPageUrl)
                 ? finalPageUrl : rawResult.getPageUrl();
         String safeUserAgent = userAgent == null || userAgent.trim().isEmpty()
@@ -71,7 +78,7 @@ public final class RuntimeMediaSessionStore {
             throw new IllegalArgumentException("页面媒体地址无效");
         }
         sessions.put(sessionId, new RuntimeMediaSession(
-                sessionId, safeUserAgent, pageUrl, System.currentTimeMillis() + ttlMs, candidates, cookies));
+                sessionId, safeUserAgent, pageUrl, clock.getAsLong() + ttlMs, candidates, cookies));
         return new XhsParseResult(
                 rawResult.getNoteId(), pageUrl, pageUrl, rawResult.getAuthorName(), rawResult.getTitle(),
                 rawResult.getCoverUrl(), rawResult.getParseStrategy(), rawResult.getEntrySource(), registeredItems
@@ -79,21 +86,41 @@ public final class RuntimeMediaSessionStore {
     }
 
     public synchronized RuntimeMediaSession claim(String sessionId) {
-        cleanupExpiredLocked(System.currentTimeMillis());
+        cleanupExpiredLocked(clock.getAsLong());
         if (sessionId == null || sessionId.trim().isEmpty()) {
             return null;
         }
         RuntimeMediaSession session = sessions.remove(sessionId);
-        if (session != null && session.isExpired(System.currentTimeMillis())) {
+        boolean previewHeld = previewOwners.remove(sessionId) != null;
+        if (session != null && !previewHeld && session.isExpired(clock.getAsLong())) {
             session.close();
             return null;
         }
         return session;
     }
 
+    /** A visible preview owns its session across long playback; unclaimed sessions still expire. */
+    public synchronized boolean retainForPreview(String sessionId) {
+        cleanupExpiredLocked(clock.getAsLong());
+        if (!sessions.containsKey(sessionId)) return false;
+        Integer owners = previewOwners.get(sessionId);
+        previewOwners.put(sessionId, owners == null ? 1 : owners + 1);
+        return true;
+    }
+
+    /** Release on activity destruction; a configuration handoff gets the normal idle timeout. */
+    public synchronized void releasePreview(String sessionId) {
+        Integer owners = previewOwners.get(sessionId);
+        if (owners == null) return;
+        if (owners > 1) { previewOwners.put(sessionId, owners - 1); return; }
+        previewOwners.remove(sessionId);
+        RuntimeMediaSession session = sessions.get(sessionId);
+        if (session != null) session.renewUntil(clock.getAsLong() + ttlMs);
+    }
+
     /** 仅为用户主动预览的已登记地址提供请求头，既不消费下载句柄也不返回其它来源 Cookie。 */
     public synchronized Map<String, String> previewHeaders(XhsMediaItem item) {
-        cleanupExpiredLocked(System.currentTimeMillis());
+        cleanupExpiredLocked(clock.getAsLong());
         RuntimeMediaSession session = sessions.get(item.getRuntimeSessionId());
         RuntimeMediaSession.Candidate candidate = session == null ? null : session.resolve(item.getRuntimeCandidateId());
         if (candidate == null || !candidate.getUrl().equals(item.getMediaUrl())) {
@@ -108,6 +135,7 @@ public final class RuntimeMediaSessionStore {
     }
 
     public synchronized void discard(String sessionId) {
+        previewOwners.remove(sessionId);
         RuntimeMediaSession session = sessions.remove(sessionId);
         if (session != null) {
             session.close();
@@ -115,7 +143,7 @@ public final class RuntimeMediaSessionStore {
     }
 
     synchronized int sizeForTest() {
-        cleanupExpiredLocked(System.currentTimeMillis());
+        cleanupExpiredLocked(clock.getAsLong());
         return sessions.size();
     }
 
@@ -138,7 +166,7 @@ public final class RuntimeMediaSessionStore {
         Iterator<Map.Entry<String, RuntimeMediaSession>> iterator = sessions.entrySet().iterator();
         while (iterator.hasNext()) {
             RuntimeMediaSession session = iterator.next().getValue();
-            if (session.isExpired(nowMs)) {
+            if (session.isExpired(nowMs) && !previewOwners.containsKey(session.getId())) {
                 iterator.remove();
                 session.close();
             }

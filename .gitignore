@@ -7,5 +7,7 @@
 /build
 /captures
 .externalNativeBuild
+.kotlin/
+/tools/__pycache__/
 */build/*
 /key.properties

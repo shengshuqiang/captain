@@ -2,6 +2,10 @@
 apply from: "config.gradle"
 
 buildscript {
+    // Shared toolchain versions keep the host and embedded browser on one DI/compiler runtime.
+    ext.captainHiltVersion = '2.57.1'
+    ext.captainKotlinVersion = '2.2.10'
+    ext.captainDesugarVersion = '2.0.4'
     repositories {
         google()
         mavenCentral()
@@ -19,7 +23,11 @@ buildscript {
     }
     dependencies {
         // Media3 1.10 requires API 36 and the corresponding Android build tools.
-        classpath 'com.android.tools.build:gradle:8.10.1'
+        classpath 'com.android.tools.build:gradle:8.13.1'
+        // Fulguris retains its Kotlin/Hilt toolchain as an embedded browser module.
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$captainKotlinVersion"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$captainHiltVersion"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$captainKotlinVersion-2.0.2"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

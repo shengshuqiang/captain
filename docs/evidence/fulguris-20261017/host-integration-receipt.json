@@ -1,0 +1,30 @@
+{
+  "application_id": "com.shuqiang.captain",
+  "application_label": "船长",
+  "version_name": "1.1.200",
+  "version_code": 100010200,
+  "apk_sha256": "03aea48f812d53073c1cb5d07834f7f75314357a45cdb28c48c967fadb45f705",
+  "installed_apk_sha256_verified": true,
+  "signer_sha256": "3cfb4d740f1b30d1a58481fa104e6e8f80c37ca5d5032500419708576e0391a9",
+  "update_mode": "adb install -r; original data retained",
+  "original_first_install_time": "2026-07-10 23:20:29",
+  "last_update_time": "2026-10-17 23:49:40",
+  "test_package": "disabled-user; data retained",
+  "unit_results": {
+    "tests": 126,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2
+  },
+  "navigation_task_id": 198,
+  "navigation_verified": [
+    "home tool -> embedded browser in same task",
+    "Back after closing tabs -> same Captain MainActivity",
+    "full browser menu Exit -> same Captain MainActivity",
+    "reopen browser after return"
+  ],
+  "panic_cleanup": "static review and signed release build; no device panic intent test",
+  "lint": "Only Google Play ExpiredTargetSdkVersion policy disabled for local target29 distribution; lintVitalRelease passed",
+  "media_device_evidence": "Prior side-by-side package MP4 playback-complete/save checks retained; not repeated in this release",
+  "changes_committed": false
+}

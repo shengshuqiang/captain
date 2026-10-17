@@ -1,0 +1,20 @@
+{
+  "application_id": "com.shuqiang.captain.browser.test",
+  "version_name": "1.1.200",
+  "version_code": 100010200,
+  "apk_sha256": "e6ea4dbd2fe0a76f3ce6ee5e744baf0d898bea8db7bc4f5fd556bd2e7e25b3d9",
+  "upstream_commit": "66d56d4501575324f09621a5babcbf4bc7641118",
+  "git_head": "ffafb3537abb3c29e896a4a24db0be7e9fa10dc7",
+  "changes_committed": false,
+  "device": "NOH-AN00 / API 31",
+  "media_sha256": "b049fb37dd0adcd90b129d5f948dbd7bfda95450ea2f3f08fa70f76d3413bb0c",
+  "device_core_paths": "web MP4 complete -> save; preview MP4 complete -> save",
+  "post_device_patches": "session retention/private export guard/closed-view error protection/non-HTTP navigation cleanup validated by build and unit tests",
+  "application_label": "船长浏览器测试",
+  "unit_tests": 126,
+  "unit_failures": 0,
+  "unit_errors": 0,
+  "independent_review": "One P2 navigation cleanup issue fixed; incremental re-review found no Critical/Important issues",
+  "installed_apk_sha256_verified": true,
+  "normal_package_build_verified": true
+}

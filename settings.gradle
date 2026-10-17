@@ -1,4 +1,15 @@
-include ':captain', ':keyboard', ':popupwindow'
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs { from(files('third_party/fulguris/gradle/libs.versions.toml')) }
+    }
+}
+include ':captain', ':keyboard', ':popupwindow', ':browser'
+include ':Preference', ':AppIntro'
+project(':Preference').projectDir = file('third_party/fulguris/subs/Preference/lib')
+project(':AppIntro').projectDir = file('third_party/fulguris/subs/AppIntro/appintro')
 include ':zxing'
 include ':zxing-core', 'zxing-android-core'
 include ':toolbox', ':pictureselector', ':navigationtabbar'

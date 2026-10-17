@@ -1,6 +1,14 @@
 ext {
     // GSY/Media3 的 API 36 要求由所有 Android 模块共享。
     captainCompileSdk = 36
+    // The embedded browser's build information describes its Captain host.
+    captainMinSdk = 23
+    captainVersionCode = 100010200
+    captainVersionName = '1.1.200'
+    // A side-by-side package is used for browser acceptance; the normal app ID stays unchanged.
+    captainBrowserTestEnabled = project.findProperty('captainBrowserTest') == 'true'
+    captainApplicationId = 'com.shuqiang.captain' +
+            (captainBrowserTestEnabled ? '.browser.test' : '')
     cfgs = [
             versionCode                   : 91,
             versionName                   : "v3.11.1",

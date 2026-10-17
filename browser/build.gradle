@@ -1,0 +1,98 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'com.google.devtools.ksp'
+}
+
+def upstream = rootProject.file('third_party/fulguris/app')
+def generated = layout.buildDirectory.dir('generated/fulguris').get().asFile
+def prepareBrowser = tasks.register('prepareFulguris', Exec) {
+    description = 'Prepare pinned Fulguris sources and the small Captain integration patch.'
+    inputs.dir(new File(upstream, 'src'))
+    inputs.file(rootProject.file('tools/prepare_fulguris.py'))
+    outputs.dir(generated)
+    def python = providers.gradleProperty('captainPython').getOrElse(
+            System.getProperty('os.name').contains('Mac') ? '/usr/bin/python3' : 'python3')
+    commandLine python, rootProject.file('tools/prepare_fulguris.py'),
+            upstream.parentFile, generated
+}
+
+android {
+    namespace 'fulguris'
+    compileSdk rootProject.ext.captainCompileSdk
+    defaultConfig {
+        minSdk rootProject.ext.captainMinSdk
+        resValue 'string', 'application_id', rootProject.ext.captainApplicationId
+        buildConfigField 'String', 'APPLICATION_ID', '"' + rootProject.ext.captainApplicationId + '"'
+        buildConfigField 'int', 'VERSION_CODE', rootProject.ext.captainVersionCode.toString()
+        buildConfigField 'String', 'VERSION_NAME', '"' + rootProject.ext.captainVersionName + '"'
+        buildConfigField 'String', 'FLAVOR', '"slionsFullCaptain"'
+        buildConfigField 'String', 'FLAVOR_BRAND', '"slions"'
+        buildConfigField 'String', 'FLAVOR_PUBLISHER', '"fdroid"'
+        buildConfigField 'boolean', 'FULL_VERSION', 'true'
+        buildConfigField 'fulguris.Sponsorship', 'SPONSORSHIP', 'fulguris.Sponsorship.BRONZE'
+    }
+    sourceSets.main {
+        manifest.srcFile new File(generated, 'AndroidManifest.xml')
+        java.srcDirs += new File(generated, 'java')
+        res.srcDirs += new File(generated, 'res')
+        assets.srcDirs += new File(upstream, 'src/main/assets')
+    }
+    buildFeatures { dataBinding true; buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+tasks.configureEach { task ->
+    if (task.name != 'prepareFulguris' && (task.name == 'preBuild'
+            || task.name.startsWith('compile') || task.name.startsWith('ksp')
+            || task.name.startsWith('kapt') || task.name.contains('Resources')
+            || task.name.contains('Manifest'))) task.dependsOn(prepareBrowser)
+}
+
+dependencies {
+    api "com.google.dagger:hilt-android:${rootProject.ext.captainHiltVersion}"
+    kapt "com.google.dagger:hilt-compiler:${rootProject.ext.captainHiltVersion}"
+    kapt "com.google.dagger:dagger-compiler:${rootProject.ext.captainHiltVersion}"
+    implementation "com.google.dagger:dagger:${rootProject.ext.captainHiltVersion}"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:${rootProject.ext.captainDesugarVersion}"
+    implementation project(':Preference')
+    implementation project(':AppIntro')
+    implementation libs.androidx.multidex
+    implementation libs.androidx.palette.ktx
+    implementation libs.androidx.annotation
+    implementation libs.androidx.vectordrawable.animated
+    api libs.androidx.appcompat
+    implementation libs.androidx.recyclerview.v140
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.androidx.core.ktx.v1160
+    implementation libs.androidx.core.splashscreen
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.drawerlayout
+    implementation libs.androidx.preference.ktx
+    implementation 'androidx.webkit:webkit:1.10.0'
+    implementation 'com.google.android.material:material:1.13.0'
+    // Compile upstream Kotlin against its declared API; Captain resolves its own newer Jsoup.
+    implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'junit:junit:4.13.2'
+    implementation 'net.dankito.readability4j:readability4j:1.0.8'
+    implementation platform('io.github.Rosemoe.sora-editor:bom:0.23.4')
+    implementation 'io.github.Rosemoe.sora-editor:editor'
+    implementation 'io.github.Rosemoe.sora-editor:language-textmate'
+    implementation libs.mezzanine.core
+    ksp libs.mezzanine.processor
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
+    implementation libs.volley
+    implementation libs.threetenabp
+    implementation libs.timber
+}

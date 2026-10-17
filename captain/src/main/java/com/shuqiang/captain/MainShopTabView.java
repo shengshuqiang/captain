@@ -149,6 +149,11 @@ public class MainShopTabView extends FrameLayout {
                 false,
                 createIntentFactory(XhsDownloadActivity.class)
         ));
+        // Open the embedded browser in Captain's task so Back returns to the tool grid.
+        defaultFeatureSpecs.add(new HomeFeatureSpec(
+                "captain_browser", "浏览器", R.drawable.download, false,
+                ctx -> new Intent(ctx, fulguris.activity.MainActivity.class)
+        ));
         defaultFeatureSpecs.add(new HomeFeatureSpec(
                 "suansuanle",
                 context.getString(R.string.feature_suansuanle_title),

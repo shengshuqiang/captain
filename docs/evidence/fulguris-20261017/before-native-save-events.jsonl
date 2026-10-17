@@ -1,0 +1,8 @@
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": "bytes=0-", "referer": true}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": "bytes=327680-", "referer": true}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": "bytes=0-", "referer": true}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": "bytes=0-", "referer": true}
+{"event": "web_playback_ended"}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": null, "referer": true}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": "bytes=0-", "referer": true}
+{"event": "media_request", "resource": "complete.mp4", "authorized": true, "range": null, "referer": true}

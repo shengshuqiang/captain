@@ -1,0 +1,2 @@
+    mResumedActivity: ActivityRecord{1ade682 u0 com.shuqiang.captain/.MainActivity t198}
+      * Hist #0: ActivityRecord{1ade682 u0 com.shuqiang.captain/.MainActivity t198}

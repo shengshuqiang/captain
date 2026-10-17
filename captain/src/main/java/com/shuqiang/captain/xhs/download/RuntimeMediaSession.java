@@ -14,7 +14,7 @@ public final class RuntimeMediaSession {
     private final String id;
     private final String userAgent;
     private final String pageReferer;
-    private final long expiresAtMs;
+    private long expiresAtMs;
     private final Map<String, Candidate> candidates;
     private final Map<String, String> cookieHeadersByOrigin;
     private boolean closed;
@@ -52,8 +52,13 @@ public final class RuntimeMediaSession {
         return pageReferer;
     }
 
-    boolean isExpired(long nowMs) {
+    synchronized boolean isExpired(long nowMs) {
         return nowMs >= expiresAtMs;
+    }
+
+    /** Active preview ownership is released with a fresh idle timeout. */
+    synchronized void renewUntil(long newExpiryMs) {
+        expiresAtMs = Math.max(expiresAtMs, newExpiryMs);
     }
 
     public synchronized void close() {

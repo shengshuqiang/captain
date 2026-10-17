@@ -88,6 +88,27 @@ public class PreviewPlaybackCacheTest {
         server.shutdown();
     }
 
+    @Test public void fullyPlayedVideoCanBeExportedWithoutAnotherNetworkRequest() throws Exception {
+        String url = server.url("/video?signature=played-video").toString();
+        PreviewPlaybackCache.Session session = session(url);
+        assertArrayEquals(video, read(session.cachedFactory(upstream()), url, C.LENGTH_UNSET));
+        assertEquals(1, server.getRequestCount());
+        PreviewPlaybackCache.ExportLease lease = reserveAndClaim(session, "video");
+        DataSource.Factory unavailableNetwork = () -> new DataSource() {
+            @Override public void addTransferListener(androidx.media3.datasource.TransferListener listener) { }
+            @Override public long open(DataSpec spec) throws java.io.IOException {
+                throw new java.io.IOException("Played video must export entirely from cache");
+            }
+            @Override public int read(byte[] data, int offset, int length) throws java.io.IOException {
+                throw new java.io.IOException("Unexpected network read after playback");
+            }
+            @Override public android.net.Uri getUri() { return null; }
+            @Override public void close() { }
+        };
+        assertArrayEquals(video, read(lease.createDataSourceFactory(unavailableNetwork), url, C.LENGTH_UNSET));
+        assertEquals(1, server.getRequestCount());
+    }
+
     @Test public void cachedPrefixIsNotDownloadedAgainWhenSavingWholeVideo() throws Exception {
         String url = server.url("/video?signature=private-secret").toString();
         PreviewPlaybackCache.Session session = session(url);

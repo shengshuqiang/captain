@@ -110,7 +110,8 @@ public final class PreviewVideoPlayback implements AutoCloseable {
             CaptainVideoPlayer player = binding.player;
             player.setPlayTag(playTag);
             player.setPlayPosition(binding.position);
-            player.setLooping(true);
+            // Keep the completed item and its cache available for the Save action.
+            player.setLooping(false);
             player.setFirstFrameCallback(() -> {
                 binding.firstFrame.run();
                 if (!binding.reportedFirstFrame) {

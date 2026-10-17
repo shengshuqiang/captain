@@ -12,6 +12,34 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 public class RuntimeMediaSessionStoreTest {
+    @Test public void longPlaybackRetainsTheOneShotDownloadSessionPastIdleTimeout() {
+        java.util.concurrent.atomic.AtomicLong now = new java.util.concurrent.atomic.AtomicLong(0);
+        RuntimeMediaSessionStore store = new RuntimeMediaSessionStore(1000, now::get);
+        XhsMediaItem item = store.capture(buildResult(), "ua", "https://page.example.com/final", null)
+                .getMediaItems().get(0);
+        Assert.assertTrue(store.retainForPreview(item.getRuntimeSessionId()));
+        now.set(60_000);
+        Assert.assertEquals("ua", store.previewHeaders(item).get("User-Agent"));
+        Assert.assertNotNull(store.claim(item.getRuntimeSessionId()));
+        Assert.assertNull(store.claim(item.getRuntimeSessionId()));
+        store.releasePreview(item.getRuntimeSessionId());
+    }
+
+    @Test public void releasePreviewRestoresBoundedIdleExpiryAndNeverRevivesClaimedSession() {
+        java.util.concurrent.atomic.AtomicLong now = new java.util.concurrent.atomic.AtomicLong(0);
+        RuntimeMediaSessionStore store = new RuntimeMediaSessionStore(1000, now::get);
+        XhsMediaItem item = store.capture(buildResult(), "ua", "https://page.example.com/final", null)
+                .getMediaItems().get(0);
+        Assert.assertTrue(store.retainForPreview(item.getRuntimeSessionId()));
+        now.set(60_000);
+        store.releasePreview(item.getRuntimeSessionId());
+        Assert.assertEquals(1, store.sizeForTest());
+        now.set(61_001);
+        Assert.assertEquals(0, store.sizeForTest());
+        Assert.assertFalse(store.retainForPreview(item.getRuntimeSessionId()));
+        Assert.assertNull(store.claim(item.getRuntimeSessionId()));
+    }
+
     @Test
     public void captureProducesSingleUseSessionWithScopedCookies() {
         RuntimeMediaSessionStore store = new RuntimeMediaSessionStore(60_000L);

@@ -1,0 +1,3 @@
+    mResumedActivity: ActivityRecord{5076701 u0 com.shuqiang.captain/fulguris.activity.MainActivity t198}
+      * Hist #1: ActivityRecord{5076701 u0 com.shuqiang.captain/fulguris.activity.MainActivity t198}
+      * Hist #0: ActivityRecord{1ade682 u0 com.shuqiang.captain/.MainActivity t198}
