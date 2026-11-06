@@ -52,6 +52,9 @@ android {
 }
 
 dependencies {
+    // Explicit AAR dependencies; JNA 5.13.0 remains compatible with the existing AGP 4.1.3 dexer.
+    implementation 'com.alphacephei:vosk-android:0.3.75@aar'
+    implementation 'net.java.dev.jna:jna:5.13.0@aar'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':base')
     implementation project(path: ':toolbox')
